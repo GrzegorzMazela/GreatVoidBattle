@@ -24,7 +24,7 @@ public class BattleManager
         _events = events;
     }
 
-    public async Task ApplyEventAsync(BattleEvent battleEvent)
+    public async Task ApplyEventAsync<T>(T battleEvent) where T : BattleEvent
     {
         await _eventDispatcher.DispatchAsync(battleEvent, _battleState);
         _events.Add(battleEvent);
