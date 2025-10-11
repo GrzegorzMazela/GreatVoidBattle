@@ -4,10 +4,6 @@ using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
 using GreatVoidBattle.Events;
 using Shouldly;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GreatVoidBattle.UnitTests.Events;
 
@@ -37,7 +33,9 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.Corvette,
             PositionX = 0,
             PositionY = 0,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
 
         await _battleManager.ApplyEventAsync(addShipEvent);
@@ -62,7 +60,10 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.Destroyer,
             PositionX = 0,
             PositionY = 0,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
 
         await _battleManager.ApplyEventAsync(addShipEvent);
@@ -87,7 +88,12 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.Cruiser,
             PositionX = 0,
             PositionY = 0,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
 
         await _battleManager.ApplyEventAsync(addShipEvent);
@@ -112,7 +118,16 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.Battleship,
             PositionX = 0,
             PositionY = 0,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
 
         await _battleManager.ApplyEventAsync(addShipEvent);
@@ -127,6 +142,43 @@ public class AddFractionShipEventHandlerTests
     }
 
     [Fact]
+    public async Task AddFractionShipEventHandler_AddBattleship_NumeberOfLasersMissilesPointsDefense_Success()
+    {
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Test Battleship",
+            Type = ShipType.Battleship,
+            PositionX = 0,
+            PositionY = 0,
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Laser, WeaponType.Laser }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.Missile }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.Missile }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.Missile })
+                ]
+        };
+
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.FirstOrDefault(s => s.Name == addShipEvent.Name && s.Type == ShipType.Battleship);
+
+        ship.ShouldNotBeNull();
+        ship.Name.ShouldBe(addShipEvent.Name);
+        ship.Type.ShouldBe(ShipType.Battleship);
+        ship.NumberOfLasers.ShouldBe(10);
+        ship.NumberOfMissiles.ShouldBe(10);  
+        ship.NumberOfPointsDefense.ShouldBe(4);
+    }
+
+    [Fact]
     public async Task AddFractionShipEventHandler_AddSuperBattleship_Success()
     {
         var addShipEvent = new AddFractionShipEvent
@@ -137,7 +189,20 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.SuperBattleship,
             PositionX = 0,
             PositionY = 0,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
 
         await _battleManager.ApplyEventAsync(addShipEvent);
@@ -162,7 +227,10 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.OrbitalFort,
             PositionX = 0,
             PositionY = 0,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
 
         await _battleManager.ApplyEventAsync(addShipEvent);
@@ -199,7 +267,9 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.Corvette,
             PositionX = 1,
             PositionY = 1,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
         var addBattleshipEvent = new AddFractionShipEvent
         {
@@ -209,7 +279,16 @@ public class AddFractionShipEventHandlerTests
             Type = ShipType.Battleship,
             PositionX = 2,
             PositionY = 2,
-            Modules = new List<Module>()
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+                ]
         };
 
         await battleManager.ApplyEventAsync(addCorvetteEvent);

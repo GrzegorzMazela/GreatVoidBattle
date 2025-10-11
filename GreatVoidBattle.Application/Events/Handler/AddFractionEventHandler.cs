@@ -3,9 +3,10 @@ using GreatVoidBattle.Core.Domains;
 
 namespace GreatVoidBattle.Application.Events.Handler;
 
-public class AddFractionEventHandler : BaseEventHandler<AddFractionEvent>
+public class AddFractionEventHandler : BasePreparationEventHandler<AddFractionEvent>
 {
-    public override Task HandleAsync(AddFractionEvent battleEvent, BattleState battleState)
+
+    public override Task HandlePreparationEventAsync(AddFractionEvent battleEvent, BattleState battleState)
     {
         battleState.AddFraction(FractionState.CreateNew(battleEvent.Name));
         return Task.CompletedTask;

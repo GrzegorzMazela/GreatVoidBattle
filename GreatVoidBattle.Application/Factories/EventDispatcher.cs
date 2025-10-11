@@ -17,6 +17,8 @@ public class EventDispatcher
         // Register all event handlers here
         RegisterHandler(new AddFractionEventHandler());
         RegisterHandler(new AddFractionShipEventHandler());
+        RegisterHandler(new StartBattleEventHandler());
+        RegisterHandler(new SetShipPositionEventHandler());
         // Add more handlers as needed
     }
 
@@ -28,15 +30,13 @@ public class EventDispatcher
     public async Task DispatchAsync<T>(T battleEvent, BattleState battleState) where T : BattleEvent
     {
         var targetEvent = battleEvent.GetType();
-
-        var handlerType = typeof(BaseEventHandler<>).MakeGenericType(targetEvent.GetType());
-        if (_handlers.TryGetValue(targetEvent.GetType(), out var handlerObj) && handlerObj is BaseEventHandler<BattleEvent> handler)
+        if (_handlers.TryGetValue(targetEvent, out var handlerObj))
         {
             await ((BaseEventHandler<T>)handlerObj).HandleAsync(battleEvent, battleState);
         }
         else
         {
-            throw new InvalidOperationException($"No handler registered for event type {targetEvent.GetType().Name}");
+            throw new InvalidOperationException($"No handler registered for event type {targetEvent.Name}");
         }
     }
 }

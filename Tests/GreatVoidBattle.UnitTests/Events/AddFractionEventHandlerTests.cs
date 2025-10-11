@@ -22,6 +22,7 @@ public class AddFractionEventHandlerTests
         _battleManager = new BattleManager(battleState);
     }
 
+    [Fact]
     public async Task AddFractionEventHandler_AddOne_Success()
     {
         var battleEvent = new AddFractionEvent
@@ -37,10 +38,11 @@ public class AddFractionEventHandlerTests
         fraction.ShouldNotBeNull();
         fraction.FractionId.ShouldNotBe(Guid.Empty);
         fraction.FractionName.ShouldBe(battleEvent.Name);
-        fraction.IsDefeated.ShouldBe(false);
+        fraction.IsDefeated.ShouldBe(true);
         fraction.Ships.Count.ShouldBe(0);
     }
 
+    [Fact]
     public async Task AddFractionEventHandler_AddTwo_Success()
     {
         var battleEvent1 = new AddFractionEvent
@@ -63,14 +65,14 @@ public class AddFractionEventHandlerTests
         fraction1.ShouldNotBeNull();
         fraction1.FractionId.ShouldNotBe(Guid.Empty);
         fraction1.FractionName.ShouldBe(battleEvent1.Name);
-        fraction1.IsDefeated.ShouldBe(false);
+        fraction1.IsDefeated.ShouldBe(true);
         fraction1.Ships.Count.ShouldBe(0);
 
         var fraction2 = _battleManager.BattleState.Fractions.FirstOrDefault(f => f.FractionName == battleEvent2.Name);
         fraction2.ShouldNotBeNull();
         fraction2.FractionId.ShouldNotBe(Guid.Empty);
         fraction2.FractionName.ShouldBe(battleEvent2.Name);
-        fraction2.IsDefeated.ShouldBe(false);
+        fraction2.IsDefeated.ShouldBe(true);
         fraction2.Ships.Count.ShouldBe(0);
     }
 }
