@@ -8,8 +8,7 @@ public class ShipState
     public string Name { get; private set; }
     public ShipType Type { get; private set; }
 
-    public double PositionX { get; private set; }
-    public double PositionY { get; private set; }
+    public Position Position { get; private set; }
     public double Speed { get; private set; }
 
     public int HitPoints { get; private set; }
@@ -40,8 +39,7 @@ public class ShipState
             ShipId = Guid.NewGuid(),
             Name = name,
             Type = type,
-            PositionX = positionX,
-            PositionY = positionY,
+            Position = new Position(positionX, positionY),
             Speed = speed,
             HitPoints = hitPoints,
             Shields = shields,
@@ -55,9 +53,6 @@ public class ShipState
 
     public void UpdatePosition(double newX, double newY)
     {
-        PositionX = newX;
-        PositionY = newY;
+        Position = new Position(newX, newY);
     }
-
-
 }

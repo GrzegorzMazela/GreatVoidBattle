@@ -75,8 +75,8 @@ public class SetShipPositionEventHandlerTests
             .First(f => f.FractionId == _fraction1Id)
             .Ships.First(s => s.ShipId == shipId);
 
-        ship.PositionX.ShouldBe(x);
-        ship.PositionY.ShouldBe(y);
+        ship.Position.X.ShouldBe(x);
+        ship.Position.Y.ShouldBe(y);
     }
 
     [Fact]
@@ -144,14 +144,14 @@ public class SetShipPositionEventHandlerTests
             .First(f => f.FractionId == _fraction1Id)
             .Ships.First(s => s.ShipId == ship1Id);
 
-        ship1.PositionX.ShouldBe(x1);
-        ship1.PositionY.ShouldBe(y1);
+        ship1.Position.X.ShouldBe(x1);
+        ship1.Position.Y.ShouldBe(y1);
 
         var ship2 = _battleManager.BattleState.Fractions
            .First(f => f.FractionId == _fraction2Id)
            .Ships.First(s => s.ShipId == ship2Id);
 
-        ship2.PositionX.ShouldBe(x2);
-        ship2.PositionY.ShouldBe(y2);
+        ship2.Position.X.ShouldBe(x2);
+        ship2.Position.Y.ShouldBe(y2);
     }
 }
