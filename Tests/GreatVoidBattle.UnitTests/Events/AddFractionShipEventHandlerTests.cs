@@ -16,7 +16,7 @@ public class AddFractionShipEventHandlerTests
     {
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
         var battleState = BattleState.CreateNew(battleEvent.Name);
-        var fraction = FractionState.CreateNew("Fraction 1");
+        var fraction = FractionState.CreateNew("Fraction 1", battleState.BattleLog);
         battleState.AddFraction(fraction);
         _fractionId = fraction.FractionId;
         _battleManager = new BattleManager(battleState);
@@ -174,7 +174,7 @@ public class AddFractionShipEventHandlerTests
         ship.Name.ShouldBe(addShipEvent.Name);
         ship.Type.ShouldBe(ShipType.Battleship);
         ship.NumberOfLasers.ShouldBe(10);
-        ship.NumberOfMissiles.ShouldBe(10);  
+        ship.NumberOfMissiles.ShouldBe(10);
         ship.NumberOfPointsDefense.ShouldBe(4);
     }
 
@@ -251,8 +251,8 @@ public class AddFractionShipEventHandlerTests
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
         var battleState = BattleState.CreateNew(battleEvent.Name);
 
-        var fraction1 = FractionState.CreateNew("Fraction 1");
-        var fraction2 = FractionState.CreateNew("Fraction 2");
+        var fraction1 = FractionState.CreateNew("Fraction 1", battleState.BattleLog);
+        var fraction2 = FractionState.CreateNew("Fraction 2", battleState.BattleLog);
         battleState.AddFraction(fraction1);
         battleState.AddFraction(fraction2);
 

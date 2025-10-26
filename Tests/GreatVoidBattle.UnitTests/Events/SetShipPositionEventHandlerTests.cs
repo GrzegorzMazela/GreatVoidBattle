@@ -22,8 +22,8 @@ public class SetShipPositionEventHandlerTests
     {
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
         var battleState = BattleState.CreateNew(battleEvent.Name);
-        var fraction1 = FractionState.CreateNew("Fraction 1");
-        var fraction2 = FractionState.CreateNew("Fraction 2");
+        var fraction1 = FractionState.CreateNew("Fraction 1", battleState.BattleLog);
+        var fraction2 = FractionState.CreateNew("Fraction 2", battleState.BattleLog);
         battleState.AddFraction(fraction1);
         _fraction1Id = fraction1.FractionId;
         battleState.AddFraction(fraction2);
@@ -34,6 +34,7 @@ public class SetShipPositionEventHandlerTests
     private Guid CreateShip(Guid fractionId, double posX = 0, double posY = 0)
     {
         var ship = ShipState.Create(
+            fractionId: fractionId,
             name: "Test Ship",
             type: ShipType.Corvette,
             positionX: posX,
@@ -45,7 +46,8 @@ public class SetShipPositionEventHandlerTests
             numberOfModules: 1,
             modules: [
                 ModuleState.Create(new List<SystemSlot> { SystemSlot.Create(WeaponType.Laser) })
-                ]
+                ],
+            battleLog: new BattleLog()
         );
         _battleManager.BattleState.AddFractionShip(fractionId, ship);
         return ship.ShipId;
@@ -103,7 +105,7 @@ public class SetShipPositionEventHandlerTests
         // Act
         await _battleManager.ApplyEventAsync(@startBattlerEvent);
 
-        //zmien to tak aby sprawdzalo czy zwraca dobry blad: 
+        //zmien to tak aby sprawdzalo czy zwraca dobry blad:
         await Should.ThrowAsync<WrongBattleStatusException>(async () => await _battleManager.ApplyEventAsync(@event));
     }
 
@@ -133,7 +135,6 @@ public class SetShipPositionEventHandlerTests
             NewPositionX = x2,
             NewPositionY = y2
         };
-
 
         // Act
         await _battleManager.ApplyEventAsync(@event1);

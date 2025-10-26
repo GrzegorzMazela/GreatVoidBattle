@@ -1,4 +1,5 @@
 ﻿using GreatVoidBattle.Core.Domains.Enums;
+using GreatVoidBattle.Core.Domains.ExtraActions;
 
 namespace GreatVoidBattle.Core.Domains;
 
@@ -8,8 +9,23 @@ public class BattleState
     public string BattleName { get; set; } = string.Empty;
     public int TurnNumber { get; set; }
     public BattleStatus BattleStatus { get; set; }
+    public BattleLog BattleLog { get; set; } = new();
 
-    public List<FractionState> Fractions { get; set; } = new();
+    private List<FractionState> _fractions { get; set; } = new();
+    public IReadOnlyCollection<FractionState> Fractions => _fractions.AsReadOnly();
+
+    private List<ShipMovementPath> _shipMovementPaths { get; set; } = new();
+
+    public IReadOnlyCollection<ShipMovementPath> ShipMovementPaths => _shipMovementPaths.AsReadOnly();
+
+    private List<MissileMovementPath> _missileMovementPaths { get; set; } = new();
+    public IReadOnlyCollection<MissileMovementPath> MissileMovementPaths => _missileMovementPaths.AsReadOnly();
+
+    private List<LaserShot> _laserShots { get; set; } = new();
+    public IReadOnlyCollection<LaserShot> LaserShots => _laserShots.AsReadOnly();
+
+    private List<IExtraAction> _extraActions { get; set; } = new();
+    public IReadOnlyCollection<IExtraAction> ExtraActions => _extraActions.AsReadOnly();
 
     public DateTime LastUpdated { get; set; }
 
@@ -20,11 +36,35 @@ public class BattleState
             BattleId = Guid.NewGuid(),
             BattleName = battleName,
             TurnNumber = 0,
-            Fractions = new List<FractionState>(),
+            _fractions = new List<FractionState>(),
             LastUpdated = DateTime.UtcNow,
-            BattleStatus = BattleStatus.Preparation
+            BattleStatus = BattleStatus.Preparation,
+            BattleLog = new BattleLog()
         };
     }
+
+    private FractionState GetFraction(Guid id)
+    {
+        var fraction = _fractions.FirstOrDefault(f => f.FractionId == id);
+        if (fraction is null)
+        {
+            throw new InvalidOperationException($"Fraction with ID {id} not exists in the battle.");
+        }
+        return fraction;
+    }
+
+    private ShipState? GetShip(Guid id)
+    {
+        return _fractions.SelectMany(f => f.Ships)
+            .FirstOrDefault(s => s.ShipId == id);
+    }
+
+    private void SetUpdated()
+    {
+        LastUpdated = DateTime.UtcNow;
+    }
+
+    #region Preparation
 
     public void AddFraction(FractionState fraction)
     {
@@ -32,25 +72,25 @@ public class BattleState
         {
             throw new InvalidOperationException($"Fraction with ID {fraction.FractionId} already exists in the battle.");
         }
-        Fractions.Add(fraction);
-        LastUpdated = DateTime.UtcNow;
+        _fractions.Add(fraction);
+        SetUpdated();
     }
 
     public void AddFractionShip(Guid fractionId, ShipState shipState)
     {
-        var fraction = Fractions.FirstOrDefault(f => f.FractionId == fractionId);
+        var fraction = _fractions.FirstOrDefault(f => f.FractionId == fractionId);
 
         if (fraction is null)
         {
             throw new InvalidOperationException($"Fraction with ID {fraction.FractionId} not exists in the battle.");
         }
         fraction.AddShip(shipState);
-        LastUpdated = DateTime.UtcNow;
+        SetUpdated();
     }
 
     public void SetNewShipPosition(Guid fractionId, Guid shipId, double newX, double newY)
     {
-        var fraction = Fractions.FirstOrDefault(f => f.FractionId == fractionId);
+        var fraction = _fractions.FirstOrDefault(f => f.FractionId == fractionId);
         if (fraction is null)
         {
             throw new InvalidOperationException($"Fraction with ID {fraction.FractionId} not exists in the battle.");
@@ -61,11 +101,124 @@ public class BattleState
             throw new InvalidOperationException($"Ship with ID {ship.ShipId} not exists in the fraction.");
         }
         ship.UpdatePosition(newX, newY);
-        LastUpdated = DateTime.UtcNow;
+        SetUpdated();
     }
 
     public void StartBattle()
     {
         BattleStatus = BattleStatus.InProgress;
+        SetUpdated();
     }
+
+    #endregion Preparation
+
+    #region InProgress
+
+    public void AddShipMove(Guid fractionId, Guid shipId, Position targetPosition)
+    {
+        var ship = GetFraction(fractionId).GetShip(shipId);
+
+        var movementPath = new ShipMovementPath(ship, targetPosition);
+        movementPath.GeneratePath();
+        _shipMovementPaths.Add(movementPath);
+        SetUpdated();
+    }
+
+    public void AddMissileShot(Guid fractionId, Guid shipId, Guid targetFractionId, Guid targetShipId)
+    {
+        var ship = GetFraction(fractionId).GetShip(shipId);
+        var targetShip = GetFraction(targetFractionId).GetShip(targetShipId);
+
+        ship.FireMissile();
+        var missilePath = new MissileMovementPath(ship, targetShip, Const.MissileSpeed);
+        _missileMovementPaths.Add(missilePath);
+
+        SetUpdated();
+    }
+
+    public void AddLaserShot(Guid fractionId, Guid shipId, Guid targetFractionId, Guid targetShipId)
+    {
+        var ship = GetFraction(fractionId).GetShip(shipId);
+        var targetShip = GetFraction(targetFractionId).GetShip(targetShipId);
+
+        ship.FireLaser();
+        var laserShot = new LaserShot(ship.ShipId, targetShip.ShipId);
+        _laserShots.Add(laserShot);
+
+        SetUpdated();
+    }
+
+    public void AddExtraAction(IExtraAction extraAction)
+    {
+        //TODO: implement
+    }
+
+    public void EndOfTurn()
+    {
+        RunLaserShots();
+        RunMissileShot();
+        MoveShips();
+        //TODO: Add extra actions processing
+    }
+
+    private void RunLaserShots()
+    {
+        foreach (var laserShot in _laserShots)
+        {
+            var targetShip = GetShip(laserShot.TargetId);
+            if (targetShip is null) continue;
+
+            targetShip.TakeDamage(Const.LaserDamage);
+            if (targetShip.Status == ShipStatus.Destroyed)
+            {
+                GetFraction(targetShip.FractionId).RemoveShip(targetShip);
+            }
+            //TODO: add logs
+        }
+    }
+
+    private void RunMissileShot()
+    {
+        foreach (var missileMovementPath in _missileMovementPaths)
+        {
+            missileMovementPath.MoveOneStep();
+            if (!missileMovementPath.IsCompleted) continue;
+
+            var targetShip = GetShip(missileMovementPath.TargetId);
+            if (targetShip is not null)
+            {
+                targetShip.TakeDamage(Const.MissileDamage, GetAccuracy(missileMovementPath.Accuracy, targetShip));
+                if (targetShip.Status == ShipStatus.Destroyed)
+                {
+                    GetFraction(targetShip.FractionId).RemoveShip(targetShip);
+                }
+                //TODO: add logs
+            }
+        }
+    }
+
+    public void MoveShips()
+    {
+        foreach (var shipMovementPath in _shipMovementPaths)
+        {
+            shipMovementPath.MoveOneStep();
+            var ship = GetShip(shipMovementPath.ShipId);
+            if (ship is not null)
+            {
+                shipMovementPath.MoveOneStep();
+                ship.UpdatePosition(shipMovementPath.StartPosition.X, shipMovementPath.StartPosition.Y);
+            }
+
+            //TODO: add logs
+        }
+    }
+
+    private int GetAccuracy(int missileAccuracy, ShipState TargetShip)
+    {
+        var realAccuracy = missileAccuracy - TargetShip.GetPointDefenseAccuracy();
+
+        return realAccuracy < 20 ? 20 : realAccuracy;
+    }
+
+    #endregion InProgress
 }

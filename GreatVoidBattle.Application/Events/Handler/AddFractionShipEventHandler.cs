@@ -9,7 +9,7 @@ public class AddFractionShipEventHandler : BaseEventHandler<AddFractionShipEvent
 {
     public override Task HandleAsync(AddFractionShipEvent battleEvent, BattleState battleState)
     {
-        var ship = ShipFactory.CreateShip(battleEvent);
+        var ship = ShipFactory.CreateShip(battleEvent, battleState.BattleLog);
         battleState.AddFractionShip(battleEvent.FractionId!.Value, ship);
         return Task.CompletedTask;
     }
