@@ -1,14 +1,41 @@
+using GreatVoidBattle.Application.Hubs;
 using GreatVoidBattle.Application.Factories;
+using GreatVoidBattle.Infrastructure;
+using GreatVoidBattle.Infrastructure.Repository;
+using GreatVoidBattle.Application.Repositories;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Bson;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Register the GuidSerializer globally
+BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
+var mongoConn = builder.Configuration.GetValue<string>("Mongo:ConnectionString") ?? "mongodb://localhost:27017";
+var mongoDbName = builder.Configuration.GetValue<string>("Mongo:Database") ?? "great-void-battle";
+builder.Services.AddSingleton(sp => MongoDbFactory.Create(mongoConn, mongoDbName));
+builder.Services.AddScoped<IBattleStateRepository, BattleStateRepository>();
+builder.Services.AddScoped<IBattleEventRepository, BattleEventRepository>();
+
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
 builder.Services.AddTransient<BattleManagerFactory>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .AllowAnyOrigin() // tylko do devu! W prodzie ogranicz do swojego frontu
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddControllers();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,6 +45,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
-
+app.MapControllers();
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapHub<BattleHub>("/hubs/battle");
 app.Run();

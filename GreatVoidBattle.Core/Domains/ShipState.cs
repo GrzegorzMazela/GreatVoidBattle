@@ -1,4 +1,5 @@
 ﻿using GreatVoidBattle.Core.Domains.Enums;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace GreatVoidBattle.Core.Domains;
 
@@ -25,10 +26,15 @@ public class ShipState
     public int NumberOfLasers => Modules.Sum(m => m.Slots.Count(x => x.WeaponType == WeaponType.Laser));
     public int NumberOfLasersFiredPerTurn { get; private set; } = 0;
 
+    [BsonElement("Modules")]
     public List<ModuleState> Modules { get; set; } = new();
+
+    [BsonElement("Energy")]
     public EnergyDistribution Energy { get; set; } = new();
 
     public ShipStatus Status { get; set; } = ShipStatus.Active;
+
+    [BsonIgnore]
     private BattleLog _battleLog;
 
     // create statict created method
@@ -57,6 +63,17 @@ public class ShipState
             Status = ShipStatus.Active,
             _battleLog = battleLog
         };
+    }
+
+    public void UpdateName(string name)
+    {
+        Name = name;
+    }
+
+    public void UpdateType(ShipType type, List<ModuleState> modules)
+    {
+        Type = type;
+        Modules = modules;
     }
 
     public void UpdatePosition(double newX, double newY)

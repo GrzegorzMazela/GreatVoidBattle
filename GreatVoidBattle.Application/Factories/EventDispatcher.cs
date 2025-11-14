@@ -1,6 +1,7 @@
 ﻿using GreatVoidBattle.Application.Events.Base;
 using GreatVoidBattle.Application.Events.Handler;
 using GreatVoidBattle.Application.Events.Handler.Base;
+using GreatVoidBattle.Application.Events.InProgress.Handler;
 using GreatVoidBattle.Core.Domains;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,13 @@ public class EventDispatcher
         // Register all event handlers here
         RegisterHandler(new AddFractionEventHandler());
         RegisterHandler(new AddFractionShipEventHandler());
+        RegisterHandler(new UpdateFractionShipEventHandler());
         RegisterHandler(new StartBattleEventHandler());
         RegisterHandler(new SetShipPositionEventHandler());
+        RegisterHandler(new AddLaserShotEventHandler());
+        RegisterHandler(new AddMissileShotEventHandler());
+        RegisterHandler(new AddShipMoveEventHandler());
+        RegisterHandler(new EndOfTurnEventHandler());
         // Add more handlers as needed
     }
 
@@ -32,7 +38,15 @@ public class EventDispatcher
         var targetEvent = battleEvent.GetType();
         if (_handlers.TryGetValue(targetEvent, out var handlerObj))
         {
-            await ((BaseEventHandler<T>)handlerObj).HandleAsync(battleEvent, battleState);
+            // Znajdź metodę HandleAsync za pomocą refleksji
+            var method = handlerObj.GetType().GetMethod("HandleAsync");
+            if (method == null)
+                throw new InvalidOperationException($"Handler for event type {targetEvent.Name} does not implement HandleAsync.");
+
+            // Wywołaj metodę asynchronicznie
+            var task = (Task?)method.Invoke(handlerObj, new object[] { battleEvent, battleState });
+            if (task != null)
+                await task;
         }
         else
         {

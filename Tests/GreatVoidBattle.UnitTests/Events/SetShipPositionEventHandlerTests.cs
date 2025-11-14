@@ -21,7 +21,7 @@ public class SetShipPositionEventHandlerTests
     public SetShipPositionEventHandlerTests()
     {
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
-        var battleState = BattleState.CreateNew(battleEvent.Name);
+        var battleState = BattleState.CreateNew(battleEvent.Name, 500, 500);
         var fraction1 = FractionState.CreateNew("Fraction 1", battleState.BattleLog);
         var fraction2 = FractionState.CreateNew("Fraction 2", battleState.BattleLog);
         battleState.AddFraction(fraction1);

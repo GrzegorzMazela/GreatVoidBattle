@@ -1,4 +1,5 @@
 ﻿using GreatVoidBattle.Core.Domains.Enums;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace GreatVoidBattle.Core.Domains;
 
@@ -7,7 +8,11 @@ public class FractionState
     public Guid FractionId { get; set; }
     public string FractionName { get; set; } = string.Empty;
     public IReadOnlyList<ShipState> Ships => _ships.AsReadOnly();
+
+    [BsonElement("Ships")]
     private List<ShipState> _ships { get; set; } = new();
+
+    [BsonIgnore]
     private BattleLog _battleLog;
 
     public bool IsDefeated => _ships.All(s => s.Status is ShipStatus.Destroyed or ShipStatus.Retreated);
@@ -26,6 +31,13 @@ public class FractionState
     public void AddShip(ShipState ship)
     {
         _ships.Add(ship);
+    }
+
+    public void UpdateShip(ShipState updatedShip)
+    {
+        var existingShip = GetShip(updatedShip.ShipId);
+        var index = _ships.IndexOf(existingShip);
+        _ships[index] = updatedShip;
     }
 
     public ShipState GetShip(Guid shipId)

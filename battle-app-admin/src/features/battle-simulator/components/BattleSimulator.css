@@ -1,0 +1,185 @@
+.battle-simulator {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  color: #fff;
+  overflow: hidden;
+}
+
+.battle-simulator.loading,
+.battle-simulator.error {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.battle-simulator.error h2 {
+  color: #F44336;
+  margin-bottom: 1rem;
+}
+
+.battle-simulator.error button {
+  padding: 0.75rem 1.5rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.battle-simulator.error button:hover {
+  background: #45a049;
+}
+
+.battle-header {
+  padding: 1rem 1.5rem;
+  background: #2a2a2a;
+  border-bottom: 2px solid #444;
+}
+
+.battle-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.back-btn {
+  padding: 0.5rem 1rem;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #555;
+}
+
+.battle-title h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.battle-size {
+  padding: 0.25rem 0.75rem;
+  background: #444;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.fraction-selector {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.fraction-selector p {
+  margin: 0 0 0.75rem 0;
+  color: #aaa;
+}
+
+.fraction-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.fraction-select-btn {
+  padding: 0.75rem 1.5rem;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.fraction-select-btn:hover {
+  opacity: 0.9;
+}
+
+.battle-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.battle-main {
+  flex: 1;
+  min-width: 0;
+  background: #0a0a0a;
+}
+
+.battle-sidebar {
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: #1a1a1a;
+  border-left: 2px solid #444;
+  overflow-y: auto;
+}
+
+.orders-error {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 1.5rem;
+  background: #F44336;
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .battle-sidebar {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .battle-content {
+    flex-direction: column;
+  }
+
+  .battle-sidebar {
+    width: 100%;
+    max-height: 40vh;
+    border-left: none;
+    border-top: 2px solid #444;
+  }
+
+  .battle-main {
+    min-height: 60vh;
+  }
+}

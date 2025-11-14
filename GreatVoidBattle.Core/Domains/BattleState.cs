@@ -1,35 +1,50 @@
 ﻿using GreatVoidBattle.Core.Domains.Enums;
 using GreatVoidBattle.Core.Domains.ExtraActions;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace GreatVoidBattle.Core.Domains;
 
 public class BattleState
 {
+    [BsonId]
     public Guid BattleId { get; set; }
+
     public string BattleName { get; set; } = string.Empty;
+    public int Width { get; set; }
+    public int Height { get; set; }
     public int TurnNumber { get; set; }
     public BattleStatus BattleStatus { get; set; }
     public BattleLog BattleLog { get; set; } = new();
 
+    [BsonElement("Fractions")]
     private List<FractionState> _fractions { get; set; } = new();
+
     public IReadOnlyCollection<FractionState> Fractions => _fractions.AsReadOnly();
 
+    [BsonElement("ShipMovementPaths")]
     private List<ShipMovementPath> _shipMovementPaths { get; set; } = new();
 
     public IReadOnlyCollection<ShipMovementPath> ShipMovementPaths => _shipMovementPaths.AsReadOnly();
 
+    [BsonElement("MissileMovementPaths")]
     private List<MissileMovementPath> _missileMovementPaths { get; set; } = new();
+
     public IReadOnlyCollection<MissileMovementPath> MissileMovementPaths => _missileMovementPaths.AsReadOnly();
 
+    [BsonElement("LaserShots")]
     private List<LaserShot> _laserShots { get; set; } = new();
+
     public IReadOnlyCollection<LaserShot> LaserShots => _laserShots.AsReadOnly();
 
+    [BsonElement("ExtraActions")]
     private List<IExtraAction> _extraActions { get; set; } = new();
+
     public IReadOnlyCollection<IExtraAction> ExtraActions => _extraActions.AsReadOnly();
 
     public DateTime LastUpdated { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public static BattleState CreateNew(string battleName)
+    public static BattleState CreateNew(string battleName, int width, int height)
     {
         return new BattleState
         {
@@ -38,7 +53,10 @@ public class BattleState
             TurnNumber = 0,
             _fractions = new List<FractionState>(),
             LastUpdated = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
             BattleStatus = BattleStatus.Preparation,
+            Width = width,
+            Height = height,
             BattleLog = new BattleLog()
         };
     }
@@ -53,7 +71,7 @@ public class BattleState
         return fraction;
     }
 
-    private ShipState? GetShip(Guid id)
+    public ShipState? GetShip(Guid id)
     {
         return _fractions.SelectMany(f => f.Ships)
             .FirstOrDefault(s => s.ShipId == id);
@@ -85,6 +103,17 @@ public class BattleState
             throw new InvalidOperationException($"Fraction with ID {fraction.FractionId} not exists in the battle.");
         }
         fraction.AddShip(shipState);
+        SetUpdated();
+    }
+
+    public void UpdateFractionShip(Guid fractionId, ShipState updatedShipState)
+    {
+        var fraction = _fractions.FirstOrDefault(f => f.FractionId == fractionId);
+        if (fraction is null)
+        {
+            throw new InvalidOperationException($"Fraction with ID {fraction.FractionId} not exists in the battle.");
+        }
+        fraction.UpdateShip(updatedShipState);
         SetUpdated();
     }
 

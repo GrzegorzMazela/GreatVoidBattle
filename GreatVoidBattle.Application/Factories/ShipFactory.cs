@@ -1,6 +1,6 @@
-﻿using GreatVoidBattle.Core.Domains;
+﻿using GreatVoidBattle.Application.Events;
+using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
-using GreatVoidBattle.Events;
 
 namespace GreatVoidBattle.Core.Factories;
 
@@ -18,7 +18,7 @@ public static class ShipFactory
         _ => throw new ArgumentOutOfRangeException()
     };
 
-    private static ShipState CreateShipState(AddFractionShipEvent addShipEvent, int speed, int hitPoints,
+    public static ShipState CreateShipState(AddFractionShipEvent addShipEvent, int speed, int hitPoints,
         int shields, int armor, int numberOfModules, BattleLog battleLog)
     {
         return ShipState.Create(addShipEvent.FractionId!.Value, addShipEvent.Name, addShipEvent.Type, addShipEvent.PositionX, addShipEvent.PositionY,

@@ -2,7 +2,6 @@
 using GreatVoidBattle.Application.Managers;
 using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
-using GreatVoidBattle.Events;
 using Shouldly;
 
 namespace GreatVoidBattle.UnitTests.Events;
@@ -14,8 +13,8 @@ public class AddFractionShipEventHandlerTests
 
     public AddFractionShipEventHandlerTests()
     {
-        var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
-        var battleState = BattleState.CreateNew(battleEvent.Name);
+        var battleEvent = new CreateBattleEvent { Name = "Test Battle", Width = 500, Height = 500 };
+        var battleState = BattleState.CreateNew(battleEvent.Name, battleEvent.Width, battleEvent.Height);
         var fraction = FractionState.CreateNew("Fraction 1", battleState.BattleLog);
         battleState.AddFraction(fraction);
         _fractionId = fraction.FractionId;
@@ -25,7 +24,7 @@ public class AddFractionShipEventHandlerTests
     [Fact]
     public async Task AddFractionShipEventHandler_AddCorvette_Success()
     {
-        var addShipEvent = new AddFractionShipEvent
+        var addShipEvent = new UpdateFractionShipEvent
         {
             BattleId = _battleManager.BattleId,
             FractionId = _fractionId,
@@ -52,7 +51,7 @@ public class AddFractionShipEventHandlerTests
     [Fact]
     public async Task AddFractionShipEventHandler_AddDestroyer_Success()
     {
-        var addShipEvent = new AddFractionShipEvent
+        var addShipEvent = new UpdateFractionShipEvent
         {
             BattleId = _battleManager.BattleId,
             FractionId = _fractionId,
@@ -80,7 +79,7 @@ public class AddFractionShipEventHandlerTests
     [Fact]
     public async Task AddFractionShipEventHandler_AddCruiser_Success()
     {
-        var addShipEvent = new AddFractionShipEvent
+        var addShipEvent = new UpdateFractionShipEvent
         {
             BattleId = _battleManager.BattleId,
             FractionId = _fractionId,
@@ -110,7 +109,7 @@ public class AddFractionShipEventHandlerTests
     [Fact]
     public async Task AddFractionShipEventHandler_AddBattleship_Success()
     {
-        var addShipEvent = new AddFractionShipEvent
+        var addShipEvent = new UpdateFractionShipEvent
         {
             BattleId = _battleManager.BattleId,
             FractionId = _fractionId,
@@ -144,7 +143,7 @@ public class AddFractionShipEventHandlerTests
     [Fact]
     public async Task AddFractionShipEventHandler_AddBattleship_NumeberOfLasersMissilesPointsDefense_Success()
     {
-        var addShipEvent = new AddFractionShipEvent
+        var addShipEvent = new UpdateFractionShipEvent
         {
             BattleId = _battleManager.BattleId,
             FractionId = _fractionId,
@@ -181,7 +180,7 @@ public class AddFractionShipEventHandlerTests
     [Fact]
     public async Task AddFractionShipEventHandler_AddSuperBattleship_Success()
     {
-        var addShipEvent = new AddFractionShipEvent
+        var addShipEvent = new UpdateFractionShipEvent
         {
             BattleId = _battleManager.BattleId,
             FractionId = _fractionId,
@@ -219,7 +218,7 @@ public class AddFractionShipEventHandlerTests
     [Fact]
     public async Task AddFractionShipEventHandler_AddOrbitalFort_Success()
     {
-        var addShipEvent = new AddFractionShipEvent
+        var addShipEvent = new UpdateFractionShipEvent
         {
             BattleId = _battleManager.BattleId,
             FractionId = _fractionId,
@@ -248,8 +247,8 @@ public class AddFractionShipEventHandlerTests
     public async Task AddFractionShipEventHandler_AddShipsToTwoFractions_Success()
     {
         // Arrange: create battle with two fractions
-        var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
-        var battleState = BattleState.CreateNew(battleEvent.Name);
+        var battleEvent = new CreateBattleEvent { Name = "Test Battle", Width = 500, Height = 500 };
+        var battleState = BattleState.CreateNew(battleEvent.Name, battleEvent.Width, battleEvent.Height);
 
         var fraction1 = FractionState.CreateNew("Fraction 1", battleState.BattleLog);
         var fraction2 = FractionState.CreateNew("Fraction 2", battleState.BattleLog);
@@ -259,7 +258,7 @@ public class AddFractionShipEventHandlerTests
         var battleManager = new BattleManager(battleState);
 
         // Act: add a Corvette to fraction1 and a Battleship to fraction2
-        var addCorvetteEvent = new AddFractionShipEvent
+        var addCorvetteEvent = new UpdateFractionShipEvent
         {
             BattleId = battleManager.BattleId,
             FractionId = fraction1.FractionId,
@@ -271,7 +270,7 @@ public class AddFractionShipEventHandlerTests
                 new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
                 ]
         };
-        var addBattleshipEvent = new AddFractionShipEvent
+        var addBattleshipEvent = new UpdateFractionShipEvent
         {
             BattleId = battleManager.BattleId,
             FractionId = fraction2.FractionId,

@@ -1,7 +1,6 @@
 ﻿using GreatVoidBattle.Application.Events.Handler.Base;
 using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Factories;
-using GreatVoidBattle.Events;
 
 namespace GreatVoidBattle.Application.Events.Handler;
 
