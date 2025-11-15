@@ -9,5 +9,6 @@ public class FractionDto
     public string PlayerName { get; set; } = string.Empty;
     public string FractionColor { get; set; } = string.Empty;
     public bool IsDefeated { get; set; }
+    public bool TurnFinished { get; set; }
     public List<ShipDto> Ships { get; set; } = [];
 }

@@ -10,6 +10,7 @@ public class FractionState
     public string PlayerName { get; set; } = string.Empty;
     public string FractionColor { get; set; } = string.Empty;
     public Guid AuthToken { get; set; }
+    public bool TurnFinished { get; set; } = false;
     public IReadOnlyList<ShipState> Ships => _ships.AsReadOnly();
 
     [BsonElement("Ships")]

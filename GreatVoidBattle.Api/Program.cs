@@ -30,9 +30,10 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .AllowAnyOrigin() // tylko do devu! W prodzie ogranicz do swojego frontu
+            .WithOrigins("http://localhost:5173", "http://localhost:5174", "https://localhost:7295")
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials(); // Wymagane dla SignalR
     });
 });
 

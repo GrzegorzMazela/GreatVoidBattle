@@ -1,17 +1,33 @@
-﻿using GreatVoidBattle.Application.Dto.Fractions;
+using GreatVoidBattle.Application.Dto.Fractions;
 using GreatVoidBattle.Application.Dto.Battles;
 using GreatVoidBattle.Application.Factories;
 using Microsoft.AspNetCore.Mvc;
 using GreatVoidBattle.Application.Repositories;
 using GreatVoidBattle.Application.Events.InProgress;
 using GreatVoidBattle.Api.Attributes;
+using Microsoft.AspNetCore.SignalR;
+using GreatVoidBattle.Application.Hubs;
 
 namespace GreatVoidBattle.Application.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class BattlesController(BattleManagerFactory battleManagerFactory, IBattleStateRepository _battleStateRepository) : ControllerBase
+public class BattlesController : ControllerBase
 {
+    private readonly BattleManagerFactory _battleManagerFactory;
+    private readonly IBattleStateRepository _battleStateRepository;
+    private readonly IHubContext<BattleHub> _hubContext;
+
+    public BattlesController(
+        BattleManagerFactory battleManagerFactory,
+        IBattleStateRepository battleStateRepository,
+        IHubContext<BattleHub> hubContext)
+    {
+        _battleManagerFactory = battleManagerFactory;
+        _battleStateRepository = battleStateRepository;
+        _hubContext = hubContext;
+    }
+
     [HttpPost]
     [ProducesResponseType<Guid>(201)]
     public IActionResult CreateBattle([FromBody] CreateBattleDto createBattleDto)
@@ -22,7 +38,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
             Width = createBattleDto.Width,
             Height = createBattleDto.Height
         };
-        var battleId = battleManagerFactory.CreateNewBattle(createBattleEvent);
+        var battleId = _battleManagerFactory.CreateNewBattle(createBattleEvent);
         return Ok(battleId);
     }
 
@@ -30,7 +46,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
     [ProducesResponseType<BattleStateDto>(200)]
     public async Task<IActionResult> GetBattleState(Guid battleId)
     {
-        var battleState = await battleManagerFactory.GetBattleState(battleId);
+        var battleState = await _battleManagerFactory.GetBattleState(battleId);
         if (battleState == null)
         {
             return NotFound();
@@ -51,6 +67,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
                 FractionColor = f.FractionColor,
                 //AuthToken = f.AuthToken,
                 IsDefeated = f.IsDefeated,
+                TurnFinished = f.TurnFinished,
                 Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
                 {
                     ShipId = s.ShipId,
@@ -101,7 +118,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
     [ProducesResponseType<BattleStateAdminDto>(200)]
     public async Task<IActionResult> GetBattleStateAdmin(Guid battleId)
     {
-        var battleState = await battleManagerFactory.GetBattleState(battleId);
+        var battleState = await _battleManagerFactory.GetBattleState(battleId);
         if (battleState == null)
         {
             return NotFound();
@@ -122,6 +139,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
                 FractionColor = f.FractionColor,
                 AuthToken = f.AuthToken,
                 IsDefeated = f.IsDefeated,
+                TurnFinished = f.TurnFinished,
                 Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
                 {
                     ShipId = s.ShipId,
@@ -170,7 +188,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
         {
             BattleId = battleId
         };
-        await battleManagerFactory.ApplyEventAsync(startBattleEvent);
+        await _battleManagerFactory.ApplyEventAsync(startBattleEvent);
         return Ok();
     }
 
@@ -179,7 +197,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
     [FractionAuth]
     public async Task<IActionResult> SubmitOrders(Guid battleId, Guid fractionId, [FromBody] SubmitOrdersDto submitOrdersDto)
     {
-        var battleState = await battleManagerFactory.GetBattleState(battleId);
+        var battleState = await _battleManagerFactory.GetBattleState(battleId);
         if (battleState == null)
         {
             return NotFound("Battle not found");
@@ -206,7 +224,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
                         ShipId = order.ShipId,
                         TargetPosition = new Core.Domains.Position(order.TargetX.Value, order.TargetY.Value)
                     };
-                    await battleManagerFactory.ApplyEventAsync(moveEvent);
+                    await _battleManagerFactory.ApplyEventAsync(moveEvent);
                     break;
 
                 case "laser":
@@ -222,7 +240,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
                         TargetShipId = order.TargetShipId.Value,
                         TargetFractionId = order.TargetFractionId.Value
                     };
-                    await battleManagerFactory.ApplyEventAsync(laserEvent);
+                    await _battleManagerFactory.ApplyEventAsync(laserEvent);
                     break;
 
                 case "missile":
@@ -238,7 +256,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
                         TargetShipId = order.TargetShipId.Value,
                         TargetFractionId = order.TargetFractionId.Value
                     };
-                    await battleManagerFactory.ApplyEventAsync(missileEvent);
+                    await _battleManagerFactory.ApplyEventAsync(missileEvent);
                     break;
 
                 default:
@@ -247,7 +265,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
         }
 
         // Pobierz zaktualizowany stan bitwy
-        var updatedBattleState = await battleManagerFactory.GetBattleState(battleId);
+        var updatedBattleState = await _battleManagerFactory.GetBattleState(battleId);
         var battleStateDto = new BattleStateDto
         {
             BattleId = updatedBattleState.BattleId,
@@ -264,6 +282,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
                 FractionColor = f.FractionColor,
                 //AuthToken = f.AuthToken,
                 IsDefeated = f.IsDefeated,
+                TurnFinished = f.TurnFinished,
                 Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
                 {
                     ShipId = s.ShipId,
@@ -306,10 +325,110 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
     }
 
     [HttpPost]
+    [Route("{battleId}/fractions/{fractionId}/end-turn")]
+    [FractionAuth]
+    public async Task<IActionResult> EndTurn(Guid battleId, Guid fractionId)
+    {
+        var battleState = await _battleManagerFactory.GetBattleState(battleId);
+        if (battleState == null)
+        {
+            return NotFound("Battle not found");
+        }
+
+        var fraction = battleState.Fractions.FirstOrDefault(f => f.FractionId == fractionId);
+        if (fraction == null)
+        {
+            return NotFound("Fraction not found");
+        }
+
+        if (fraction.TurnFinished)
+        {
+            return BadRequest("Turn already finished for this fraction");
+        }
+
+        // Oznacz turę frakcji jako zakończoną
+        fraction.TurnFinished = true;
+        await _battleStateRepository.UpdateAsync(battleState.BattleId, battleState);
+
+        // Powiadom innych graczy że ten gracz zakończył turę
+        await _hubContext.Clients.Group($"battle-{battleId}")
+            .SendAsync("PlayerFinishedTurn", new
+            {
+                FractionId = fraction.FractionId,
+                FractionName = fraction.FractionName,
+                PlayerName = fraction.PlayerName,
+                Timestamp = DateTime.UtcNow
+            });
+
+        // Sprawdź czy wszystkie frakcje zakończyły turę
+        var allFinished = battleState.Fractions.All(f => f.IsDefeated || f.TurnFinished);
+
+        if (allFinished)
+        {
+            // Wszystkie frakcje zakończyły - wykonaj turę
+            var endOfTurnEvent = new Application.Events.InProgress.EndOfTurnEvent
+            {
+                BattleId = battleId
+            };
+            await _battleManagerFactory.ApplyEventAsync(endOfTurnEvent);
+
+            // Resetuj flagi TurnFinished dla wszystkich frakcji
+            var freshBattleState = await _battleManagerFactory.GetBattleState(battleId);
+            foreach (var f in freshBattleState.Fractions)
+            {
+                f.TurnFinished = false;
+            }
+            await _battleStateRepository.UpdateAsync(freshBattleState.BattleId, freshBattleState);
+
+            // Powiadom wszystkich że rozpoczyna się nowa tura
+            await _hubContext.Clients.Group($"battle-{battleId}")
+                .SendAsync("NewTurnStarted", new
+                {
+                    TurnNumber = freshBattleState.TurnNumber,
+                    Timestamp = DateTime.UtcNow
+                });
+        }
+        else
+        {
+            // Jeszcze nie wszyscy zakończyli - wyślij listę oczekujących
+            var waitingPlayers = battleState.Fractions
+                .Where(f => !f.IsDefeated && !f.TurnFinished)
+                .Select(f => new
+                {
+                    FractionId = f.FractionId,
+                    FractionName = f.FractionName,
+                    PlayerName = f.PlayerName
+                }).ToList();
+
+            await _hubContext.Clients.Group($"battle-{battleId}")
+                .SendAsync("WaitingPlayersUpdated", waitingPlayers);
+        }
+
+        // Zwróć listę graczy którzy jeszcze nie zakończyli
+        var currentWaitingPlayers = battleState.Fractions
+            .Where(f => !f.IsDefeated && !f.TurnFinished)
+            .Select(f => new
+            {
+                FractionId = f.FractionId,
+                FractionName = f.FractionName,
+                PlayerName = f.PlayerName,
+                TurnFinished = f.TurnFinished
+            }).ToList();
+
+        return Ok(new
+        {
+            TurnFinished = true,
+            AllPlayersReady = allFinished,
+            WaitingForPlayers = currentWaitingPlayers,
+            NewTurnNumber = battleState.TurnNumber
+        });
+    }
+
+    [HttpPost]
     [Route("{battleId}/execute-turn")]
     public async Task<IActionResult> ExecuteTurn(Guid battleId)
     {
-        var battleState = await battleManagerFactory.GetBattleState(battleId);
+        var battleState = await _battleManagerFactory.GetBattleState(battleId);
         if (battleState == null)
         {
             return NotFound("Battle not found");
@@ -319,10 +438,10 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
         {
             BattleId = battleId
         };
-        await battleManagerFactory.ApplyEventAsync(endOfTurnEvent);
+        await _battleManagerFactory.ApplyEventAsync(endOfTurnEvent);
 
         // Return updated battle state
-        var updatedBattleState = await battleManagerFactory.GetBattleState(battleId);
+        var updatedBattleState = await _battleManagerFactory.GetBattleState(battleId);
         var battleStateDto = new BattleStateDto
         {
             BattleId = updatedBattleState.BattleId,
@@ -339,6 +458,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
                 FractionColor = f.FractionColor,
                 //AuthToken = f.AuthToken,
                 IsDefeated = f.IsDefeated,
+                TurnFinished = f.TurnFinished,
                 Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
                 {
                     ShipId = s.ShipId,

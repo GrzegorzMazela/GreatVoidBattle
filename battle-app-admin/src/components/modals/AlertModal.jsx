@@ -35,17 +35,17 @@ export const AlertModal = ({ isOpen, onClose, title = 'Informacja', message, var
 
   return (
     <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && onClose()} size="md">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+      <DialogContent style={{ backgroundColor: '#ffffff', color: '#000000' }}>
+        <DialogHeader style={{ borderBottom: '1px solid #e2e8f0' }}>
+          <DialogTitle style={{ color: '#000000' }}>{title}</DialogTitle>
         </DialogHeader>
         <DialogCloseTrigger />
-        <DialogBody>
-          <p>{message}</p>
+        <DialogBody style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+          <p style={{ color: '#000000' }}>{message}</p>
         </DialogBody>
-        <DialogFooter>
+        <DialogFooter style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
           <DialogActionTrigger asChild>
-            <Button colorScheme={getColorScheme()} onClick={onClose}>
+            <Button colorScheme={getColorScheme()} onClick={onClose} style={{ color: '#ffffff' }}>
               OK
             </Button>
           </DialogActionTrigger>

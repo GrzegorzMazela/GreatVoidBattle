@@ -193,8 +193,8 @@ export const BattleCanvas = ({
 
     const { cellSize, zoom } = viewport;
     const scaledCellSize = cellSize * zoom;
-    const shipX = selectedShip.x;
-    const shipY = selectedShip.y;
+    const shipX = Math.floor(selectedShip.x);
+    const shipY = Math.floor(selectedShip.y);
     
     const MISSILE_MIN_RANGE = 35;
     const MISSILE_MAX_RANGE = 55;
@@ -202,9 +202,8 @@ export const BattleCanvas = ({
     // Rysuj zasięg rakiet w kolorze niebieskim
     for (let x = visibleArea.startX; x <= visibleArea.endX; x++) {
       for (let y = visibleArea.startY; y <= visibleArea.endY; y++) {
-        const distance = Math.sqrt(
-          Math.pow(x - shipX, 2) + Math.pow(y - shipY, 2)
-        );
+        // Backend używa Manhattan distance (Path.Count)
+        const distance = Math.abs(x - shipX) + Math.abs(y - shipY);
 
         if (distance >= MISSILE_MIN_RANGE && distance <= MISSILE_MAX_RANGE) {
           const screenX = (x - viewport.x) * scaledCellSize;
@@ -229,22 +228,30 @@ export const BattleCanvas = ({
       }
     }
 
-    // Rysuj okręgi zasięgu
-    const centerPos = mapToScreen(shipX, shipY);
+    // Rysuj romby zasięgu (Manhattan distance)
+    const centerPos = mapToScreen(shipX + 0.5, shipY + 0.5);
     
-    // Okrąg minimalnego zasięgu
+    // Romb minimalnego zasięgu
     ctx.strokeStyle = 'rgba(50, 150, 255, 0.5)';
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 5]);
     ctx.beginPath();
-    ctx.arc(centerPos.x, centerPos.y, MISSILE_MIN_RANGE * scaledCellSize, 0, Math.PI * 2);
+    ctx.moveTo(centerPos.x, centerPos.y - MISSILE_MIN_RANGE * scaledCellSize);
+    ctx.lineTo(centerPos.x + MISSILE_MIN_RANGE * scaledCellSize, centerPos.y);
+    ctx.lineTo(centerPos.x, centerPos.y + MISSILE_MIN_RANGE * scaledCellSize);
+    ctx.lineTo(centerPos.x - MISSILE_MIN_RANGE * scaledCellSize, centerPos.y);
+    ctx.closePath();
     ctx.stroke();
     
-    // Okrąg maksymalnego zasięgu
+    // Romb maksymalnego zasięgu
     ctx.strokeStyle = 'rgba(50, 150, 255, 0.4)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(centerPos.x, centerPos.y, MISSILE_MAX_RANGE * scaledCellSize, 0, Math.PI * 2);
+    ctx.moveTo(centerPos.x, centerPos.y - MISSILE_MAX_RANGE * scaledCellSize);
+    ctx.lineTo(centerPos.x + MISSILE_MAX_RANGE * scaledCellSize, centerPos.y);
+    ctx.lineTo(centerPos.x, centerPos.y + MISSILE_MAX_RANGE * scaledCellSize);
+    ctx.lineTo(centerPos.x - MISSILE_MAX_RANGE * scaledCellSize, centerPos.y);
+    ctx.closePath();
     ctx.stroke();
     
     ctx.setLineDash([]);

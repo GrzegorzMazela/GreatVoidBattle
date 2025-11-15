@@ -2,14 +2,16 @@ import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBattleState } from '../hooks/useBattleState';
 import { useOrders } from '../hooks/useOrders';
-import { setShipPosition, executeTurn } from '../../../services/api';
+import { setShipPosition, endPlayerTurn } from '../../../services/api';
 import { getPlayerSession } from '../../../services/authApi';
 import { BattleCanvas } from './BattleCanvas';
 import { ShipControlPanel } from './ShipControlPanel';
 import { TurnController } from './TurnController';
 import { WeaponCountDialog } from './WeaponCountDialog';
+import { TurnWaitingModal } from './TurnWaitingModal';
 import { useModal } from '../../../hooks/useModal';
 import { AlertModal } from '../../../components/modals/AlertModal';
+import { useTurnSystem } from '../hooks/useTurnSystem';
 import './BattleSimulator.css';
 
 /**
@@ -40,6 +42,13 @@ export const BattleSimulator = ({ sessionData }) => {
   
   // Modal dla komunikatów
   const alertModal = useModal();
+
+  // System turowy z SignalR
+  const turnSystem = useTurnSystem(battleId, playerFractionId, (newTurnNumber) => {
+    // Callback wywoływany gdy rozpoczyna się nowa tura
+    console.log('New turn started:', newTurnNumber);
+    refresh(); // Odśwież stan bitwy
+  }, battleState);
 
   // Hook do zarządzania rozkazami
   const ordersManager = useOrders(
@@ -128,10 +137,9 @@ export const BattleSimulator = ({ sessionData }) => {
         // Kliknięto we wrogi statek - tylko jeśli mamy wybraną broń
         if (weaponMode === 'missile') {
           // Tryb rakiet - sprawdź zasięg
-          const distance = Math.sqrt(
-            Math.pow(clickedShip.x - selectedShip.x, 2) + 
-            Math.pow(clickedShip.y - selectedShip.y, 2)
-          );
+          // Backend używa Manhattan distance dla rakiet
+          const distance = Math.abs(Math.floor(clickedShip.x) - Math.floor(selectedShip.x)) + 
+                          Math.abs(Math.floor(clickedShip.y) - Math.floor(selectedShip.y));
           
           const MISSILE_MAX_RANGE = 55;
           
@@ -325,44 +333,55 @@ export const BattleSimulator = ({ sessionData }) => {
     }
   }, [ordersManager, refresh, alertModal]);
 
-  // Obsługa wykonania tury
-  const handleTurnExecuted = useCallback(async (updatedBattle) => {
-    console.log('Turn executed, new state:', updatedBattle);
-    // Wyczyść rozkazy i wybór po wykonaniu tury
-    ordersManager.clearOrders();
-    ordersManager.resetSubmittedCounts(); // Reset liczników zatwierdzonych rozkazów
-    setSelectedShip(null);
-    setSelectedFraction(null);
-    setWeaponMode(null);
-    setWeaponDialog(null);
-  }, [ordersManager]);
-
-  // Obsługa bezpośredniego wykonania tury
-  const handleExecuteTurn = useCallback(async () => {
+  // Obsługa zakończenia tury przez gracza
+  const handleEndTurn = useCallback(async () => {
     try {
       setIsExecuting(true);
 
-      // Wykonaj turę
-      const updatedBattle = await executeTurn(battleId);
+      // Pobierz token autoryzacyjny
+      const session = getPlayerSession();
+      const token = session.authToken;
+
+      // Zakończ turę gracza
+      const result = await endPlayerTurn(battleId, playerFractionId, token);
       
-      // Notify parent component
-      await handleTurnExecuted(updatedBattle);
-      
-      // Refresh battle state
-      await refresh();
+      console.log('End turn result:', result);
+
+      // Jeśli wszyscy gracze są gotowi, tura została wykonana automatycznie
+      if (result.allPlayersReady) {
+        // Nowa tura rozpoczęta - odśwież stan
+        await refresh();
+        
+        // Wyczyść rozkazy i wybór
+        ordersManager.clearOrders();
+        ordersManager.resetSubmittedCounts();
+        setSelectedShip(null);
+        setSelectedFraction(null);
+        setWeaponMode(null);
+        setWeaponDialog(null);
+
+        alertModal.openModal({
+          title: 'Nowa tura!',
+          message: `Wszyscy gracze zakończyli swoje rozkazy. Rozpoczyna się tura ${result.newTurnNumber}!`,
+          variant: 'success'
+        });
+      } else {
+        // Czekamy na innych graczy
+        turnSystem.finishTurn(result.waitingForPlayers || []);
+      }
       
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || 'Failed to execute turn';
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to end turn';
       alertModal.openModal({
-        title: 'Błąd wykonania tury',
+        title: 'Błąd zakończenia tury',
         message: errorMsg,
         variant: 'error'
       });
-      console.error('Error executing turn:', error);
+      console.error('Error ending turn:', error);
     } finally {
       setIsExecuting(false);
     }
-  }, [battleId, handleTurnExecuted, refresh]);
+  }, [battleId, playerFractionId, refresh, ordersManager, alertModal, turnSystem]);
 
   // Pokaż informację o frakcji gracza
   const playerFraction = battleState?.fractions.find(f => f.fractionId === playerFractionId);
@@ -452,14 +471,14 @@ export const BattleSimulator = ({ sessionData }) => {
               <span className="value">{battleState.turnNumber}</span>
             </div>
             
-            {battleState.status === 'InProgress' && (
+            {battleState.status === 'InProgress' && !turnSystem.turnFinished && (
               <>
                 <button 
                   className="execute-turn-btn-inline"
-                  onClick={handleExecuteTurn}
-                  disabled={isExecuting}
+                  onClick={handleEndTurn}
+                  disabled={isExecuting || turnSystem.isWaitingForPlayers}
                 >
-                  {isExecuting ? '⏳' : '▶'} Wykonaj turę
+                  {isExecuting ? '⏳' : '✓'} Zakończ turę
                 </button>
                 
                 <button 
@@ -470,6 +489,12 @@ export const BattleSimulator = ({ sessionData }) => {
                   🔄
                 </button>
               </>
+            )}
+
+            {turnSystem.turnFinished && (
+              <div className="waiting-indicator">
+                <span>⏳ Oczekiwanie na graczy...</span>
+              </div>
             )}
           </div>
         </div>
@@ -516,11 +541,10 @@ export const BattleSimulator = ({ sessionData }) => {
         />
       )}
 
-      {ordersManager.error && (
-        <div className="orders-error">
-          <strong>Błąd rozkazów:</strong> {ordersManager.error}
-        </div>
-      )}
+      <TurnWaitingModal
+        isOpen={turnSystem.isWaitingForPlayers}
+        waitingPlayers={turnSystem.waitingPlayers}
+      />
 
       <AlertModal
         isOpen={alertModal.isOpen}

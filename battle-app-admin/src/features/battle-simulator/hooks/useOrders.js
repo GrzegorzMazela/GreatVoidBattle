@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { submitOrders } from '../../../services/api';
+import { getPlayerSession } from '../../../services/authApi';
 
 /**
  * Hook do zarządzania kolejką rozkazów
@@ -111,12 +112,16 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
       setSubmitting(true);
       setError(null);
 
+      // Pobierz token autoryzacyjny
+      const session = getPlayerSession();
+      const token = session.authToken;
+
       const payload = {
         turnNumber,
         orders: orders,
       };
 
-      const battleState = await submitOrders(battleId, fractionId, payload);
+      const battleState = await submitOrders(battleId, fractionId, payload, token);
       
       // Zapisz zatwierdzone rozkazy do licznika
       const newCounts = { ...submittedOrdersCount };

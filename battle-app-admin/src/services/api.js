@@ -28,5 +28,28 @@ export const deleteShip = async (battleId, fractionId, shipId) => (await api.del
 export const setShipPosition = async (battleId, fractionId, shipId, x, y) => (await api.patch(`/api/battles/${battleId}/fractions/${fractionId}/ships/${shipId}/position`, { x, y })).data;
 
 // Battle simulation
-export const submitOrders = async (battleId, fractionId, payload) => (await api.post(`/api/battles/${battleId}/fractions/${fractionId}/orders`, payload)).data;
+export const submitOrders = async (battleId, fractionId, payload, token) => {
+  const response = await api.post(
+    `/api/battles/${battleId}/fractions/${fractionId}/orders`,
+    payload,
+    {
+      headers: {
+        'X-Auth-Token': token
+      }
+    }
+  );
+  return response.data;
+};
 export const executeTurn = async (battleId) => (await api.post(`/api/battles/${battleId}/execute-turn`)).data;
+export const endPlayerTurn = async (battleId, fractionId, token) => {
+  const response = await api.post(
+    `/api/battles/${battleId}/fractions/${fractionId}/end-turn`,
+    {},
+    {
+      headers: {
+        'X-Auth-Token': token
+      }
+    }
+  );
+  return response.data;
+};

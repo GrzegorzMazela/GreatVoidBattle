@@ -130,8 +130,16 @@ export const initializePlayerSession = () => {
       localStorage.setItem('battleId', battleId);
     }
 
-    // Usuń parametry z URL dla czystości
-    window.history.replaceState({}, document.title, window.location.pathname);
+    // Usuń tylko parametry auth z URL (token, fractionId, battleId), pozostaw inne
+    urlParams.delete('token');
+    urlParams.delete('fractionId');
+    if (battleId) {
+      urlParams.delete('battleId');
+    }
+    
+    const newSearch = urlParams.toString();
+    const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
+    window.history.replaceState({}, document.title, newUrl);
     
     return { authToken, fractionId, battleId };
   }
