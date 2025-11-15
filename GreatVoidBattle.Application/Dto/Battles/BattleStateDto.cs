@@ -12,4 +12,6 @@ public class BattleStateDto
     public int Height { get; set; }
 
     public List<FractionDto> Fractions { get; set; } = new();
+    public List<ShipMovementPathDto> ShipMovementPaths { get; set; } = new();
+    public List<MissileMovementPathDto> MissileMovementPaths { get; set; } = new();
 }

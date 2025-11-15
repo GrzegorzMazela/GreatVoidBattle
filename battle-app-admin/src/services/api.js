@@ -7,12 +7,17 @@ export const api = axios.create({
 // Battles
 export const listBattles = async () => (await api.get('/api/battles')).data;
 export const getBattle = async (id) => (await api.get(`/api/battles/${id}`)).data;
+export const getBattleAdmin = async (id) => (await api.get(`/api/battles/${id}/admin`)).data;
 export const createBattle = async (payload) => (await api.post('/api/battles', payload)).data;
 export const deleteBattle = async (id) => (await api.delete(`/api/battles/${id}`)).data;
+export const startBattle = async (id) => (await api.post(`/api/battles/${id}/start`)).data;
 
 // Fractions
 export const listFractions = async (battleId) => (await api.get(`/api/battles/${battleId}/fractions`)).data;
+export const listFractionsAdmin = async (battleId) => (await api.get(`/api/battles/${battleId}/fractions/admin`)).data;
+export const getFraction = async (battleId, fractionId) => (await api.get(`/api/battles/${battleId}/fractions/${fractionId}`)).data;
 export const createFraction = async (battleId, payload) => (await api.post(`/api/battles/${battleId}/fractions`, payload)).data;
+export const updateFraction = async (battleId, fractionId, payload) => (await api.put(`/api/battles/${battleId}/fractions/${fractionId}`, payload)).data;
 
 // Ships
 export const listShips = async (battleId, fractionId) => (await api.get(`/api/battles/${battleId}/fractions/${fractionId}/ships`)).data;

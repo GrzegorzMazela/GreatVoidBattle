@@ -9,34 +9,21 @@ export const ShipControlPanel = ({
   selectedShip, 
   selectedFraction,
   currentOrder,
+  orderStats,
   onClearOrder,
   battleStatus,
+  weaponMode,
+  onWeaponModeChange,
+  missileFiredCount,
+  laserFiredCount,
+  isPlayerShip,
+  allOrders,
+  onSubmitOrders,
 }) => {
   if (!selectedShip || !selectedFraction) {
-    const isPreparation = battleStatus === 'Preparation';
-    
     return (
       <div className="ship-control-panel empty">
-        <p>Wybierz statek, aby {isPreparation ? 'go przesunąć' : 'wydać rozkaz'}</p>
-        <div className="instructions">
-          <h4>Instrukcje:</h4>
-          {isPreparation ? (
-            <ul>
-              <li><strong>Kliknij statek</strong> - wybierz go</li>
-              <li><strong>Kliknij puste pole</strong> - przesuń statek</li>
-              <li><strong>Scroll</strong> - zoom</li>
-              <li><strong>Ctrl + przeciągnij</strong> - przesuń widok</li>
-            </ul>
-          ) : (
-            <ul>
-              <li><strong>Kliknij statek</strong> - wybierz go</li>
-              <li><strong>Kliknij puste pole</strong> - wydaj rozkaz ruchu</li>
-              <li><strong>Kliknij wrogi statek</strong> - wydaj rozkaz ataku</li>
-              <li><strong>Scroll</strong> - zoom</li>
-              <li><strong>Ctrl + przeciągnij</strong> - przesuń widok</li>
-            </ul>
-          )}
-        </div>
+        <p>Wybierz statek, aby zobaczyć szczegóły</p>
       </div>
     );
   }
@@ -58,6 +45,13 @@ export const ShipControlPanel = ({
 
   const hpPercent = (selectedShip.hitPoints / 100) * 100;
 
+  // Oblicz dostępną broń
+  const totalMissiles = selectedShip.numberOfMissiles || 0;
+  const totalLasers = selectedShip.numberOfLasers || 0;
+  const pointDefense = selectedShip.numberOfPointsDefense || 0;
+  const availableMissiles = totalMissiles - (missileFiredCount || 0);
+  const availableLasers = totalLasers - (laserFiredCount || 0);
+
   return (
     <div className="ship-control-panel">
       <div className="ship-info">
@@ -68,6 +62,42 @@ export const ShipControlPanel = ({
           {selectedFraction.fractionName}
         </div>
       </div>
+
+      {/* Sekcja broni - tylko dla statków gracza */}
+      {isPlayerShip && battleStatus !== 'Preparation' && (
+        <div className="weapon-controls">
+          <h4>Broń:</h4>
+          <div className="weapon-buttons">
+            <button 
+              className={`weapon-btn-compact ${weaponMode === 'missile' ? 'active' : ''} ${availableMissiles === 0 ? 'disabled' : ''}`}
+              onClick={() => availableMissiles > 0 && onWeaponModeChange('missile')}
+              disabled={availableMissiles === 0}
+              title={`Rakiety: ${missileFiredCount || 0}/${totalMissiles} (zasięg 35-55)`}
+            >
+              <span className="weapon-icon">🚀</span>
+              <span className="weapon-count-compact">{missileFiredCount || 0}/{totalMissiles}</span>
+            </button>
+            <button 
+              className={`weapon-btn-compact ${weaponMode === 'laser' ? 'active' : ''} ${availableLasers === 0 ? 'disabled' : ''}`}
+              onClick={() => availableLasers > 0 && onWeaponModeChange('laser')}
+              disabled={availableLasers === 0}
+              title={`Lasery: ${laserFiredCount || 0}/${totalLasers} (zasięg 0-20)`}
+            >
+              <span className="weapon-icon">⚡</span>
+              <span className="weapon-count-compact">{laserFiredCount || 0}/{totalLasers}</span>
+            </button>
+          </div>
+          {weaponMode && (
+            <div className="weapon-hint">
+              {weaponMode === 'missile' ? (
+                <p>💡 Zasięg rakiet: 35-55</p>
+              ) : (
+                <p>💡 Zasięg laserów: 0-20</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="ship-stats">
         <div className="stat-row">
@@ -109,43 +139,93 @@ export const ShipControlPanel = ({
             <span className="stat-value">{selectedShip.armor}</span>
           </div>
         )}
+
+        <div className="stat-row">
+          <span className="stat-label">Obrona (PD):</span>
+          <span className="stat-value">{pointDefense}</span>
+        </div>
       </div>
 
       {battleStatus === 'Preparation' ? (
         <div className="action-hints">
-          <p><strong>Tryb przygotowania:</strong></p>
-          <ul>
-            <li>Kliknij puste pole - przesuń statek</li>
-          </ul>
           <p className="hint-note">💡 Niebieski obszar pokazuje zasięg ruchu</p>
         </div>
       ) : (
         <>
           <div className="current-order">
-            <h4>Aktualny rozkaz:</h4>
-            <div className="order-info">
-              <span className={currentOrder ? 'has-order' : 'no-order'}>
-                {getOrderDescription()}
-              </span>
-              {currentOrder && (
-                <button 
-                  className="clear-order-btn"
-                  onClick={onClearOrder}
-                  title="Anuluj rozkaz"
-                >
-                  ✕
-                </button>
+            <h4>Rozkazy w tej turze:</h4>
+            <div className="order-stats">
+              {orderStats && (
+                <>
+                  {orderStats.moveOrders > 0 && (
+                    <div className="order-stat-item">
+                      <span className="order-stat-icon">🚶</span>
+                      <span className="order-stat-label">Ruch:</span>
+                      <span className="order-stat-value">{orderStats.moveOrders}</span>
+                    </div>
+                  )}
+                  {orderStats.laserOrders > 0 && (
+                    <div className="order-stat-item">
+                      <span className="order-stat-icon">⚡</span>
+                      <span className="order-stat-label">Lasery:</span>
+                      <span className="order-stat-value">{orderStats.laserOrders}</span>
+                    </div>
+                  )}
+                  {orderStats.missileOrders > 0 && (
+                    <div className="order-stat-item">
+                      <span className="order-stat-icon">🚀</span>
+                      <span className="order-stat-label">Rakiety:</span>
+                      <span className="order-stat-value">{orderStats.missileOrders}</span>
+                    </div>
+                  )}
+                  {!orderStats.moveOrders && !orderStats.laserOrders && !orderStats.missileOrders && (
+                    <span className="no-order">Brak rozkazów</span>
+                  )}
+                </>
               )}
             </div>
+
+            {/* Przycisk zatwierdzenia rozkazów */}
+            {allOrders && allOrders.length > 0 && (
+              <button 
+                className="submit-orders-btn"
+                onClick={onSubmitOrders}
+              >
+                Zatwierdź rozkazy
+              </button>
+            )}
           </div>
 
-          <div className="action-hints">
-            <p><strong>Kliknij:</strong></p>
-            <ul>
-              <li>Puste pole w zasięgu - wydaj rozkaz ruchu</li>
-              <li>Wrogi statek - zaatakuj</li>
-            </ul>
-            <p className="hint-note">💡 Niebieski obszar pokazuje zasięg ruchu</p>
+          {/* Log wszystkich rozkazów z scrollowaniem */}
+          <div className="orders-log">
+            <h4>Log rozkazów:</h4>
+            <div className="orders-log-content">
+              {allOrders && allOrders.length > 0 ? (
+                allOrders.map((order, index) => (
+                  <div key={index} className="order-log-item">
+                    <span className="order-log-index">#{index + 1}</span>
+                    <span className="order-log-ship">{order.shipId.substring(0, 8)}</span>
+                    {order.type === 'move' && (
+                      <span className="order-log-details">
+                        🚶 Ruch → ({order.targetX}, {order.targetY})
+                      </span>
+                    )}
+                    {order.type === 'laser' && (
+                      <span className="order-log-details">
+                        ⚡ Laser → {order.targetShipId?.substring(0, 8)}
+                      </span>
+                    )}
+                    {order.type === 'missile' && (
+                      <span className="order-log-details">
+                        🚀 Rakieta → {order.targetShipId?.substring(0, 8)}
+                      </span>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="orders-log-empty">Brak rozkazów w tej turze</p>
+              )}
+            </div>
           </div>
         </>
       )}
@@ -163,6 +243,9 @@ ShipControlPanel.propTypes = {
     hitPoints: PropTypes.number,
     shields: PropTypes.number,
     armor: PropTypes.number,
+    numberOfMissiles: PropTypes.number,
+    numberOfLasers: PropTypes.number,
+    numberOfPointsDefense: PropTypes.number,
   }),
   selectedFraction: PropTypes.shape({
     fractionId: PropTypes.string.isRequired,
@@ -174,6 +257,24 @@ ShipControlPanel.propTypes = {
     targetX: PropTypes.number,
     targetY: PropTypes.number,
   }),
+  orderStats: PropTypes.shape({
+    moveOrders: PropTypes.number,
+    laserOrders: PropTypes.number,
+    missileOrders: PropTypes.number,
+  }),
   onClearOrder: PropTypes.func,
   battleStatus: PropTypes.string,
+  weaponMode: PropTypes.oneOf(['missile', 'laser', null]),
+  onWeaponModeChange: PropTypes.func,
+  missileFiredCount: PropTypes.number,
+  laserFiredCount: PropTypes.number,
+  isPlayerShip: PropTypes.bool,
+  allOrders: PropTypes.arrayOf(PropTypes.shape({
+    shipId: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    targetX: PropTypes.number,
+    targetY: PropTypes.number,
+    targetShipId: PropTypes.string,
+  })),
+  onSubmitOrders: PropTypes.func,
 };

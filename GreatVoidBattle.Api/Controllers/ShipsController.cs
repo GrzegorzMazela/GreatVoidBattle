@@ -1,6 +1,7 @@
 ﻿using GreatVoidBattle.Application.Dto.Ships;
 using GreatVoidBattle.Application.Factories;
 using GreatVoidBattle.Core.Domains.Enums;
+using GreatVoidBattle.Api.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

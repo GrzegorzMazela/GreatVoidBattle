@@ -34,9 +34,6 @@ public class ShipState
 
     public ShipStatus Status { get; set; } = ShipStatus.Active;
 
-    [BsonIgnore]
-    private BattleLog _battleLog;
-
     // create statict created method
     public static ShipState Create(Guid fractionId, string name, ShipType type, double positionX, double positionY,
         int speed, int hitPoints, int shields, int armor, int numberOfModules, List<ModuleState> modules, BattleLog battleLog)
@@ -60,8 +57,7 @@ public class ShipState
             Modules = modules,
             NumberOfModules = numberOfModules,
             Energy = new EnergyDistribution(),
-            Status = ShipStatus.Active,
-            _battleLog = battleLog
+            Status = ShipStatus.Active
         };
     }
 
@@ -105,17 +101,17 @@ public class ShipState
         NumberOfMissilesFiredPerTurn = 0;
     }
 
-    public bool TakeDamage(int damage, int accuracy = 100)
+    public bool TakeDamage(BattleLog battleLog, int damage, int accuracy = 100)
     {
         var rand = new Random(DateTime.UtcNow.Microsecond);
         var shotAccuracy = rand.Next(1, 101);
         if (shotAccuracy > accuracy)
         {
-            _battleLog.AddMissedLog(ShipId, Name, accuracy, shotAccuracy);
+            battleLog.AddMissedLog(ShipId, Name, accuracy, shotAccuracy);
             return false;
         }
 
-        _battleLog.AddTakeDamageLog(ShipId, Name, damage, accuracy, shotAccuracy);
+        battleLog.AddTakeDamageLog(ShipId, Name, damage, accuracy, shotAccuracy);
         int remainingDamage = damage;
         if (Shields > 0)
         {
@@ -151,7 +147,7 @@ public class ShipState
         if (HitPoints == 0)
         {
             Status = ShipStatus.Destroyed;
-            _battleLog.ShipIsDestroyLog(ShipId, Name);
+            battleLog.ShipIsDestroyLog(ShipId, Name);
         }
         return true;
     }

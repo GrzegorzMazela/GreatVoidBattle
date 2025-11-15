@@ -17,6 +17,7 @@ public class EventDispatcher
     {
         // Register all event handlers here
         RegisterHandler(new AddFractionEventHandler());
+        RegisterHandler(new UpdateFractionEventHandler());
         RegisterHandler(new AddFractionShipEventHandler());
         RegisterHandler(new UpdateFractionShipEventHandler());
         RegisterHandler(new StartBattleEventHandler());

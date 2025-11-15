@@ -7,7 +7,7 @@ public class AddFractionEventHandler : BasePreparationEventHandler<AddFractionEv
 {
     public override Task HandlePreparationEventAsync(AddFractionEvent battleEvent, BattleState battleState)
     {
-        battleState.AddFraction(FractionState.CreateNew(battleEvent.Name, battleState.BattleLog));
+        battleState.AddFraction(FractionState.CreateNew(battleEvent.Name, battleEvent.PlayerName, battleEvent.FractionColor));
         return Task.CompletedTask;
     }
 }

@@ -62,6 +62,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .back-btn {
@@ -91,6 +92,148 @@
   font-size: 0.9rem;
   color: #aaa;
 }
+
+/* Informacja o graczu */
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4CAF50;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.player-label {
+  color: #aaa;
+}
+
+.player-name {
+  font-weight: bold;
+  color: #fff;
+}
+
+.player-fraction {
+  font-style: italic;
+  font-weight: 600;
+}
+
+/* Status frakcji w jednej linii */
+.fractions-status-inline {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.fraction-status-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.fraction-status-inline .fraction-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.fraction-status-inline .fraction-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.fraction-status-inline .ships-count {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.fraction-status-inline .defeated-badge {
+  padding: 0.1rem 0.4rem;
+  background: #F44336;
+  color: white;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Kontrolki tury w jednej linii */
+.turn-controls-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 1rem;
+}
+
+.turn-number-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.turn-number-inline .label {
+  color: #aaa;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.turn-number-inline .value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.execute-turn-btn-inline {
+  padding: 0.5rem 1rem;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.9rem;
+}
+
+.execute-turn-btn-inline:hover:not(:disabled) {
+  background: #1976D2;
+}
+
+.execute-turn-btn-inline:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.refresh-btn-inline {
+  padding: 0.5rem 0.75rem;
+  background: #555;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 1.1rem;
+}
+
+.refresh-btn-inline:hover:not(:disabled) {
+  background: #666;
+}
+
+.refresh-btn-inline:disabled {
+  background: #333;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 
 .fraction-selector {
   margin-top: 1rem;

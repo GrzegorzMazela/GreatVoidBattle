@@ -1,6 +1,7 @@
 ﻿using GreatVoidBattle.Core.Domains.Enums;
 using GreatVoidBattle.Core.Domains.ExtraActions;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Net.WebSockets;
 
 namespace GreatVoidBattle.Core.Domains;
 
@@ -137,6 +138,7 @@ public class BattleState
     {
         BattleStatus = BattleStatus.InProgress;
         SetUpdated();
+        TurnNumber = 1;
     }
 
     #endregion Preparation
@@ -188,6 +190,15 @@ public class BattleState
         RunMissileShot();
         MoveShips();
         //TODO: Add extra actions processing
+
+        foreach (var fraction in _fractions)
+        {
+            foreach (var ship in fraction.Ships)
+            {
+                ship.FinishTurn();
+            }
+        }
+        TurnNumber++;
     }
 
     private void RunLaserShots()
@@ -197,17 +208,19 @@ public class BattleState
             var targetShip = GetShip(laserShot.TargetId);
             if (targetShip is null) continue;
 
-            targetShip.TakeDamage(Const.LaserDamage);
+            targetShip.TakeDamage(BattleLog, Const.LaserDamage);
             if (targetShip.Status == ShipStatus.Destroyed)
             {
                 GetFraction(targetShip.FractionId).RemoveShip(targetShip);
             }
             //TODO: add logs
         }
+        _laserShots.Clear();
     }
 
     private void RunMissileShot()
     {
+        var completedMissiles = new List<MissileMovementPath>();
         foreach (var missileMovementPath in _missileMovementPaths)
         {
             missileMovementPath.MoveOneStep();
@@ -216,13 +229,18 @@ public class BattleState
             var targetShip = GetShip(missileMovementPath.TargetId);
             if (targetShip is not null)
             {
-                targetShip.TakeDamage(Const.MissileDamage, GetAccuracy(missileMovementPath.Accuracy, targetShip));
+                targetShip.TakeDamage(BattleLog, Const.MissileDamage, GetAccuracy(missileMovementPath.Accuracy, targetShip));
                 if (targetShip.Status == ShipStatus.Destroyed)
                 {
                     GetFraction(targetShip.FractionId).RemoveShip(targetShip);
                 }
                 //TODO: add logs
             }
+            completedMissiles.Add(missileMovementPath);
+        }
+        foreach (var completedMissile in completedMissiles)
+        {
+            _missileMovementPaths.Remove(completedMissile);
         }
     }
 

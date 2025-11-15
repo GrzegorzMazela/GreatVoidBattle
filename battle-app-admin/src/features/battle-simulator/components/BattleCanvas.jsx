@@ -1,5 +1,25 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
+import './BattleCanvas.css';
+
+// Import ship icons
+import CorvetteIcon from '../../../assets/Corvette_64.png';
+import DestroyerIcon from '../../../assets/Destroyer_64.png';
+import CruiserIcon from '../../../assets/Cruiser_64.png';
+import BattleshipIcon from '../../../assets/Battleship_64.png';
+import SuperBattleshipIcon from '../../../assets/SuperBattleship_64.png';
+import OrbitalFortIcon from '../../../assets/OrbitalFort_64.png';
+import MissileIcon from '../../../assets/Missile_64.png';
+
+// Map ship types to icons
+const SHIP_ICONS = {
+  Corvette: CorvetteIcon,
+  Destroyer: DestroyerIcon,
+  Cruiser: CruiserIcon,
+  Battleship: BattleshipIcon,
+  SuperBattleship: SuperBattleshipIcon,
+  OrbitalFort: OrbitalFortIcon,
+};
 
 /**
  * Wydajny komponent Canvas do renderowania pola bitwy
@@ -11,6 +31,7 @@ export const BattleCanvas = ({
   onShipClick,
   onCellClick,
   orders,
+  weaponMode,
 }) => {
   const canvasRef = useRef(null);
   const [viewport, setViewport] = useState({
@@ -21,8 +42,51 @@ export const BattleCanvas = ({
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [loadedImages, setLoadedImages] = useState({});
 
   const { width, height, fractions } = battleState || {};
+
+  // Load ship icons
+  useEffect(() => {
+    const images = {};
+    const loadPromises = [];
+
+    // Load ship icons
+    Object.entries(SHIP_ICONS).forEach(([type, src]) => {
+      const img = new Image();
+      const promise = new Promise((resolve) => {
+        img.onload = () => {
+          images[type] = img;
+          resolve();
+        };
+        img.onerror = () => {
+          console.error(`Failed to load ship icon: ${type}`);
+          resolve();
+        };
+      });
+      img.src = src;
+      loadPromises.push(promise);
+    });
+
+    // Load missile icon
+    const missileImg = new Image();
+    const missilePromise = new Promise((resolve) => {
+      missileImg.onload = () => {
+        images.Missile = missileImg;
+        resolve();
+      };
+      missileImg.onerror = () => {
+        console.error('Failed to load missile icon');
+        resolve();
+      };
+    });
+    missileImg.src = MissileIcon;
+    loadPromises.push(missilePromise);
+
+    Promise.all(loadPromises).then(() => {
+      setLoadedImages(images);
+    });
+  }, []);
 
   // Funkcja do konwersji współrzędnych ekranu na współrzędne mapy
   const screenToMap = useCallback((screenX, screenY) => {
@@ -123,13 +187,121 @@ export const BattleCanvas = ({
     }
   }, [selectedShip, viewport]);
 
+  // Renderuj zasięg rakiet wybranego statku
+  const drawMissileRange = useCallback((ctx, visibleArea) => {
+    if (!selectedShip || weaponMode !== 'missile') return;
+
+    const { cellSize, zoom } = viewport;
+    const scaledCellSize = cellSize * zoom;
+    const shipX = selectedShip.x;
+    const shipY = selectedShip.y;
+    
+    const MISSILE_MIN_RANGE = 35;
+    const MISSILE_MAX_RANGE = 55;
+
+    // Rysuj zasięg rakiet w kolorze niebieskim
+    for (let x = visibleArea.startX; x <= visibleArea.endX; x++) {
+      for (let y = visibleArea.startY; y <= visibleArea.endY; y++) {
+        const distance = Math.sqrt(
+          Math.pow(x - shipX, 2) + Math.pow(y - shipY, 2)
+        );
+
+        if (distance >= MISSILE_MIN_RANGE && distance <= MISSILE_MAX_RANGE) {
+          const screenX = (x - viewport.x) * scaledCellSize;
+          const screenY = (y - viewport.y) * scaledCellSize;
+
+          // Różne odcienie w zależności od efektywnego zasięgu
+          if (distance <= 35) {
+            // Efektywny zasięg - intensywniejszy niebieski
+            ctx.fillStyle = 'rgba(50, 150, 255, 0.25)';
+          } else {
+            // Daleki zasięg - słabszy niebieski
+            ctx.fillStyle = 'rgba(50, 150, 255, 0.12)';
+          }
+          
+          ctx.fillRect(screenX, screenY, scaledCellSize, scaledCellSize);
+          
+          // Subtelne obramowanie
+          ctx.strokeStyle = 'rgba(50, 150, 255, 0.3)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(screenX, screenY, scaledCellSize, scaledCellSize);
+        }
+      }
+    }
+
+    // Rysuj okręgi zasięgu
+    const centerPos = mapToScreen(shipX, shipY);
+    
+    // Okrąg minimalnego zasięgu
+    ctx.strokeStyle = 'rgba(50, 150, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.arc(centerPos.x, centerPos.y, MISSILE_MIN_RANGE * scaledCellSize, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Okrąg maksymalnego zasięgu
+    ctx.strokeStyle = 'rgba(50, 150, 255, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(centerPos.x, centerPos.y, MISSILE_MAX_RANGE * scaledCellSize, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    ctx.setLineDash([]);
+  }, [selectedShip, viewport, weaponMode, mapToScreen]);
+
+  // Renderuj zasięg laserów wybranego statku
+  const drawLaserRange = useCallback((ctx, visibleArea) => {
+    if (!selectedShip || weaponMode !== 'laser') return;
+
+    const { cellSize, zoom } = viewport;
+    const scaledCellSize = cellSize * zoom;
+    const shipX = selectedShip.x;
+    const shipY = selectedShip.y;
+    
+    const LASER_MAX_RANGE = 20;
+
+    // Rysuj zasięg laserów w kolorze czerwonym
+    for (let x = visibleArea.startX; x <= visibleArea.endX; x++) {
+      for (let y = visibleArea.startY; y <= visibleArea.endY; y++) {
+        const distance = Math.sqrt(
+          Math.pow(x - shipX, 2) + Math.pow(y - shipY, 2)
+        );
+
+        if (distance <= LASER_MAX_RANGE) {
+          const screenX = (x - viewport.x) * scaledCellSize;
+          const screenY = (y - viewport.y) * scaledCellSize;
+
+          ctx.fillStyle = 'rgba(255, 50, 50, 0.2)';
+          ctx.fillRect(screenX, screenY, scaledCellSize, scaledCellSize);
+          
+          // Subtelne obramowanie
+          ctx.strokeStyle = 'rgba(255, 50, 50, 0.3)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(screenX, screenY, scaledCellSize, scaledCellSize);
+        }
+      }
+    }
+
+    // Rysuj okrąg maksymalnego zasięgu
+    const centerPos = mapToScreen(shipX, shipY);
+    
+    ctx.strokeStyle = 'rgba(255, 50, 50, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.arc(centerPos.x, centerPos.y, LASER_MAX_RANGE * scaledCellSize, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    ctx.setLineDash([]);
+  }, [selectedShip, viewport, weaponMode, mapToScreen]);
+
   // Renderuj statki
   const drawShips = useCallback((ctx, visibleArea) => {
     if (!fractions) return;
 
     const { cellSize, zoom } = viewport;
     const scaledCellSize = cellSize * zoom;
-    const shipRadius = scaledCellSize * 0.4;
 
     fractions.forEach((fraction, fractionIndex) => {
       // Kolor dla każdej frakcji
@@ -159,16 +331,41 @@ export const BattleCanvas = ({
           );
         }
 
-        // Rysuj statek jako koło
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(screenPos.x, screenPos.y, shipRadius, 0, Math.PI * 2);
-        ctx.fill();
+        // Rysuj ikonę statku jeśli dostępna
+        const shipIcon = loadedImages[ship.type];
+        if (shipIcon) {
+          const iconSize = scaledCellSize * 0.9;
+          
+          // Rysuj kolorowe tło dla frakcji
+          ctx.fillStyle = color;
+          ctx.fillRect(
+            screenPos.x - iconSize / 2,
+            screenPos.y - iconSize / 2,
+            iconSize,
+            iconSize
+          );
+          
+          // Rysuj ikonę statku na kolorowym tle
+          ctx.drawImage(
+            shipIcon,
+            screenPos.x - iconSize / 2,
+            screenPos.y - iconSize / 2,
+            iconSize,
+            iconSize
+          );
+        } else {
+          // Fallback - rysuj statek jako koło
+          const shipRadius = scaledCellSize * 0.4;
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(screenPos.x, screenPos.y, shipRadius, 0, Math.PI * 2);
+          ctx.fill();
 
-        // Obramowanie
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+          // Obramowanie
+          ctx.strokeStyle = '#000';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
 
         // HP bar
         const hpPercent = ship.hitPoints / 100; // Zakładam max 100 HP
@@ -183,7 +380,7 @@ export const BattleCanvas = ({
         ctx.fillRect(barX, barY, barWidth * hpPercent, barHeight);
       });
     });
-  }, [fractions, viewport, selectedShip, mapToScreen]);
+  }, [fractions, viewport, selectedShip, mapToScreen, loadedImages]);
 
   // Renderuj rozkazy
   const drawOrders = useCallback((ctx) => {
@@ -270,6 +467,145 @@ export const BattleCanvas = ({
     });
   }, [orders, fractions, mapToScreen]);
 
+  // Renderuj zatwierdzone ścieżki ruchu statków
+  const drawMovementPaths = useCallback((ctx) => {
+    if (!battleState?.shipMovementPaths || battleState.shipMovementPaths.length === 0) return;
+
+    const { cellSize, zoom } = viewport;
+
+    battleState.shipMovementPaths.forEach(movementPath => {
+      if (!movementPath.path || movementPath.path.length === 0) return;
+
+      // Rysuj ścieżkę jako połączone segmenty
+      ctx.strokeStyle = 'rgba(100, 255, 100, 0.7)';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([]);
+
+      // Podświetl komórki przez które przechodzi ścieżka
+      ctx.fillStyle = 'rgba(100, 255, 100, 0.2)';
+      movementPath.path.forEach(pos => {
+        const screenX = (Math.floor(pos.x) - viewport.x) * cellSize * zoom;
+        const screenY = (Math.floor(pos.y) - viewport.y) * cellSize * zoom;
+        ctx.fillRect(screenX, screenY, cellSize * zoom, cellSize * zoom);
+      });
+
+      // Rysuj linię ścieżki
+      ctx.beginPath();
+      const startPos = mapToScreen(movementPath.startPosition.x + 0.5, movementPath.startPosition.y + 0.5);
+      ctx.moveTo(startPos.x, startPos.y);
+
+      movementPath.path.forEach(pos => {
+        const screenPos = mapToScreen(pos.x + 0.5, pos.y + 0.5);
+        ctx.lineTo(screenPos.x, screenPos.y);
+      });
+
+      ctx.stroke();
+
+      // Rysuj strzałkę na końcu
+      if (movementPath.path.length > 0) {
+        const lastPos = movementPath.path[movementPath.path.length - 1];
+        const secondLastPos = movementPath.path.length > 1 
+          ? movementPath.path[movementPath.path.length - 2] 
+          : movementPath.startPosition;
+        
+        const endScreenPos = mapToScreen(lastPos.x + 0.5, lastPos.y + 0.5);
+        const prevScreenPos = mapToScreen(secondLastPos.x + 0.5, secondLastPos.y + 0.5);
+        
+        const angle = Math.atan2(endScreenPos.y - prevScreenPos.y, endScreenPos.x - prevScreenPos.x);
+        const arrowSize = 12;
+        
+        ctx.fillStyle = 'rgba(100, 255, 100, 0.7)';
+        ctx.beginPath();
+        ctx.moveTo(endScreenPos.x, endScreenPos.y);
+        ctx.lineTo(
+          endScreenPos.x - arrowSize * Math.cos(angle - Math.PI / 6),
+          endScreenPos.y - arrowSize * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.lineTo(
+          endScreenPos.x - arrowSize * Math.cos(angle + Math.PI / 6),
+          endScreenPos.y - arrowSize * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fill();
+      }
+    });
+  }, [battleState, viewport, mapToScreen]);
+
+  // Renderuj zatwierdzone ścieżki pocisków
+  const drawMissilePaths = useCallback((ctx) => {
+    if (!battleState?.missileMovementPaths || battleState.missileMovementPaths.length === 0) return;
+
+    const { cellSize, zoom } = viewport;
+
+    battleState.missileMovementPaths.forEach(missilePath => {
+      if (!missilePath.path || missilePath.path.length === 0) return;
+
+      // Rysuj ścieżkę pocisku
+      ctx.strokeStyle = 'rgba(255, 150, 0, 0.7)';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 3]);
+
+      // Podświetl komórki przez które przechodzi pocisk
+      ctx.fillStyle = 'rgba(255, 150, 0, 0.15)';
+      missilePath.path.forEach(pos => {
+        const screenX = (Math.floor(pos.x) - viewport.x) * cellSize * zoom;
+        const screenY = (Math.floor(pos.y) - viewport.y) * cellSize * zoom;
+        ctx.fillRect(screenX, screenY, cellSize * zoom, cellSize * zoom);
+      });
+
+      // Rysuj linię trajektorii
+      ctx.beginPath();
+      const startPos = mapToScreen(missilePath.startPosition.x + 0.5, missilePath.startPosition.y + 0.5);
+      ctx.moveTo(startPos.x, startPos.y);
+
+      missilePath.path.forEach(pos => {
+        const screenPos = mapToScreen(pos.x + 0.5, pos.y + 0.5);
+        ctx.lineTo(screenPos.x, screenPos.y);
+      });
+
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Rysuj ikonę rakiety na początku ścieżki
+      const missileIcon = loadedImages.Missile;
+      if (missileIcon) {
+        const { cellSize, zoom } = viewport;
+        const scaledCellSize = cellSize * zoom;
+        const iconSize = scaledCellSize * 0.6;
+        
+        ctx.save();
+        // Obróć ikonę w kierunku ruchu (jeśli ścieżka ma punkty)
+        if (missilePath.path.length > 0) {
+          const firstPos = missilePath.path[0];
+          const angle = Math.atan2(
+            firstPos.y - missilePath.startPosition.y,
+            firstPos.x - missilePath.startPosition.x
+          );
+          ctx.translate(startPos.x, startPos.y);
+          ctx.rotate(angle);
+          ctx.drawImage(missileIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+        } else {
+          ctx.drawImage(missileIcon, startPos.x - iconSize / 2, startPos.y - iconSize / 2, iconSize, iconSize);
+        }
+        ctx.restore();
+      } else {
+        // Fallback - rysuj trójkąt
+        ctx.fillStyle = 'rgba(255, 150, 0, 0.9)';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        
+        const missileSize = 6;
+        ctx.beginPath();
+        ctx.moveTo(startPos.x, startPos.y - missileSize);
+        ctx.lineTo(startPos.x + missileSize, startPos.y + missileSize);
+        ctx.lineTo(startPos.x - missileSize, startPos.y + missileSize);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+    });
+  }, [battleState, viewport, mapToScreen, loadedImages]);
+
   // Główna funkcja renderująca
   const render = useCallback(() => {
     const canvas = canvasRef.current;
@@ -292,10 +628,14 @@ export const BattleCanvas = ({
     // Renderuj warstwy
     drawGrid(ctx, visibleArea);
     drawMoveRange(ctx, visibleArea);
+    drawMissileRange(ctx, visibleArea);
+    drawLaserRange(ctx, visibleArea);
+    drawMovementPaths(ctx); // Zatwierdzone ścieżki ruchu statków
+    drawMissilePaths(ctx); // Zatwierdzone ścieżki pocisków
     drawShips(ctx, visibleArea);
-    drawOrders(ctx);
+    drawOrders(ctx); // Planowane rozkazy (jeszcze niezatwierdzone)
 
-  }, [battleState, viewport, width, height, drawGrid, drawMoveRange, drawShips, drawOrders]);
+  }, [battleState, viewport, width, height, drawGrid, drawMoveRange, drawMissileRange, drawLaserRange, drawMovementPaths, drawMissilePaths, drawShips, drawOrders]);
 
   // Renderuj przy zmianach
   useEffect(() => {
@@ -322,17 +662,35 @@ export const BattleCanvas = ({
 
   // Obsługa kliknięcia
   const handleClick = useCallback((e) => {
+    // Ignoruj prawy przycisk - obsługiwany przez contextmenu
+    if (e.button !== 0) return;
+    
     const mapPos = screenToMap(e.clientX, e.clientY);
     
     // Sprawdź czy kliknięto w statek
     const shipData = findShipAt(mapPos.x, mapPos.y);
     
-    if (shipData) {
-      onShipClick?.(shipData.ship, shipData.fraction);
-    } else {
-      onCellClick?.(mapPos.x, mapPos.y);
+    // Najpierw wywołaj onCellClick (obsługuje logikę ataku)
+    // Jeśli to zatrzyma propagację, onShipClick nie zostanie wywołany
+    if (onCellClick) {
+      const result = onCellClick(mapPos.x, mapPos.y);
+      // Jeśli onCellClick zwrócił false, zatrzymaj dalsze przetwarzanie
+      if (result === false) {
+        return;
+      }
+    }
+    
+    // Jeśli był statek i nie zatrzymano propagacji, wywołaj onShipClick
+    if (shipData && onShipClick) {
+      onShipClick(shipData.ship, shipData.fraction, e.clientX, e.clientY);
     }
   }, [screenToMap, findShipAt, onShipClick, onCellClick]);
+
+  // Obsługa prawego przycisku myszy (odznaczenie statku)
+  const handleContextMenu = useCallback((e) => {
+    e.preventDefault();
+    onShipClick?.(null, null, 0, 0); // Odznacz statek
+  }, [onShipClick]);
 
   // Obsługa przeciągania (pan)
   const handleMouseDown = useCallback((e) => {
@@ -375,21 +733,49 @@ export const BattleCanvas = ({
     }));
   }, [viewport]);
 
+  // Zoom In
+  const handleZoomIn = useCallback(() => {
+    setViewport(prev => ({
+      ...prev,
+      zoom: Math.min(prev.zoom + 0.2, 3),
+    }));
+  }, []);
+
+  // Zoom Out
+  const handleZoomOut = useCallback(() => {
+    setViewport(prev => ({
+      ...prev,
+      zoom: Math.max(prev.zoom - 0.2, 0.2),
+    }));
+  }, []);
+
   return (
-    <canvas
-      ref={canvasRef}
-      onClick={handleClick}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onWheel={handleWheel}
-      style={{
-        width: '100%',
-        height: '100%',
-        cursor: isDragging ? 'grabbing' : 'crosshair',
-      }}
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <canvas
+        ref={canvasRef}
+        onClick={handleClick}
+        onContextMenu={handleContextMenu}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onWheel={handleWheel}
+        style={{
+          width: '100%',
+          height: '100%',
+          cursor: isDragging ? 'grabbing' : 'crosshair',
+        }}
+      />
+      {/* Przyciski zoom */}
+      <div className="zoom-controls">
+        <button className="zoom-btn" onClick={handleZoomIn} title="Przybliż (+)">
+          +
+        </button>
+        <button className="zoom-btn" onClick={handleZoomOut} title="Oddal (-)">
+          −
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -412,4 +798,5 @@ BattleCanvas.propTypes = {
   onShipClick: PropTypes.func,
   onCellClick: PropTypes.func,
   orders: PropTypes.arrayOf(PropTypes.object),
+  weaponMode: PropTypes.oneOf(['missile', 'laser', null]),
 };

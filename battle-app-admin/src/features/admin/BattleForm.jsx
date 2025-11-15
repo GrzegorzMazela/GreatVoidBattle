@@ -34,7 +34,7 @@ export default function BattleForm() {
     onSuccess: (battleId) => {
       qc.invalidateQueries(['battles']);
       toaster.create({ title: 'Battle created', type: 'success' });
-      nav(`/admin/${battleId}`);
+      nav(`/pustka-admin-panel/${battleId}`);
     }
   });
 

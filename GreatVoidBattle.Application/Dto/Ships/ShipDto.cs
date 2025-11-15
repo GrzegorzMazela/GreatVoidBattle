@@ -12,4 +12,9 @@ public class ShipDto
     public int Shields { get; set; }
     public int HitPoints { get; set; }
     public List<ModuleDto> Modules { get; set; } = new();
+    
+    // Weapon counts
+    public int NumberOfMissiles { get; set; }
+    public int NumberOfLasers { get; set; }
+    public int NumberOfPointsDefense { get; set; }
 }

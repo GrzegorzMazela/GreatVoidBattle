@@ -7,24 +7,26 @@ public class FractionState
 {
     public Guid FractionId { get; set; }
     public string FractionName { get; set; } = string.Empty;
+    public string PlayerName { get; set; } = string.Empty;
+    public string FractionColor { get; set; } = string.Empty;
+    public Guid AuthToken { get; set; }
     public IReadOnlyList<ShipState> Ships => _ships.AsReadOnly();
 
     [BsonElement("Ships")]
     private List<ShipState> _ships { get; set; } = new();
 
-    [BsonIgnore]
-    private BattleLog _battleLog;
-
     public bool IsDefeated => _ships.All(s => s.Status is ShipStatus.Destroyed or ShipStatus.Retreated);
 
-    public static FractionState CreateNew(string fractionName, BattleLog battleLog)
+    public static FractionState CreateNew(string fractionName, string playerName, string fractionColor)
     {
         return new FractionState
         {
             FractionId = Guid.NewGuid(),
             FractionName = fractionName,
-            _ships = new List<ShipState>(),
-            _battleLog = battleLog
+            PlayerName = playerName,
+            FractionColor = fractionColor,
+            AuthToken = Guid.NewGuid(),
+            _ships = new List<ShipState>()
         };
     }
 

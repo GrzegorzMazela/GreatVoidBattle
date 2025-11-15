@@ -30,7 +30,7 @@ export default function BattlesList() {
       <Box>
         <HStack justify="space-between" mb="4">
           <Heading size="md">Battles</Heading>
-          <Button as={Link} to="/admin/new" colorScheme="green">New</Button>
+          <Button as={Link} to="/pustka-admin-panel/new" colorScheme="green">New</Button>
         </HStack>
 
       <Box bg="white" rounded="lg" shadow="sm" overflow="hidden">
@@ -56,8 +56,7 @@ export default function BattlesList() {
                 <Table.Cell>{b.fractions?.join(', ') || 'No fractions'}</Table.Cell>
                 <Table.Cell>
                   <HStack>
-                    <Button as={Link} to={`/admin/${b.battleId}`} size="sm" colorScheme="blue">Details</Button>
-                    <Button as={Link} to={`/battles/${b.battleId}/simulator`} size="sm" colorScheme="teal">Simulator</Button>
+                    <Button as={Link} to={`/pustka-admin-panel/${b.battleId}`} size="sm" colorScheme="blue">Details</Button>
                     <Button
                       size="sm"
                       colorScheme="red"

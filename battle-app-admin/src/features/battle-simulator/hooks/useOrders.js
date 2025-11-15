@@ -11,6 +11,9 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
   const [orders, setOrders] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Licznik zatwierdzonych rozkazów w bieżącej turze (resetowany tylko po wykonaniu tury)
+  const [submittedOrdersCount, setSubmittedOrdersCount] = useState({});
 
   /**
    * Dodaj rozkaz ruchu statku
@@ -33,9 +36,8 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
    */
   const addLaserOrder = useCallback((shipId, targetShipId, targetFractionId) => {
     setOrders(prev => {
-      // Usuń poprzedni rozkaz dla tego statku
-      const filtered = prev.filter(o => o.shipId !== shipId);
-      return [...filtered, {
+      // Dodaj nowy rozkaz (NIE usuwaj poprzednich - statek może strzelić wielokrotnie)
+      return [...prev, {
         shipId,
         type: 'laser',
         targetShipId,
@@ -49,9 +51,8 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
    */
   const addMissileOrder = useCallback((shipId, targetShipId, targetFractionId) => {
     setOrders(prev => {
-      // Usuń poprzedni rozkaz dla tego statku
-      const filtered = prev.filter(o => o.shipId !== shipId);
-      return [...filtered, {
+      // Dodaj nowy rozkaz (NIE usuwaj poprzednich - statek może strzelić wielokrotnie)
+      return [...prev, {
         shipId,
         type: 'missile',
         targetShipId,
@@ -68,10 +69,34 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
   }, []);
 
   /**
+   * Usuń ostatni rozkaz danego typu dla statku
+   */
+  const removeLastOrderOfType = useCallback((shipId, orderType) => {
+    setOrders(prev => {
+      // Znajdź ostatni indeks rozkazu danego typu dla tego statku
+      const lastIndex = prev.map((o, i) => 
+        o.shipId === shipId && o.type === orderType ? i : -1
+      ).filter(i => i !== -1).pop();
+      
+      if (lastIndex !== undefined) {
+        return prev.filter((_, i) => i !== lastIndex);
+      }
+      return prev;
+    });
+  }, []);
+
+  /**
    * Wyczyść wszystkie rozkazy
    */
   const clearOrders = useCallback(() => {
     setOrders([]);
+  }, []);
+
+  /**
+   * Resetuj liczniki zatwierdzonych rozkazów (wywołaj po wykonaniu tury)
+   */
+  const resetSubmittedCounts = useCallback(() => {
+    setSubmittedOrdersCount({});
   }, []);
 
   /**
@@ -91,12 +116,17 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
         orders: orders,
       };
 
-      await submitOrders(battleId, fractionId, payload);
+      const battleState = await submitOrders(battleId, fractionId, payload);
       
-      // Wyczyść rozkazy po udanym wysłaniu
-      setOrders([]);
+      // Zapisz zatwierdzone rozkazy do licznika
+      const newCounts = { ...submittedOrdersCount };
+      orders.forEach(order => {
+        const key = `${order.shipId}_${order.type}`;
+        newCounts[key] = (newCounts[key] || 0) + 1;
+      });
+      setSubmittedOrdersCount(newCounts);
       
-      return { success: true };
+      return { success: true, battleState };
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || 'Failed to submit orders';
       setError(errorMsg);
@@ -104,7 +134,7 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
     } finally {
       setSubmitting(false);
     }
-  }, [battleId, fractionId, turnNumber, orders]);
+  }, [battleId, fractionId, turnNumber, orders, submittedOrdersCount]);
 
   /**
    * Pobierz rozkaz dla konkretnego statku
@@ -113,15 +143,29 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
     return orders.find(o => o.shipId === shipId);
   }, [orders]);
 
+  /**
+   * Pobierz łączną liczbę rozkazów danego typu dla statku (lokalne + zatwierdzone)
+   */
+  const getTotalOrderCount = useCallback((shipId, orderType) => {
+    const localCount = orders.filter(
+      order => order.shipId === shipId && order.type === orderType
+    ).length;
+    const submittedCount = submittedOrdersCount[`${shipId}_${orderType}`] || 0;
+    return localCount + submittedCount;
+  }, [orders, submittedOrdersCount]);
+
   return {
     orders,
     addMoveOrder,
     addLaserOrder,
     addMissileOrder,
     removeOrder,
+    removeLastOrderOfType,
     clearOrders,
+    resetSubmittedCounts,
     submit,
     getOrderForShip,
+    getTotalOrderCount,
     submitting,
     error,
     hasOrders: orders.length > 0,

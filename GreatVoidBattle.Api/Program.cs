@@ -3,6 +3,7 @@ using GreatVoidBattle.Application.Factories;
 using GreatVoidBattle.Infrastructure;
 using GreatVoidBattle.Infrastructure.Repository;
 using GreatVoidBattle.Application.Repositories;
+using GreatVoidBattle.Api.Middleware;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Bson;
@@ -47,6 +48,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 app.UseHttpsRedirection();
+app.UseFractionAuthorization();
 app.MapControllers();
 app.UseDefaultFiles();
 app.UseStaticFiles();

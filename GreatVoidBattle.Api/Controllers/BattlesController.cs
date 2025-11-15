@@ -4,6 +4,7 @@ using GreatVoidBattle.Application.Factories;
 using Microsoft.AspNetCore.Mvc;
 using GreatVoidBattle.Application.Repositories;
 using GreatVoidBattle.Application.Events.InProgress;
+using GreatVoidBattle.Api.Attributes;
 
 namespace GreatVoidBattle.Application.Controllers;
 
@@ -46,18 +47,45 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
             {
                 FractionId = f.FractionId,
                 FractionName = f.FractionName,
+                PlayerName = f.PlayerName,
+                FractionColor = f.FractionColor,
+                //AuthToken = f.AuthToken,
                 IsDefeated = f.IsDefeated,
                 Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
                 {
                     ShipId = s.ShipId,
                     Name = s.Name,
+                    Type = s.Type.ToString(),
                     X = s.Position.X,
                     Y = s.Position.Y,
                     Speed = s.Speed,
                     Armor = s.Armor,
                     Shields = s.Shields,
-                    HitPoints = s.HitPoints
+                    HitPoints = s.HitPoints,
+                    NumberOfMissiles = s.NumberOfMissiles,
+                    NumberOfLasers = s.NumberOfLasers,
+                    NumberOfPointsDefense = s.NumberOfPointsDefense
                 }).ToList()
+            }).ToList(),
+            ShipMovementPaths = battleState.ShipMovementPaths.Select(smp => new ShipMovementPathDto
+            {
+                ShipId = smp.ShipId,
+                Speed = smp.Speed,
+                StartPosition = new PositionDto { X = smp.StartPosition.X, Y = smp.StartPosition.Y },
+                TargetPosition = new PositionDto { X = smp.TargetPosition.X, Y = smp.TargetPosition.Y },
+                Path = smp.Path.Select(p => new PositionDto { X = p.X, Y = p.Y }).ToList()
+            }).ToList(),
+            MissileMovementPaths = battleState.MissileMovementPaths.Select(mmp => new MissileMovementPathDto
+            {
+                MissileId = mmp.MissileId,
+                ShipId = mmp.ShipId,
+                ShipName = mmp.ShipName,
+                TargetId = mmp.TargetId,
+                Speed = mmp.Speed,
+                Accuracy = mmp.Accuracy,
+                StartPosition = new PositionDto { X = mmp.StartPosition.X, Y = mmp.StartPosition.Y },
+                TargetPosition = new PositionDto { X = mmp.TargetPosition.X, Y = mmp.TargetPosition.Y },
+                Path = mmp.Path.Select(p => new PositionDto { X = p.X, Y = p.Y }).ToList()
             }).ToList()
         };
         return Ok(battleStateDto);
@@ -67,6 +95,71 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
     public async Task<IActionResult> GetBattles(Guid battleId)
     {
         return Ok(await _battleStateRepository.GetBattles());
+    }
+
+    [HttpGet("{battleId}/admin")]
+    [ProducesResponseType<BattleStateAdminDto>(200)]
+    public async Task<IActionResult> GetBattleStateAdmin(Guid battleId)
+    {
+        var battleState = await battleManagerFactory.GetBattleState(battleId);
+        if (battleState == null)
+        {
+            return NotFound();
+        }
+        var battleStateDto = new BattleStateAdminDto
+        {
+            BattleId = battleState.BattleId,
+            Name = battleState.BattleName,
+            Status = battleState.BattleStatus.ToString(),
+            Height = battleState.Height,
+            Width = battleState.Width,
+            TurnNumber = battleState.TurnNumber,
+            Fractions = battleState.Fractions.Select(f => new FractionAdminDto
+            {
+                FractionId = f.FractionId,
+                FractionName = f.FractionName,
+                PlayerName = f.PlayerName,
+                FractionColor = f.FractionColor,
+                AuthToken = f.AuthToken,
+                IsDefeated = f.IsDefeated,
+                Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
+                {
+                    ShipId = s.ShipId,
+                    Name = s.Name,
+                    Type = s.Type.ToString(),
+                    X = s.Position.X,
+                    Y = s.Position.Y,
+                    Speed = s.Speed,
+                    Armor = s.Armor,
+                    Shields = s.Shields,
+                    HitPoints = s.HitPoints,
+                    NumberOfMissiles = s.NumberOfMissiles,
+                    NumberOfLasers = s.NumberOfLasers,
+                    NumberOfPointsDefense = s.NumberOfPointsDefense
+                }).ToList()
+            }).ToList(),
+            ShipMovementPaths = battleState.ShipMovementPaths.Select(smp => new ShipMovementPathDto
+            {
+                ShipId = smp.ShipId,
+                Speed = smp.Speed,
+                StartPosition = new PositionDto { X = smp.StartPosition.X, Y = smp.StartPosition.Y },
+                TargetPosition = new PositionDto { X = smp.TargetPosition.X, Y = smp.TargetPosition.Y },
+                Path = smp.Path.Select(p => new PositionDto { X = p.X, Y = p.Y }).ToList()
+            }).ToList(),
+            MissileMovementPaths = battleState.MissileMovementPaths.Select(mmp => new MissileMovementPathDto
+            {
+                MissileId = mmp.MissileId,
+                ShipId = mmp.ShipId,
+                ShipName = mmp.ShipName,
+                TargetId = mmp.TargetId,
+                Speed = mmp.Speed,
+                Accuracy = mmp.Accuracy,
+                StartPosition = new PositionDto { X = mmp.StartPosition.X, Y = mmp.StartPosition.Y },
+                TargetPosition = new PositionDto { X = mmp.TargetPosition.X, Y = mmp.TargetPosition.Y },
+                Path = mmp.Path.Select(p => new PositionDto { X = p.X, Y = p.Y }).ToList()
+            }).ToList()
+        };
+        return Ok(battleStateDto);
     }
 
     [HttpPost]
@@ -83,6 +176,7 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
 
     [HttpPost]
     [Route("{battleId}/fractions/{fractionId}/orders")]
+    [FractionAuth]
     public async Task<IActionResult> SubmitOrders(Guid battleId, Guid fractionId, [FromBody] SubmitOrdersDto submitOrdersDto)
     {
         var battleState = await battleManagerFactory.GetBattleState(battleId);
@@ -152,7 +246,63 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
             }
         }
 
-        return Ok(new { message = "Orders submitted successfully" });
+        // Pobierz zaktualizowany stan bitwy
+        var updatedBattleState = await battleManagerFactory.GetBattleState(battleId);
+        var battleStateDto = new BattleStateDto
+        {
+            BattleId = updatedBattleState.BattleId,
+            Name = updatedBattleState.BattleName,
+            Status = updatedBattleState.BattleStatus.ToString(),
+            Height = updatedBattleState.Height,
+            Width = updatedBattleState.Width,
+            TurnNumber = updatedBattleState.TurnNumber,
+            Fractions = updatedBattleState.Fractions.Select(f => new FractionDto
+            {
+                FractionId = f.FractionId,
+                FractionName = f.FractionName,
+                PlayerName = f.PlayerName,
+                FractionColor = f.FractionColor,
+                //AuthToken = f.AuthToken,
+                IsDefeated = f.IsDefeated,
+                Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
+                {
+                    ShipId = s.ShipId,
+                    Name = s.Name,
+                    Type = s.Type.ToString(),
+                    X = s.Position.X,
+                    Y = s.Position.Y,
+                    Speed = s.Speed,
+                    Armor = s.Armor,
+                    Shields = s.Shields,
+                    HitPoints = s.HitPoints,
+                    NumberOfMissiles = s.NumberOfMissiles,
+                    NumberOfLasers = s.NumberOfLasers,
+                    NumberOfPointsDefense = s.NumberOfPointsDefense
+                }).ToList()
+            }).ToList(),
+            ShipMovementPaths = updatedBattleState.ShipMovementPaths.Select(smp => new ShipMovementPathDto
+            {
+                ShipId = smp.ShipId,
+                Speed = smp.Speed,
+                StartPosition = new PositionDto { X = smp.StartPosition.X, Y = smp.StartPosition.Y },
+                TargetPosition = new PositionDto { X = smp.TargetPosition.X, Y = smp.TargetPosition.Y },
+                Path = smp.Path.Select(p => new PositionDto { X = p.X, Y = p.Y }).ToList()
+            }).ToList(),
+            MissileMovementPaths = updatedBattleState.MissileMovementPaths.Select(mmp => new MissileMovementPathDto
+            {
+                MissileId = mmp.MissileId,
+                ShipId = mmp.ShipId,
+                ShipName = mmp.ShipName,
+                TargetId = mmp.TargetId,
+                Speed = mmp.Speed,
+                Accuracy = mmp.Accuracy,
+                StartPosition = new PositionDto { X = mmp.StartPosition.X, Y = mmp.StartPosition.Y },
+                TargetPosition = new PositionDto { X = mmp.TargetPosition.X, Y = mmp.TargetPosition.Y },
+                Path = mmp.Path.Select(p => new PositionDto { X = p.X, Y = p.Y }).ToList()
+            }).ToList()
+        };
+
+        return Ok(battleStateDto);
     }
 
     [HttpPost]
@@ -185,21 +335,28 @@ public class BattlesController(BattleManagerFactory battleManagerFactory, IBattl
             {
                 FractionId = f.FractionId,
                 FractionName = f.FractionName,
+                PlayerName = f.PlayerName,
+                FractionColor = f.FractionColor,
+                //AuthToken = f.AuthToken,
                 IsDefeated = f.IsDefeated,
                 Ships = f.Ships.Select(s => new Application.Dto.Ships.ShipDto
                 {
                     ShipId = s.ShipId,
                     Name = s.Name,
+                    Type = s.Type.ToString(),
                     X = s.Position.X,
                     Y = s.Position.Y,
                     Speed = s.Speed,
                     Armor = s.Armor,
                     Shields = s.Shields,
-                    HitPoints = s.HitPoints
+                    HitPoints = s.HitPoints,
+                    NumberOfMissiles = s.NumberOfMissiles,
+                    NumberOfLasers = s.NumberOfLasers,
+                    NumberOfPointsDefense = s.NumberOfPointsDefense
                 }).ToList()
             }).ToList()
         };
-        
+
         return Ok(battleStateDto);
     }
 }

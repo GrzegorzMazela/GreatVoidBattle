@@ -54,13 +54,13 @@ export default function ShipsTable() {
           <Breadcrumb.List>
             <Breadcrumb.Item>
               <Breadcrumb.Link asChild>
-                <Link to="/admin">Battles</Link>
+                <Link to="/pustka-admin-panel">Battles</Link>
               </Breadcrumb.Link>
             </Breadcrumb.Item>
             <Breadcrumb.Separator />
             <Breadcrumb.Item>
               <Breadcrumb.Link asChild>
-                <Link to={`/admin/${battleId}`}>{battle?.name || 'Battle'}</Link>
+                <Link to={`/pustka-admin-panel/${battleId}`}>{battle?.name || 'Battle'}</Link>
               </Breadcrumb.Link>
             </Breadcrumb.Item>
             <Breadcrumb.Separator />
@@ -81,10 +81,10 @@ export default function ShipsTable() {
             )}
           </VStack>
           <HStack>
-            <Button as={Link} to={`/admin/${battleId}/fractions/${fractionId}/ships/new`} colorScheme="green">
+            <Button as={Link} to={`/pustka-admin-panel/${battleId}/fractions/${fractionId}/ships/new`} colorScheme="green">
               Add Ship
             </Button>
-            <Button as={Link} to={`/admin/${battleId}`} variant="outline">
+            <Button as={Link} to={`/pustka-admin-panel/${battleId}`} variant="outline">
               Back to Battle
             </Button>
           </HStack>
@@ -125,7 +125,7 @@ export default function ShipsTable() {
                         colorScheme="blue" 
                         variant="outline" 
                         as={Link} 
-                        to={`/admin/${battleId}/fractions/${fractionId}/ships/${s.shipId}/edit`}
+                        to={`/pustka-admin-panel/${battleId}/fractions/${fractionId}/ships/${s.shipId}/edit`}
                       >
                         Edit
                       </Button>

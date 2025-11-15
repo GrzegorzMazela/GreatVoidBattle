@@ -151,7 +151,7 @@ export default function ShipForm() {
           <Button type="submit" colorScheme="green" isLoading={mutation.isPending}>
             {isEditMode ? 'Update' : 'Save'}
           </Button>
-          <Button variant="outline" onClick={() => nav(`/admin/${battleId}/fractions/${fractionId}/ships`)}>
+          <Button variant="outline" onClick={() => nav(`/pustka-admin-panel/${battleId}/fractions/${fractionId}/ships`)}>
             Cancel
           </Button>
         </VStack>
