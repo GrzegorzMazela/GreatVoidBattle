@@ -11,20 +11,18 @@ EXPOSE 8081
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["src/GreatVoidBattle.Api/GreatVoidBattle.Api.csproj", "src/GreatVoidBattle.Api/"]
-COPY ["src/GreatVoidBattle.Infrastructure/GreatVoidBattle.Infrastructure.csproj", "src/GreatVoidBattle.Infrastructure/"]
-COPY ["src/GreatVoidBattle.Application/GreatVoidBattle.Application.csproj", "src/GreatVoidBattle.Application/"]
-COPY ["src/GreatVoidBattle.Core/GreatVoidBattle.Core.csproj", "src/GreatVoidBattle.Core/"]
-RUN dotnet restore "./src/GreatVoidBattle.Api/GreatVoidBattle.Api.csproj"
+COPY ["GreatVoidBattle.Api/GreatVoidBattle.Api.csproj", "GreatVoidBattle.Api/"]
+COPY ["GreatVoidBattle.Infrastructure/GreatVoidBattle.Infrastructure.csproj", "GreatVoidBattle.Infrastructure/"]
+COPY ["GreatVoidBattle.Application/GreatVoidBattle.Application.csproj", "GreatVoidBattle.Application/"]
+COPY ["GreatVoidBattle.Core/GreatVoidBattle.Core.csproj", "GreatVoidBattle.Core/"]
+RUN dotnet restore "./GreatVoidBattle.Api/GreatVoidBattle.Api.csproj"
 COPY . .
-WORKDIR /src
-RUN dotnet build "./src/GreatVoidBattle.Api/GreatVoidBattle.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./GreatVoidBattle.Api/GreatVoidBattle.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./src/GreatVoidBattle.Api/GreatVoidBattle.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./GreatVoidBattle.Api/GreatVoidBattle.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
