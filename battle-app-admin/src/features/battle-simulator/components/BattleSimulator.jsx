@@ -445,12 +445,12 @@ export const BattleSimulator = ({ sessionData }) => {
 
           {/* Status frakcji w jednej linii */}
           <div className="fractions-status-inline">
-            {battleState.fractions.map((fraction, index) => (
+            {battleState.fractions.map((fraction) => (
               <div key={fraction.fractionId} className="fraction-status-inline">
                 <div 
                   className="fraction-color" 
                   style={{ 
-                    backgroundColor: ['#4CAF50', '#F44336', '#2196F3', '#FF9800', '#9C27B0'][index % 5] 
+                    backgroundColor: fraction.fractionColor || '#4CAF50'
                   }}
                 />
                 <span className="fraction-name">{fraction.fractionName}</span>
@@ -509,6 +509,7 @@ export const BattleSimulator = ({ sessionData }) => {
             onCellClick={handleCellClick}
             orders={ordersManager.orders}
             weaponMode={weaponMode}
+            playerFractionId={playerFractionId}
           />
         </div>
 

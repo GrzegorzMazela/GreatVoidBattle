@@ -9,6 +9,7 @@ import ShipsTable from '../features/admin/ShipsTable';
 import ShipForm from '../features/admin/ShipForm';
 import { BattleSimulator } from '../features/battle-simulator';
 import RequireAuth from '../components/RequireAuth';
+import MainPage from '../components/MainPage';
 
 export const router = createBrowserRouter([
   // Panel administracyjny z layoutem (Sidebar + Topbar)
@@ -44,9 +45,6 @@ export const router = createBrowserRouter([
   // Przekierowanie ze starego URL
   {
     path: '/',
-    element: <AdminLayout />,
-    children: [
-      { index: true, element: <BattlesList /> },
-    ],
+    element: <MainPage />,
   },
 ]);

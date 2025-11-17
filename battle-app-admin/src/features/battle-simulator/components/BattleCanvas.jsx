@@ -21,6 +21,16 @@ const SHIP_ICONS = {
   OrbitalFort: OrbitalFortIcon,
 };
 
+// Map ship types to max HP (from ShipFactory.cs)
+const SHIP_MAX_HP = {
+  Corvette: 50,
+  Destroyer: 100,
+  Cruiser: 200,
+  Battleship: 400,
+  SuperBattleship: 600,
+  OrbitalFort: 100,
+};
+
 /**
  * Wydajny komponent Canvas do renderowania pola bitwy
  * Używa viewport rendering - rysuje tylko widoczny obszar
@@ -32,6 +42,7 @@ export const BattleCanvas = ({
   onCellClick,
   orders,
   weaponMode,
+  playerFractionId,
 }) => {
   const canvasRef = useRef(null);
   const [viewport, setViewport] = useState({
@@ -311,9 +322,10 @@ export const BattleCanvas = ({
     const scaledCellSize = cellSize * zoom;
 
     fractions.forEach((fraction, fractionIndex) => {
-      // Kolor dla każdej frakcji
-      const colors = ['#4CAF50', '#F44336', '#2196F3', '#FF9800', '#9C27B0'];
-      const color = colors[fractionIndex % colors.length];
+      // Użyj koloru przypisanego do frakcji, fallback do domyślnych kolorów
+      const defaultColors = ['#4CAF50', '#F44336', '#2196F3', '#FF9800', '#9C27B0'];
+      const color = fraction.fractionColor || defaultColors[fractionIndex % defaultColors.length];
+      const isPlayerFraction = playerFractionId && fraction.fractionId === playerFractionId;
 
       fraction.ships.forEach(ship => {
         const shipX = Math.floor(ship.x);
@@ -374,20 +386,23 @@ export const BattleCanvas = ({
           ctx.stroke();
         }
 
-        // HP bar
-        const hpPercent = ship.hitPoints / 100; // Zakładam max 100 HP
-        const barWidth = scaledCellSize * 0.8;
-        const barHeight = 4;
-        const barX = (shipX - viewport.x) * scaledCellSize + (scaledCellSize - barWidth) / 2;
-        const barY = (shipY - viewport.y + 0.9) * scaledCellSize;
+        // HP bar - tylko dla statków gracza
+        if (isPlayerFraction) {
+          const maxHp = SHIP_MAX_HP[ship.type] || 100;
+          const hpPercent = ship.hitPoints / maxHp;
+          const barWidth = scaledCellSize * 0.8;
+          const barHeight = 4;
+          const barX = (shipX - viewport.x) * scaledCellSize + (scaledCellSize - barWidth) / 2;
+          const barY = (shipY - viewport.y + 0.9) * scaledCellSize;
 
-        ctx.fillStyle = '#333';
-        ctx.fillRect(barX, barY, barWidth, barHeight);
-        ctx.fillStyle = hpPercent > 0.5 ? '#4CAF50' : hpPercent > 0.25 ? '#FF9800' : '#F44336';
-        ctx.fillRect(barX, barY, barWidth * hpPercent, barHeight);
+          ctx.fillStyle = '#333';
+          ctx.fillRect(barX, barY, barWidth, barHeight);
+          ctx.fillStyle = hpPercent > 0.5 ? '#4CAF50' : hpPercent > 0.25 ? '#FF9800' : '#F44336';
+          ctx.fillRect(barX, barY, barWidth * hpPercent, barHeight);
+        }
       });
     });
-  }, [fractions, viewport, selectedShip, mapToScreen, loadedImages]);
+  }, [fractions, viewport, selectedShip, mapToScreen, loadedImages, playerFractionId]);
 
   // Renderuj rozkazy
   const drawOrders = useCallback((ctx) => {
@@ -396,12 +411,20 @@ export const BattleCanvas = ({
     orders.forEach(order => {
       // Znajdź statek który wydał rozkaz
       let ship = null;
+      let shipFraction = null;
       for (const fraction of fractions) {
         ship = fraction.ships.find(s => s.shipId === order.shipId);
-        if (ship) break;
+        if (ship) {
+          shipFraction = fraction;
+          break;
+        }
       }
 
       if (!ship) return;
+
+      // Pokazuj tylko rozkazy gracza (ruchy i ataki)
+      const isPlayerOrder = playerFractionId && shipFraction.fractionId === playerFractionId;
+      if (!isPlayerOrder) return;
 
       const startPos = mapToScreen(ship.x + 0.5, ship.y + 0.5);
 
@@ -472,7 +495,7 @@ export const BattleCanvas = ({
         }
       }
     });
-  }, [orders, fractions, mapToScreen]);
+  }, [orders, fractions, mapToScreen, playerFractionId]);
 
   // Renderuj zatwierdzone ścieżki ruchu statków
   const drawMovementPaths = useCallback((ctx) => {
@@ -482,6 +505,18 @@ export const BattleCanvas = ({
 
     battleState.shipMovementPaths.forEach(movementPath => {
       if (!movementPath.path || movementPath.path.length === 0) return;
+
+      // Sprawdź czy to ścieżka statku gracza
+      if (playerFractionId) {
+        let isPlayerShip = false;
+        for (const fraction of battleState.fractions) {
+          if (fraction.fractionId === playerFractionId) {
+            isPlayerShip = fraction.ships.some(s => s.shipId === movementPath.shipId);
+            if (isPlayerShip) break;
+          }
+        }
+        if (!isPlayerShip) return;
+      }
 
       // Rysuj ścieżkę jako połączone segmenty
       ctx.strokeStyle = 'rgba(100, 255, 100, 0.7)';
@@ -536,7 +571,7 @@ export const BattleCanvas = ({
         ctx.fill();
       }
     });
-  }, [battleState, viewport, mapToScreen]);
+  }, [battleState, viewport, mapToScreen, playerFractionId]);
 
   // Renderuj zatwierdzone ścieżki pocisków
   const drawMissilePaths = useCallback((ctx) => {
@@ -546,6 +581,25 @@ export const BattleCanvas = ({
 
     battleState.missileMovementPaths.forEach(missilePath => {
       if (!missilePath.path || missilePath.path.length === 0) return;
+
+      // Sprawdź czy to rakieta gracza lub rakieta wymierzona w statek gracza
+      if (playerFractionId) {
+        let isPlayerMissile = false;
+        let isTargetingPlayer = false;
+
+        // Sprawdź czy to rakieta statku gracza
+        for (const fraction of battleState.fractions) {
+          if (fraction.fractionId === playerFractionId) {
+            isPlayerMissile = fraction.ships.some(s => s.shipId === missilePath.sourceShipId);
+            // Sprawdź czy cel to statek gracza
+            isTargetingPlayer = fraction.ships.some(s => s.shipId === missilePath.targetShipId);
+            if (isPlayerMissile || isTargetingPlayer) break;
+          }
+        }
+
+        // Pokazuj tylko rakiety gracza lub rakiety wymierzone w gracza
+        if (!isPlayerMissile && !isTargetingPlayer) return;
+      }
 
       // Rysuj ścieżkę pocisku
       ctx.strokeStyle = 'rgba(255, 150, 0, 0.7)';
@@ -611,7 +665,7 @@ export const BattleCanvas = ({
         ctx.stroke();
       }
     });
-  }, [battleState, viewport, mapToScreen, loadedImages]);
+  }, [battleState, viewport, mapToScreen, loadedImages, playerFractionId]);
 
   // Główna funkcja renderująca
   const render = useCallback(() => {
@@ -806,4 +860,5 @@ BattleCanvas.propTypes = {
   onCellClick: PropTypes.func,
   orders: PropTypes.arrayOf(PropTypes.object),
   weaponMode: PropTypes.oneOf(['missile', 'laser', null]),
+  playerFractionId: PropTypes.string,
 };

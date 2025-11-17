@@ -50,11 +50,24 @@
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #444;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .ship-info h3 {
   margin: 0;
   font-size: 1.3rem;
+  flex-basis: 100%;
+}
+
+.ship-type-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196F3;
+  border: 1px solid rgba(33, 150, 243, 0.5);
 }
 
 .fraction-badge {
@@ -62,6 +75,21 @@
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: bold;
+}
+
+.enemy-ship-notice {
+  background: rgba(255, 152, 0, 0.15);
+  border-left: 3px solid #FF9800;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.enemy-ship-notice p {
+  margin: 0;
+  color: #FF9800;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .ship-stats {
