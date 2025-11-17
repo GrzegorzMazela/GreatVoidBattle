@@ -55,13 +55,35 @@ const FractionCreator = ({ battleId }) => {
     }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    alertModal.openModal({
-      title: 'Sukces',
-      message: 'Skopiowano do schowka!',
-      variant: 'success'
-    });
+  const copyToClipboard = async (text) => {
+    try {
+      // Próbuj użyć nowoczesnego API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Fallback dla starszych przeglądarek lub HTTP
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      alertModal.openModal({
+        title: 'Sukces',
+        message: 'Skopiowano do schowka!',
+        variant: 'success'
+      });
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      alertModal.openModal({
+        title: 'Błąd',
+        message: 'Nie udało się skopiować. Tekst: ' + text,
+        variant: 'error'
+      });
+    }
   };
 
   return (

@@ -37,7 +37,7 @@ export default function BattleDetails() {
     });
   };
 
-  const copyPlayerLink = (fraction) => {
+  const copyPlayerLink = async (fraction) => {
     if (!fraction.authToken) {
       alertModal.openModal({
         title: 'Błąd',
@@ -47,9 +47,32 @@ export default function BattleDetails() {
       return;
     }
     const playerUrl = `${window.location.origin}/battles/${battleId}/simulator?token=${fraction.authToken}&fractionId=${fraction.fractionId}`;
-    navigator.clipboard.writeText(playerUrl);
-    setCopiedToken(fraction.fractionId);
-    setTimeout(() => setCopiedToken(null), 2000);
+    
+    try {
+      // Próbuj użyć nowoczesnego API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(playerUrl);
+      } else {
+        // Fallback dla starszych przeglądarek lub HTTP
+        const textArea = document.createElement('textarea');
+        textArea.value = playerUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopiedToken(fraction.fractionId);
+      setTimeout(() => setCopiedToken(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      alertModal.openModal({
+        title: 'Błąd',
+        message: 'Nie udało się skopiować linku. Spróbuj ręcznie: ' + playerUrl,
+        variant: 'error'
+      });
+    }
   };
 
   if (isLoading) return <Spinner />;
