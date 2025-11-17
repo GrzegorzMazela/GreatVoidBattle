@@ -61,24 +61,24 @@ export const useTurnSystem = (battleId, fractionId, onNewTurn, battleState) => {
         });
 
         battleHubService.onNewTurnStarted((data) => {
-          console.log('New turn started:', data);
+          console.log('New turn started - full data:', data);
+          console.log('TurnNumber:', data.TurnNumber, 'turnNumber:', data.turnNumber);
           setIsWaitingForPlayers(false);
           setWaitingPlayers([]);
           setTurnFinished(false);
           
-          // Wywołaj callback z nowym numerem tury
-          if (onNewTurnRef.current) {
-            onNewTurnRef.current(data.TurnNumber);
+          // Wywołaj callback z nowym numerem tury (próbuj obie notacje)
+          const turnNumber = data.TurnNumber || data.turnNumber;
+          if (onNewTurnRef.current && turnNumber !== undefined) {
+            onNewTurnRef.current(turnNumber);
           }
         });
 
         battleHubService.onWaitingPlayersUpdated((players) => {
           console.log('Waiting players updated:', players);
           setWaitingPlayers(players || []);
-          // Jeśli lista się zmniejszyła, znaczy że ktoś zakończył turę
-          if (players && players.length > 0) {
-            setIsWaitingForPlayers(true);
-          }
+          // Aktualizuj tylko listę oczekujących graczy
+          // NIE zmieniaj isWaitingForPlayers - to zależy od tego czy LOKALNY gracz zakończył turę
         });
 
       } catch (error) {

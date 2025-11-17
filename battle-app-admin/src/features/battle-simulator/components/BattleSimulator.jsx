@@ -43,19 +43,38 @@ export const BattleSimulator = ({ sessionData }) => {
   // Modal dla komunikatów
   const alertModal = useModal();
 
-  // System turowy z SignalR
-  const turnSystem = useTurnSystem(battleId, playerFractionId, (newTurnNumber) => {
-    // Callback wywoływany gdy rozpoczyna się nowa tura
-    console.log('New turn started:', newTurnNumber);
-    refresh(); // Odśwież stan bitwy
-  }, battleState);
-
   // Hook do zarządzania rozkazami
   const ordersManager = useOrders(
     battleId,
     playerFractionId,
     battleState?.turnNumber || 0
   );
+
+  // Callback dla nowej tury - używa ref aby mieć dostęp do aktualnych wartości
+  const handleNewTurn = useCallback((newTurnNumber) => {
+    console.log('New turn started:', newTurnNumber);
+    refresh(); // Odśwież stan bitwy
+    
+    // Wyczyść rozkazy i stan po nowej turze
+    ordersManager.clearOrders();
+    ordersManager.resetSubmittedCounts();
+    setSelectedShip(null);
+    setSelectedFraction(null);
+    setWeaponMode(null);
+    setWeaponDialog(null);
+    
+    // Pokaż komunikat o nowej turze
+    alertModal.openModal({
+      title: 'Nowa tura!',
+      message: newTurnNumber 
+        ? `Wszyscy gracze zakończyli swoje rozkazy. Rozpoczyna się tura ${newTurnNumber}!`
+        : 'Wszyscy gracze zakończyli swoje rozkazy. Rozpoczyna się nowa tura!',
+      variant: 'success'
+    });
+  }, [refresh, ordersManager, alertModal]);
+
+  // System turowy z SignalR
+  const turnSystem = useTurnSystem(battleId, playerFractionId, handleNewTurn, battleState);
 
   // Znajdź frakcję na podstawie statku
   const findFractionByShip = useCallback((shipId) => {
@@ -349,22 +368,9 @@ export const BattleSimulator = ({ sessionData }) => {
 
       // Jeśli wszyscy gracze są gotowi, tura została wykonana automatycznie
       if (result.allPlayersReady) {
-        // Nowa tura rozpoczęta - odśwież stan
+        // Nowa tura rozpoczęta - odśwież stan (komunikat pokaże się z eventu SignalR)
         await refresh();
-        
-        // Wyczyść rozkazy i wybór
-        ordersManager.clearOrders();
-        ordersManager.resetSubmittedCounts();
-        setSelectedShip(null);
-        setSelectedFraction(null);
-        setWeaponMode(null);
-        setWeaponDialog(null);
-
-        alertModal.openModal({
-          title: 'Nowa tura!',
-          message: `Wszyscy gracze zakończyli swoje rozkazy. Rozpoczyna się tura ${result.newTurnNumber}!`,
-          variant: 'success'
-        });
+        // SignalR event NewTurnStarted obsłuży czyszczenie rozkazów i pokazanie komunikatu
       } else {
         // Czekamy na innych graczy
         turnSystem.finishTurn(result.waitingForPlayers || []);
@@ -543,7 +549,7 @@ export const BattleSimulator = ({ sessionData }) => {
       )}
 
       <TurnWaitingModal
-        isOpen={turnSystem.isWaitingForPlayers}
+        isOpen={turnSystem.turnFinished && turnSystem.isWaitingForPlayers}
         waitingPlayers={turnSystem.waitingPlayers}
       />
 

@@ -13,7 +13,14 @@ import './TurnWaitingModal.css';
  */
 export const TurnWaitingModal = ({ isOpen, waitingPlayers }) => {
   return (
-    <DialogRoot open={isOpen} size="lg" closeOnInteractOutside={false} closeOnEscape={false}>
+    <DialogRoot 
+      open={isOpen} 
+      size="lg" 
+      closeOnInteractOutside={false} 
+      closeOnEscape={false}
+      blockScrollOnMount={false}
+      preserveScrollBarGap
+    >
       <DialogContent style={{ backgroundColor: '#ffffff', color: '#000000' }}>
         <DialogHeader style={{ borderBottom: '1px solid #e2e8f0' }}>
           <DialogTitle style={{ color: '#000000' }}>Oczekiwanie na innych graczy</DialogTitle>

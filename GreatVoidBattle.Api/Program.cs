@@ -32,7 +32,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:5173", 
-                "http://localhost:5174", 
+                "http://localhost:5174",
+                "http://localhost:5112",
                 "https://localhost:7295",
                 "http://109.173.167.125",
                 "http://109.173.167.125:32000",
@@ -56,6 +57,10 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 app.UseHttpsRedirection();
 app.UseFractionAuthorization();
+
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 app.MapControllers();
 app.UseDefaultFiles();
 app.UseStaticFiles();

@@ -6,6 +6,13 @@
   background: #1a1a1a;
   color: #fff;
   overflow: hidden;
+  /* Zapobiega zmianie szerokości przy otwieraniu modali */
+  position: relative;
+}
+
+/* Zapobiega przesuwaniu się zawartości przy otwieraniu modali */
+.battle-simulator * {
+  box-sizing: border-box;
 }
 
 .battle-simulator.loading,

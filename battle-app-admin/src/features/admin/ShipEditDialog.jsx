@@ -105,7 +105,12 @@ export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) 
   return (
     <>
       <Toaster toaster={toaster} />
-      <DialogRoot open={true} size="xl">
+      <DialogRoot 
+        open={true} 
+        size="xl"
+        blockScrollOnMount={false}
+        preserveScrollBarGap
+      >
         <DialogBackdrop />
         <DialogContent maxH="90vh" overflowY="auto">
           <DialogCloseTrigger onClick={onClose} />

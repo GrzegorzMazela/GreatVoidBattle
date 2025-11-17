@@ -97,7 +97,7 @@ export default function ShipForm() {
       qc.invalidateQueries(['ships', battleId, fractionId]);
       qc.invalidateQueries(['battle', battleId]);
       toaster.create({ title: isEditMode ? 'Ship updated' : 'Ship created', type: 'success' });
-      nav(`/admin/${battleId}/fractions/${fractionId}/ships`);
+      nav(`/pustka-admin-panel/${battleId}/fractions/${fractionId}/ships`);
     }
   });
 

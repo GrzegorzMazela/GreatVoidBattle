@@ -34,7 +34,13 @@ export const AlertModal = ({ isOpen, onClose, title = 'Informacja', message, var
   };
 
   return (
-    <DialogRoot open={isOpen} onOpenChange={(e) => !e.open && onClose()} size="md">
+    <DialogRoot 
+      open={isOpen} 
+      onOpenChange={(e) => !e.open && onClose()} 
+      size="md"
+      blockScrollOnMount={false}
+      preserveScrollBarGap
+    >
       <DialogContent style={{ backgroundColor: '#ffffff', color: '#000000' }}>
         <DialogHeader style={{ borderBottom: '1px solid #e2e8f0' }}>
           <DialogTitle style={{ color: '#000000' }}>{title}</DialogTitle>
