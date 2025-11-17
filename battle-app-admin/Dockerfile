@@ -10,6 +10,10 @@ RUN npm install
 # Kopiujemy resztę projektu
 COPY . .
 
+# Argument budowania dla URL API (można override podczas docker build)
+ARG VITE_API_URL=http://109.173.167.125:32001
+ENV VITE_API_URL=$VITE_API_URL
+
 # Budujemy aplikację (Vite -> domyślnie /dist)
 RUN npm run build
 

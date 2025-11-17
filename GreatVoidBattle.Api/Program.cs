@@ -30,7 +30,13 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://localhost:5174", "https://localhost:7295")
+            .WithOrigins(
+                "http://localhost:5173", 
+                "http://localhost:5174", 
+                "https://localhost:7295",
+                "http://109.173.167.125",
+                "http://109.173.167.125:32000",
+                "http://109.173.167.125:32001")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials(); // Wymagane dla SignalR
