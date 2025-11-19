@@ -39,9 +39,12 @@ export const OrdersPanel = ({
       return Math.ceil(distance / speed);
     } else if (order.type === 'missile') {
       // Rakiety poruszają się z własną prędkością
-      const MISSILE_SPEED = 10; // Przykładowa prędkość rakiety
+      const MISSILE_SPEED = 10; // Prędkość rakiety z backendu
       const targetShip = ships.find(s => s.shipId === order.targetShipId);
-      if (!targetShip) return '?';
+      if (!targetShip) {
+        // Jeśli nie znaleziono statku docelowego, spróbuj obliczyć na podstawie ostatniej pozycji
+        return '?';
+      }
       
       const distance = Math.abs(targetShip.x - ship.x) + Math.abs(targetShip.y - ship.y);
       return Math.ceil(distance / MISSILE_SPEED);

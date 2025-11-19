@@ -89,3 +89,33 @@
   text-align: right;
   flex: 1;
 }
+
+.missile-fraction {
+  font-weight: 500;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+/* Tooltip dla okrętów */
+.ship-tooltip {
+  background: linear-gradient(135deg, rgba(30, 30, 45, 0.98), rgba(40, 40, 60, 0.98));
+  border: 2px solid rgba(76, 175, 80, 0.6);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  min-width: 180px;
+}
+
+.ship-tooltip-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ship-tooltip-damage {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}

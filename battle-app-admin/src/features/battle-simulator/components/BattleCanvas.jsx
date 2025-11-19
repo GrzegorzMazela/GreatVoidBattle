@@ -56,6 +56,7 @@ export const BattleCanvas = forwardRef(({
   const [mouseDownPos, setMouseDownPos] = useState(null); // Pozycja początkowa dla rozróżnienia kliknięcia od przeciągania
   const [loadedImages, setLoadedImages] = useState({});
   const [missileTooltip, setMissileTooltip] = useState(null); // { x, y, missiles: [...] }
+  const [shipTooltip, setShipTooltip] = useState(null); // { x, y, ship, fraction }
   const viewportInitialized = useRef(false); // Flaga czy widok był już zainicjalizowany
 
   const { width, height, fractions } = battleState || {};
@@ -966,6 +967,7 @@ export const BattleCanvas = forwardRef(({
       if (dx > 5 || dy > 5) {
         setIsDragging(true);
         setMissileTooltip(null); // Ukryj tooltip podczas przeciągania
+        setShipTooltip(null); // Ukryj tooltip okrętu podczas przeciągania
       }
     }
     
@@ -981,7 +983,7 @@ export const BattleCanvas = forwardRef(({
 
       setDragStart({ x: e.clientX, y: e.clientY });
     } else {
-      // Jeśli nie przeciągamy, sprawdź czy mysz jest nad rakietą
+      // Jeśli nie przeciągamy, sprawdź czy mysz jest nad rakietą lub okrętem
       const mapPos = screenToMap(e.clientX, e.clientY);
       const missiles = findMissilesAt(mapPos.x, mapPos.y);
       
@@ -991,11 +993,46 @@ export const BattleCanvas = forwardRef(({
           y: e.clientY,
           missiles: missiles
         });
+        setShipTooltip(null);
       } else {
         setMissileTooltip(null);
+        
+        // Sprawdź czy mysz jest nad okrętem wroga
+        let hoveredShip = null;
+        let hoveredFraction = null;
+        
+        if (fractions) {
+          for (const fraction of fractions) {
+            // Pomijamy okręty gracza
+            if (playerFractionId && fraction.fractionId === playerFractionId) continue;
+            
+            for (const ship of fraction.ships) {
+              const shipX = Math.floor(ship.x);
+              const shipY = Math.floor(ship.y);
+              
+              if (Math.floor(mapPos.x) === shipX && Math.floor(mapPos.y) === shipY) {
+                hoveredShip = ship;
+                hoveredFraction = fraction;
+                break;
+              }
+            }
+            if (hoveredShip) break;
+          }
+        }
+        
+        if (hoveredShip) {
+          setShipTooltip({
+            x: e.clientX,
+            y: e.clientY,
+            ship: hoveredShip,
+            fraction: hoveredFraction
+          });
+        } else {
+          setShipTooltip(null);
+        }
       }
     }
-  }, [isDragging, mouseDownPos, dragStart, viewport, width, height, screenToMap, findMissilesAt]);
+  }, [isDragging, mouseDownPos, dragStart, viewport, width, height, screenToMap, findMissilesAt, fractions, playerFractionId]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -1043,6 +1080,7 @@ export const BattleCanvas = forwardRef(({
         onMouseLeave={() => {
           handleMouseUp();
           setMissileTooltip(null);
+          setShipTooltip(null);
         }}
         onWheel={handleWheel}
         style={{
@@ -1076,44 +1114,131 @@ export const BattleCanvas = forwardRef(({
           <div className="missile-tooltip-header">
             Rakiety ({missileTooltip.missiles.length})
           </div>
-          {missileTooltip.missiles.map((missile, index) => {
-            // Znajdź nazwę statku źródłowego
-            let sourceName = missile.shipName || 'Nieznany';
+          {(() => {
+            // Grupuj rakiety według źródła i celu
+            const grouped = {};
             
-            // Znajdź nazwę statku docelowego
-            let targetName = 'Nieznany';
-            if (battleState?.fractions) {
-              for (const fraction of battleState.fractions) {
-                const targetShip = fraction.ships.find(s => s.shipId === missile.targetId);
-                if (targetShip) {
-                  targetName = targetShip.name;
-                  break;
+            missileTooltip.missiles.forEach(missile => {
+              const sourceName = missile.shipName || 'Nieznany';
+              
+              // Znajdź nazwę statku źródłowego i jego frakcję
+              let sourceFractionName = '';
+              let sourceFractionColor = '#fff';
+              if (battleState?.fractions) {
+                for (const fraction of battleState.fractions) {
+                  const sourceShip = fraction.ships.find(s => s.shipId === missile.shipId);
+                  if (sourceShip) {
+                    sourceFractionName = fraction.fractionName || '';
+                    sourceFractionColor = fraction.fractionColor || '#fff';
+                    break;
+                  }
                 }
               }
-            }
+              
+              // Znajdź nazwę statku docelowego i jego frakcję
+              let targetName = 'Nieznany';
+              let targetFractionName = '';
+              let targetFractionColor = '#fff';
+              if (battleState?.fractions) {
+                for (const fraction of battleState.fractions) {
+                  const targetShip = fraction.ships.find(s => s.shipId === missile.targetId);
+                  if (targetShip) {
+                    targetName = targetShip.name;
+                    targetFractionName = fraction.fractionName || '';
+                    targetFractionColor = fraction.fractionColor || '#fff';
+                    break;
+                  }
+                }
+              }
+              
+              // Liczba tur do dolecenia
+              const turnsToImpact = missile.path ? Math.ceil(missile.path.length / (missile.speed || 10)) : '?';
+              
+              // Klucz grupowania: źródło + cel + tury
+              const key = `${sourceName}->${targetName}`;
+              
+              if (!grouped[key]) {
+                grouped[key] = {
+                  sourceName,
+                  sourceFractionName,
+                  sourceFractionColor,
+                  targetName,
+                  targetFractionName,
+                  targetFractionColor,
+                  turnsToImpact,
+                  count: 0
+                };
+              }
+              grouped[key].count++;
+            });
             
-            // Liczba tur do dolecenia = długość ścieżki / prędkość rakiety
-            const turnsToImpact = missile.path ? Math.ceil(missile.path.length / (missile.speed || 10)) : '?';
-            
-            return (
+            // Renderuj zgrupowane rakiety
+            return Object.values(grouped).map((group, index) => (
               <div key={index} className="missile-tooltip-item">
+                {group.count > 1 && (
+                  <div className="missile-info">
+                    <span className="missile-label">✕</span>
+                    <span className="missile-value">{group.count}</span>
+                  </div>
+                )}
                 <div className="missile-info">
                   <span className="missile-label">➤ Od:</span>
-                  <span className="missile-value">{sourceName}</span>
+                  <span className="missile-value">
+                    {group.sourceName}
+                    {group.sourceFractionName && (
+                      <span className="missile-fraction" style={{ color: group.sourceFractionColor }}>
+                        {' '}({group.sourceFractionName})
+                      </span>
+                    )}
+                  </span>
                 </div>
                 <div className="missile-info">
                   <span className="missile-label">◉ Do:</span>
-                  <span className="missile-value">{targetName}</span>
+                  <span className="missile-value">
+                    {group.targetName}
+                    {group.targetFractionName && (
+                      <span className="missile-fraction" style={{ color: group.targetFractionColor }}>
+                        {' '}({group.targetFractionName})
+                      </span>
+                    )}
+                  </span>
                 </div>
                 <div className="missile-info">
                   <span className="missile-label">⏱ Tur:</span>
-                  <span className="missile-value">{turnsToImpact}</span>
+                  <span className="missile-value">{group.turnsToImpact}</span>
                 </div>
               </div>
-            );
-          })}
+            ));
+          })()}
         </div>
       )}
+      
+      {/* Tooltip dla okrętów wroga */}
+      {shipTooltip && ((() => {
+        const maxHp = SHIP_MAX_HP[shipTooltip.ship.type] || 100;
+        const hpPercent = Math.round((shipTooltip.ship.hitPoints / maxHp) * 100);
+        const damagePercent = 100 - hpPercent;
+        
+        return (
+          <div 
+            className="ship-tooltip"
+            style={{
+              position: 'absolute',
+              left: shipTooltip.x + 15,
+              top: shipTooltip.y - 80,
+              pointerEvents: 'none',
+              zIndex: 1000,
+            }}
+          >
+            <div className="ship-tooltip-name" style={{ color: shipTooltip.fraction.fractionColor }}>
+              {shipTooltip.ship.name}
+            </div>
+            <div className="ship-tooltip-damage">
+              Uszkodzenia: {damagePercent}%
+            </div>
+          </div>
+        );
+      })())}
     </div>
   );
 });

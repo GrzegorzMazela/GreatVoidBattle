@@ -560,7 +560,7 @@ export const BattleSimulator = ({ sessionData }) => {
         {battleState.status === 'InProgress' && (
           <OrdersPanel
             orders={ordersManager.orders}
-            ships={playerFraction?.ships || []}
+            ships={battleState.fractions.flatMap(f => f.ships)}
             onRemoveOrder={handleRemoveOrder}
           />
         )}
