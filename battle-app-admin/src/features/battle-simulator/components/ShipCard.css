@@ -1,0 +1,211 @@
+/* Karta statku */
+.ship-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(30, 30, 40, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 280px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ship-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--fraction-color, #4CAF50);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ship-card:hover {
+  border-color: rgba(100, 150, 255, 0.5);
+  background: rgba(40, 40, 50, 0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.ship-card:hover::before {
+  opacity: 0.7;
+}
+
+.ship-card.selected {
+  border-color: var(--fraction-color, #4CAF50);
+  background: rgba(40, 50, 60, 1);
+  box-shadow: 0 0 20px rgba(100, 150, 255, 0.3);
+}
+
+.ship-card.selected::before {
+  opacity: 1;
+}
+
+/* Ikona statku */
+.ship-card-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ship-card-icon img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.ship-card-placeholder {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fraction-color, #4CAF50);
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+/* Górny rząd - ikona, nazwa, typ, broń */
+.ship-card-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Informacje o statku */
+.ship-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ship-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.ship-card-type {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+/* Paski statusu */
+.ship-card-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+.ship-stat-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.stat-label {
+  width: 32px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  text-align: right;
+  font-size: 9px;
+}
+
+.stat-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+.stat-bar-fill.hp {
+  box-shadow: 0 0 8px currentColor;
+}
+
+.stat-bar-fill.shields {
+  box-shadow: 0 0 8px currentColor;
+}
+
+.stat-bar-fill.armor {
+  box-shadow: 0 0 8px currentColor;
+}
+
+.stat-value {
+  min-width: 45px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 9px;
+  text-align: right;
+}
+
+/* Ikonki broni */
+.ship-card-weapons {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.weapon-icon {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.weapon-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.weapon-icon.laser {
+  color: #ff5252;
+}
+
+.weapon-icon.missile {
+  color: #ff9800;
+}
+
+.weapon-icon.defense {
+  color: #64b5f6;
+}
+
+.weapon-count {
+  font-size: 10px;
+  font-weight: 600;
+  color: white;
+}

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { useRef, useEffect, useCallback, useState, useImperativeHandle, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import './BattleCanvas.css';
 
@@ -35,7 +35,7 @@ const SHIP_MAX_HP = {
  * Wydajny komponent Canvas do renderowania pola bitwy
  * Używa viewport rendering - rysuje tylko widoczny obszar
  */
-export const BattleCanvas = ({
+export const BattleCanvas = forwardRef(({
   battleState,
   selectedShip,
   onShipClick,
@@ -43,7 +43,7 @@ export const BattleCanvas = ({
   orders,
   weaponMode,
   playerFractionId,
-}) => {
+}, ref) => {
   const canvasRef = useRef(null);
   const [viewport, setViewport] = useState({
     x: 0,
@@ -53,10 +53,35 @@ export const BattleCanvas = ({
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [mouseDownPos, setMouseDownPos] = useState(null); // Pozycja początkowa dla rozróżnienia kliknięcia od przeciągania
   const [loadedImages, setLoadedImages] = useState({});
+  const [missileTooltip, setMissileTooltip] = useState(null); // { x, y, missiles: [...] }
   const viewportInitialized = useRef(false); // Flaga czy widok był już zainicjalizowany
 
   const { width, height, fractions } = battleState || {};
+
+  // Eksponuj metodę centerOnShip przez ref
+  useImperativeHandle(ref, () => ({
+    centerOnShip: (ship) => {
+      if (!ship || !canvasRef.current) return;
+      
+      const canvas = canvasRef.current;
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      
+      if (canvasWidth === 0 || canvasHeight === 0) return;
+
+      const { cellSize, zoom } = viewport;
+      const centerX = ship.x - (canvasWidth / (cellSize * zoom)) / 2;
+      const centerY = ship.y - (canvasHeight / (cellSize * zoom)) / 2;
+
+      setViewport(prev => ({
+        ...prev,
+        x: Math.max(0, Math.min(width - 1, centerX)),
+        y: Math.max(0, Math.min(height - 1, centerY)),
+      }));
+    }
+  }), [viewport, width, height]);
 
   // Load ship icons
   useEffect(() => {
@@ -174,6 +199,20 @@ export const BattleCanvas = ({
     }
     return null;
   }, [fractions]);
+
+  // Znajdź rakiety w danej pozycji
+  const findMissilesAt = useCallback((x, y) => {
+    if (!battleState?.missileMovementPaths || battleState.missileMovementPaths.length === 0) {
+      return [];
+    }
+
+    return battleState.missileMovementPaths.filter(missile => {
+      // Sprawdź czy rakieta jest w tej pozycji
+      const mx = Math.floor(missile.startPosition.x);
+      const my = Math.floor(missile.startPosition.y);
+      return mx === x && my === y;
+    });
+  }, [battleState]);
 
   // Renderuj siatkę
   const drawGrid = useCallback((ctx, visibleArea) => {
@@ -873,6 +912,11 @@ export const BattleCanvas = ({
 
   // Obsługa kliknięcia
   const handleClick = useCallback((e) => {
+    // Jeśli użytkownik przeciągał, nie wykonuj kliknięcia
+    if (isDragging) {
+      return;
+    }
+    
     // Ignoruj prawy przycisk - obsługiwany przez contextmenu
     if (e.button !== 0) return;
     
@@ -895,7 +939,7 @@ export const BattleCanvas = ({
     if (shipData && onShipClick) {
       onShipClick(shipData.ship, shipData.fraction, e.clientX, e.clientY);
     }
-  }, [screenToMap, findShipAt, onShipClick, onCellClick]);
+  }, [isDragging, screenToMap, findShipAt, onShipClick, onCellClick]);
 
   // Obsługa prawego przycisku myszy (odznaczenie statku)
   const handleContextMenu = useCallback((e) => {
@@ -905,30 +949,57 @@ export const BattleCanvas = ({
 
   // Obsługa przeciągania (pan)
   const handleMouseDown = useCallback((e) => {
-    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) { // Środkowy przycisk lub Ctrl+LMB
-      setIsDragging(true);
+    if (e.button === 0) { // Lewy przycisk myszy
+      setMouseDownPos({ x: e.clientX, y: e.clientY });
       setDragStart({ x: e.clientX, y: e.clientY });
       e.preventDefault();
     }
   }, []);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return;
+    // Jeśli przycisk jest wciśnięty ale jeszcze nie uznaliśmy tego za przeciąganie
+    if (mouseDownPos && !isDragging) {
+      const dx = Math.abs(e.clientX - mouseDownPos.x);
+      const dy = Math.abs(e.clientY - mouseDownPos.y);
+      
+      // Jeśli przesunięcie jest większe niż 5 pikseli, uznaj to za przeciąganie
+      if (dx > 5 || dy > 5) {
+        setIsDragging(true);
+        setMissileTooltip(null); // Ukryj tooltip podczas przeciągania
+      }
+    }
+    
+    if (isDragging) {
+      const dx = (e.clientX - dragStart.x) / (viewport.cellSize * viewport.zoom);
+      const dy = (e.clientY - dragStart.y) / (viewport.cellSize * viewport.zoom);
 
-    const dx = (e.clientX - dragStart.x) / (viewport.cellSize * viewport.zoom);
-    const dy = (e.clientY - dragStart.y) / (viewport.cellSize * viewport.zoom);
+      setViewport(prev => ({
+        ...prev,
+        x: Math.max(0, Math.min(width - 1, prev.x - dx)),
+        y: Math.max(0, Math.min(height - 1, prev.y - dy)),
+      }));
 
-    setViewport(prev => ({
-      ...prev,
-      x: Math.max(0, Math.min(width - 1, prev.x - dx)),
-      y: Math.max(0, Math.min(height - 1, prev.y - dy)),
-    }));
-
-    setDragStart({ x: e.clientX, y: e.clientY });
-  }, [isDragging, dragStart, viewport, width, height]);
+      setDragStart({ x: e.clientX, y: e.clientY });
+    } else {
+      // Jeśli nie przeciągamy, sprawdź czy mysz jest nad rakietą
+      const mapPos = screenToMap(e.clientX, e.clientY);
+      const missiles = findMissilesAt(mapPos.x, mapPos.y);
+      
+      if (missiles.length > 0) {
+        setMissileTooltip({
+          x: e.clientX,
+          y: e.clientY,
+          missiles: missiles
+        });
+      } else {
+        setMissileTooltip(null);
+      }
+    }
+  }, [isDragging, mouseDownPos, dragStart, viewport, width, height, screenToMap, findMissilesAt]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
+    setMouseDownPos(null);
   }, []);
 
   // Obsługa zoom (scroll)
@@ -969,7 +1040,10 @@ export const BattleCanvas = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={() => {
+          handleMouseUp();
+          setMissileTooltip(null);
+        }}
         onWheel={handleWheel}
         style={{
           width: '100%',
@@ -986,9 +1060,63 @@ export const BattleCanvas = ({
           −
         </button>
       </div>
+      
+      {/* Tooltip dla rakiet */}
+      {missileTooltip && (
+        <div 
+          className="missile-tooltip"
+          style={{
+            position: 'absolute',
+            left: missileTooltip.x + 15,
+            top: missileTooltip.y - 120,
+            pointerEvents: 'none',
+            zIndex: 1000,
+          }}
+        >
+          <div className="missile-tooltip-header">
+            Rakiety ({missileTooltip.missiles.length})
+          </div>
+          {missileTooltip.missiles.map((missile, index) => {
+            // Znajdź nazwę statku źródłowego
+            let sourceName = missile.shipName || 'Nieznany';
+            
+            // Znajdź nazwę statku docelowego
+            let targetName = 'Nieznany';
+            if (battleState?.fractions) {
+              for (const fraction of battleState.fractions) {
+                const targetShip = fraction.ships.find(s => s.shipId === missile.targetId);
+                if (targetShip) {
+                  targetName = targetShip.name;
+                  break;
+                }
+              }
+            }
+            
+            // Liczba tur do dolecenia = długość ścieżki / prędkość rakiety
+            const turnsToImpact = missile.path ? Math.ceil(missile.path.length / (missile.speed || 10)) : '?';
+            
+            return (
+              <div key={index} className="missile-tooltip-item">
+                <div className="missile-info">
+                  <span className="missile-label">➤ Od:</span>
+                  <span className="missile-value">{sourceName}</span>
+                </div>
+                <div className="missile-info">
+                  <span className="missile-label">◉ Do:</span>
+                  <span className="missile-value">{targetName}</span>
+                </div>
+                <div className="missile-info">
+                  <span className="missile-label">⏱ Tur:</span>
+                  <span className="missile-value">{turnsToImpact}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
-};
+});
 
 BattleCanvas.propTypes = {
   battleState: PropTypes.shape({

@@ -19,6 +19,22 @@ public class MissileMovementPath : MovementPath
         SetAccuracy();
     }
 
+    /// <summary>
+    /// Aktualizuje ścieżkę rakiety do nowej pozycji statku docelowego
+    /// </summary>
+    /// <param name="newTargetPosition">Nowa pozycja statku docelowego</param>
+    public void UpdateTargetPosition(Position newTargetPosition)
+    {
+        // Zaktualizuj pozycję docelową
+        NewTargetPosition(newTargetPosition);
+        
+        // Przelicz ścieżkę od aktualnej pozycji rakiety do nowej pozycji celu
+        GeneratePath();
+        
+        // Przelicz celność na podstawie nowej odległości
+        SetAccuracy();
+    }
+
     private void SetAccuracy()
     {
         var distance = Path.Count;

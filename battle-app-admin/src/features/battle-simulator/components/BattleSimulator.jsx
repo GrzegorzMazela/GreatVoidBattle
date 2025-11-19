@@ -1,11 +1,12 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBattleState } from '../hooks/useBattleState';
 import { useOrders } from '../hooks/useOrders';
 import { setShipPosition, endPlayerTurn } from '../../../services/api';
 import { getPlayerSession } from '../../../services/authApi';
 import { BattleCanvas } from './BattleCanvas';
-import { ShipControlPanel } from './ShipControlPanel';
+import { ShipBottomPanel } from './ShipBottomPanel';
+import { OrdersPanel } from './OrdersPanel';
 import { TurnController } from './TurnController';
 import { WeaponCountDialog } from './WeaponCountDialog';
 import { TurnWaitingModal } from './TurnWaitingModal';
@@ -23,6 +24,9 @@ export const BattleSimulator = ({ sessionData }) => {
   const navigate = useNavigate();
   
   const { battleState, loading, error, refresh } = useBattleState(battleId, false);
+  
+  // Ref do BattleCanvas dla centrowania widoku
+  const battleCanvasRef = useRef(null);
   
   // State dla wykonywania tury
   const [isExecuting, setIsExecuting] = useState(false);
@@ -105,6 +109,11 @@ export const BattleSimulator = ({ sessionData }) => {
     
     setSelectedShip(ship);
     setSelectedFraction(fraction);
+    
+    // Wycentruj widok na wybranym statku
+    if (battleCanvasRef.current && ship) {
+      battleCanvasRef.current.centerOnShip(ship);
+    }
     
     // Reset trybu broni przy wyborze nowego statku
     if (fraction.fractionId === playerFractionId) {
@@ -287,12 +296,10 @@ export const BattleSimulator = ({ sessionData }) => {
     }
   }, [selectedShip, playerFractionId, battleState, findFractionByShip, handleMoveShipInPreparation, handleOrderInProgress, weaponMode]);
 
-  // Obsługa anulowania rozkazu
-  const handleClearOrder = useCallback(() => {
-    if (selectedShip) {
-      ordersManager.removeOrder(selectedShip.shipId);
-    }
-  }, [selectedShip, ordersManager]);
+  // Obsługa usunięcia konkretnego rozkazu z panelu
+  const handleRemoveOrder = useCallback((globalIndex) => {
+    ordersManager.removeOrderByGlobalIndex(globalIndex);
+  }, [ordersManager]);
 
   // Obsługa potwierdzenia dialogu broni
   const handleWeaponDialogConfirm = useCallback((count) => {
@@ -357,11 +364,30 @@ export const BattleSimulator = ({ sessionData }) => {
     try {
       setIsExecuting(true);
 
-      // Pobierz token autoryzacyjny
+      // KROK 1: Najpierw wyślij wszystkie rozkazy, jeśli są jakieś
+      if (ordersManager.hasOrders) {
+        const submitResult = await ordersManager.submit();
+        
+        if (!submitResult.success) {
+          // Jeśli wysłanie rozkazów się nie powiodło, zatrzymaj proces
+          alertModal.openModal({
+            title: 'Błąd wysyłania rozkazów',
+            message: `Nie udało się wysłać rozkazów: ${submitResult.error}`,
+            variant: 'error'
+          });
+          setIsExecuting(false);
+          return;
+        }
+        
+        // Wyczyść lokalne rozkazy po pomyślnym wysłaniu
+        ordersManager.clearOrders();
+      }
+
+      // KROK 2: Pobierz token autoryzacyjny
       const session = getPlayerSession();
       const token = session.authToken;
 
-      // Zakończ turę gracza
+      // KROK 3: Zakończ turę gracza
       const result = await endPlayerTurn(battleId, playerFractionId, token);
       
       console.log('End turn result:', result);
@@ -509,6 +535,7 @@ export const BattleSimulator = ({ sessionData }) => {
       <div className="battle-content">
         <div className="battle-main">
           <BattleCanvas
+            ref={battleCanvasRef}
             battleState={battleState}
             selectedShip={selectedShip}
             onShipClick={handleShipClick}
@@ -517,25 +544,26 @@ export const BattleSimulator = ({ sessionData }) => {
             weaponMode={weaponMode}
             playerFractionId={playerFractionId}
           />
-        </div>
-
-        <div className="battle-sidebar">
-          <ShipControlPanel
+          
+          {/* Dolny panel z jednostkami gracza */}
+          <ShipBottomPanel
+            playerShips={playerFraction?.ships || []}
             selectedShip={selectedShip}
-            selectedFraction={selectedFraction}
-            currentOrder={currentOrder}
-            orderStats={shipOrderStats}
-            onClearOrder={handleClearOrder}
-            battleStatus={battleState.status}
+            onShipSelect={(ship) => handleShipClick(ship, playerFraction)}
+            playerFractionColor={playerFraction?.fractionColor}
             weaponMode={weaponMode}
             onWeaponModeChange={setWeaponMode}
-            missileFiredCount={selectedShip ? getWeaponFiredCount(selectedShip.shipId, 'missile') : 0}
-            laserFiredCount={selectedShip ? getWeaponFiredCount(selectedShip.shipId, 'laser') : 0}
-            isPlayerShip={selectedFraction?.fractionId === playerFractionId}
-            allOrders={ordersManager.orders}
-            onSubmitOrders={handleSubmitOrders}
           />
         </div>
+
+        {/* Panel rozkazów po prawej stronie */}
+        {battleState.status === 'InProgress' && (
+          <OrdersPanel
+            orders={ordersManager.orders}
+            ships={playerFraction?.ships || []}
+            onRemoveOrder={handleRemoveOrder}
+          />
+        )}
       </div>
 
       {weaponDialog && (

@@ -71,6 +71,45 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
   }, []);
 
   /**
+   * Usuń konkretny rozkaz na podstawie indeksu
+   */
+  const removeOrderByIndex = useCallback((shipId, orderIndex) => {
+    setOrders(prev => {
+      // Filtruj rozkazy dla tego statku
+      const shipOrders = prev.filter(o => o.shipId === shipId);
+      
+      // Jeśli indeks jest poprawny
+      if (orderIndex >= 0 && orderIndex < shipOrders.length) {
+        // Usuń rozkaz na danym indeksie
+        const orderToRemove = shipOrders[orderIndex];
+        let removed = false;
+        
+        return prev.filter(o => {
+          if (!removed && o === orderToRemove) {
+            removed = true;
+            return false;
+          }
+          return true;
+        });
+      }
+      
+      return prev;
+    });
+  }, []);
+
+  /**
+   * Usuń rozkaz na podstawie globalnego indeksu w tablicy orders
+   */
+  const removeOrderByGlobalIndex = useCallback((globalIndex) => {
+    setOrders(prev => {
+      if (globalIndex >= 0 && globalIndex < prev.length) {
+        return prev.filter((_, index) => index !== globalIndex);
+      }
+      return prev;
+    });
+  }, []);
+
+  /**
    * Usuń ostatni rozkaz danego typu dla statku
    */
   const removeLastOrderOfType = useCallback((shipId, orderType) => {
@@ -166,6 +205,8 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
     addLaserOrder,
     addMissileOrder,
     removeOrder,
+    removeOrderByIndex,
+    removeOrderByGlobalIndex,
     removeLastOrderOfType,
     clearOrders,
     resetSubmittedCounts,

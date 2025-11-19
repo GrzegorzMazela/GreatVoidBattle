@@ -1,6 +1,10 @@
 export { BattleSimulator } from './components/BattleSimulator';
 export { BattleCanvas } from './components/BattleCanvas';
 export { ShipControlPanel } from './components/ShipControlPanel';
+export { ShipBottomPanel } from './components/ShipBottomPanel';
+export { ShipCard } from './components/ShipCard';
+export { ShipDetailsModal } from './components/ShipDetailsModal';
+export { OrdersPanel } from './components/OrdersPanel';
 export { TurnController } from './components/TurnController';
 export { useBattleState } from './hooks/useBattleState';
 export { useOrders } from './hooks/useOrders';

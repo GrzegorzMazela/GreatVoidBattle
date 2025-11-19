@@ -260,6 +260,43 @@ public class BattleState
 
             //TODO: add logs
         }
+        
+        // Po przesunięciu statków zaktualizuj ścieżki rakiet
+        UpdateMissilesPaths();
+    }
+
+    private void UpdateMissilesPaths()
+    {
+        var missilesToRemove = new List<MissileMovementPath>();
+        
+        foreach (var missile in _missileMovementPaths)
+        {
+            var targetShip = GetShip(missile.TargetId);
+            
+            // Jeśli statek docelowy nie istnieje (został zniszczony), usuń rakietę
+            if (targetShip is null)
+            {
+                missilesToRemove.Add(missile);
+                continue;
+            }
+            
+            // Zaktualizuj ścieżkę rakiety do nowej pozycji statku
+            try
+            {
+                missile.UpdateTargetPosition(targetShip.Position);
+            }
+            catch (InvalidOperationException)
+            {
+                // Jeśli cel jest teraz poza zasięgiem, usuń rakietę
+                missilesToRemove.Add(missile);
+            }
+        }
+        
+        // Usuń rakiety, które nie mają już celu lub cel jest poza zasięgiem
+        foreach (var missile in missilesToRemove)
+        {
+            _missileMovementPaths.Remove(missile);
+        }
     }
 
     private int GetAccuracy(int missileAccuracy, ShipState TargetShip)
