@@ -54,6 +54,7 @@ export const BattleCanvas = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [loadedImages, setLoadedImages] = useState({});
+  const viewportInitialized = useRef(false); // Flaga czy widok był już zainicjalizowany
 
   const { width, height, fractions } = battleState || {};
 
@@ -98,6 +99,46 @@ export const BattleCanvas = ({
       setLoadedImages(images);
     });
   }, []);
+
+  // Wycentruj widok na pierwszym statku gracza przy inicjalizacji
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !battleState || !playerFractionId || viewportInitialized.current) {
+      return;
+    }
+
+    // Znajdź frakcję gracza
+    const playerFraction = battleState.fractions?.find(f => f.fractionId === playerFractionId);
+    if (!playerFraction || !playerFraction.ships || playerFraction.ships.length === 0) {
+      return;
+    }
+
+    // Pobierz pierwszy statek gracza
+    const firstShip = playerFraction.ships[0];
+    if (!firstShip) return;
+
+    // Wycentruj widok na statku - czekamy aż canvas będzie miał rozmiar
+    setTimeout(() => {
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      
+      if (canvasWidth === 0 || canvasHeight === 0) return;
+
+      const { cellSize, zoom } = viewport;
+
+      const centerX = firstShip.x - (canvasWidth / (cellSize * zoom)) / 2;
+      const centerY = firstShip.y - (canvasHeight / (cellSize * zoom)) / 2;
+
+      setViewport(prev => ({
+        ...prev,
+        x: Math.max(0, Math.min(battleState.width - 1, centerX)),
+        y: Math.max(0, Math.min(battleState.height - 1, centerY)),
+      }));
+
+      viewportInitialized.current = true;
+      console.log(`Widok wycentrowany na pierwszym statku gracza: ${firstShip.name || firstShip.shipId} (${firstShip.x}, ${firstShip.y})`);
+    }, 100);
+  }, [battleState, playerFractionId, viewport.cellSize, viewport.zoom]);
 
   // Funkcja do konwersji współrzędnych ekranu na współrzędne mapy
   const screenToMap = useCallback((screenX, screenY) => {
@@ -518,6 +559,12 @@ export const BattleCanvas = ({
         if (!isPlayerShip) return;
       }
 
+      // Nie rysuj zatwierdzonych ścieżek jeśli statek ma nowy lokalny rozkaz
+      // (nowy rozkaz nadpisuje zatwierdzoną ścieżkę)
+      if (orders && orders.some(o => o.shipId === movementPath.shipId)) {
+        return;
+      }
+
       // Rysuj ścieżkę jako połączone segmenty
       ctx.strokeStyle = 'rgba(100, 255, 100, 0.7)';
       ctx.lineWidth = 4;
@@ -571,7 +618,7 @@ export const BattleCanvas = ({
         ctx.fill();
       }
     });
-  }, [battleState, viewport, mapToScreen, playerFractionId]);
+  }, [battleState, viewport, mapToScreen, playerFractionId, orders]);
 
   // Renderuj zatwierdzone ścieżki pocisków
   const drawMissilePaths = useCallback((ctx) => {
@@ -587,13 +634,21 @@ export const BattleCanvas = ({
         let isPlayerMissile = false;
         let isTargetingPlayer = false;
 
-        // Sprawdź czy to rakieta statku gracza
+        // Sprawdź czy to rakieta statku gracza (używamy shipId, nie sourceShipId)
         for (const fraction of battleState.fractions) {
           if (fraction.fractionId === playerFractionId) {
-            isPlayerMissile = fraction.ships.some(s => s.shipId === missilePath.sourceShipId);
-            // Sprawdź czy cel to statek gracza
-            isTargetingPlayer = fraction.ships.some(s => s.shipId === missilePath.targetShipId);
-            if (isPlayerMissile || isTargetingPlayer) break;
+            isPlayerMissile = fraction.ships.some(s => s.shipId === missilePath.shipId);
+            if (isPlayerMissile) break;
+          }
+        }
+
+        // Sprawdź czy cel to statek gracza (używamy targetId, nie targetShipId)
+        if (!isPlayerMissile) {
+          for (const fraction of battleState.fractions) {
+            if (fraction.fractionId === playerFractionId) {
+              isTargetingPlayer = fraction.ships.some(s => s.shipId === missilePath.targetId);
+              if (isTargetingPlayer) break;
+            }
           }
         }
 
@@ -601,20 +656,26 @@ export const BattleCanvas = ({
         if (!isPlayerMissile && !isTargetingPlayer) return;
       }
 
-      // Rysuj ścieżkę pocisku
-      ctx.strokeStyle = 'rgba(255, 150, 0, 0.7)';
-      ctx.lineWidth = 3;
+      // Nie rysuj zatwierdzonych trajektorii rakiet jeśli statek źródłowy ma nowy lokalny rozkaz
+      // (nowy rozkaz nadpisuje zatwierdzone trajektorie)
+      if (orders && orders.some(o => o.shipId === missilePath.shipId)) {
+        return;
+      }
+
+      // Rysuj całą planowaną ścieżkę jako półprzezroczystą linię
+      ctx.strokeStyle = 'rgba(255, 150, 0, 0.3)';
+      ctx.lineWidth = 2;
       ctx.setLineDash([5, 3]);
 
-      // Podświetl komórki przez które przechodzi pocisk
-      ctx.fillStyle = 'rgba(255, 150, 0, 0.15)';
+      // Podświetl komórki przez które przechodzi pocisk (całą przyszłą ścieżkę)
+      ctx.fillStyle = 'rgba(255, 150, 0, 0.1)';
       missilePath.path.forEach(pos => {
         const screenX = (Math.floor(pos.x) - viewport.x) * cellSize * zoom;
         const screenY = (Math.floor(pos.y) - viewport.y) * cellSize * zoom;
         ctx.fillRect(screenX, screenY, cellSize * zoom, cellSize * zoom);
       });
 
-      // Rysuj linię trajektorii
+      // Rysuj linię całej trajektorii
       ctx.beginPath();
       const startPos = mapToScreen(missilePath.startPosition.x + 0.5, missilePath.startPosition.y + 0.5);
       ctx.moveTo(startPos.x, startPos.y);
@@ -627,12 +688,71 @@ export const BattleCanvas = ({
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Rysuj ikonę rakiety na początku ścieżki
+      // Podświetl komórkę, w której znajduje się rakieta (aktualną pozycję)
+      const currentCellScreenX = (Math.floor(missilePath.startPosition.x) - viewport.x) * cellSize * zoom;
+      const currentCellScreenY = (Math.floor(missilePath.startPosition.y) - viewport.y) * cellSize * zoom;
+      
+      // Pulsujące podświetlenie komórki z rakietą
+      ctx.fillStyle = 'rgba(255, 200, 50, 0.4)';
+      ctx.fillRect(currentCellScreenX, currentCellScreenY, cellSize * zoom, cellSize * zoom);
+      
+      // Dodatkowa ramka wokół komórki z rakietą
+      ctx.strokeStyle = 'rgba(255, 220, 100, 0.8)';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([]);
+      ctx.strokeRect(currentCellScreenX, currentCellScreenY, cellSize * zoom, cellSize * zoom);
+
+      // Rysuj ślad rakiety (trail) - ostatnie kilka pozycji
+      const trailLength = Math.min(5, missilePath.speed || 2); // Długość śladu zależna od prędkości
+      ctx.strokeStyle = 'rgba(255, 200, 50, 0.9)';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Gradient śladu - od aktualnej pozycji do przeszłości
+      ctx.beginPath();
+      ctx.moveTo(startPos.x, startPos.y);
+      
+      // Rysuj ślad z malejącą intensywnością
+      for (let i = 0; i < trailLength && i < missilePath.path.length; i++) {
+        const pos = missilePath.path[i];
+        const screenPos = mapToScreen(pos.x + 0.5, pos.y + 0.5);
+        const alpha = 1 - (i / trailLength) * 0.7; // Od 1.0 do 0.3
+        ctx.strokeStyle = `rgba(255, 200, 50, ${alpha})`;
+        ctx.lineTo(screenPos.x, screenPos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(screenPos.x, screenPos.y);
+      }
+
+      // Rysuj jaskrawą linię pokazującą bezpośredni ruch rakiety
+      if (missilePath.path.length > 0) {
+        const nextPos = missilePath.path[0];
+        const nextScreenPos = mapToScreen(nextPos.x + 0.5, nextPos.y + 0.5);
+        
+        // Główna linia śladu
+        ctx.strokeStyle = 'rgba(255, 220, 100, 1)';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(startPos.x, startPos.y);
+        ctx.lineTo(nextScreenPos.x, nextScreenPos.y);
+        ctx.stroke();
+
+        // Dodatkowy efekt świecenia
+        ctx.strokeStyle = 'rgba(255, 255, 200, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(startPos.x, startPos.y);
+        ctx.lineTo(nextScreenPos.x, nextScreenPos.y);
+        ctx.stroke();
+      }
+
+      // Rysuj ikonę rakiety na aktualnej pozycji
       const missileIcon = loadedImages.Missile;
       if (missileIcon) {
         const { cellSize, zoom } = viewport;
         const scaledCellSize = cellSize * zoom;
-        const iconSize = scaledCellSize * 0.6;
+        const iconSize = scaledCellSize * 0.7;
         
         ctx.save();
         // Obróć ikonę w kierunku ruchu (jeśli ścieżka ma punkty)
@@ -644,28 +764,58 @@ export const BattleCanvas = ({
           );
           ctx.translate(startPos.x, startPos.y);
           ctx.rotate(angle);
+          
+          // Dodaj efekt świecenia wokół rakiety
+          ctx.shadowColor = 'rgba(255, 200, 50, 0.8)';
+          ctx.shadowBlur = 15;
           ctx.drawImage(missileIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+          ctx.shadowBlur = 0;
         } else {
+          ctx.shadowColor = 'rgba(255, 200, 50, 0.8)';
+          ctx.shadowBlur = 15;
           ctx.drawImage(missileIcon, startPos.x - iconSize / 2, startPos.y - iconSize / 2, iconSize, iconSize);
+          ctx.shadowBlur = 0;
         }
         ctx.restore();
       } else {
-        // Fallback - rysuj trójkąt
-        ctx.fillStyle = 'rgba(255, 150, 0, 0.9)';
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 1;
+        // Fallback - rysuj trójkąt ze świeceniem
+        ctx.save();
+        ctx.shadowColor = 'rgba(255, 200, 50, 0.8)';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = 'rgba(255, 180, 0, 1)';
+        ctx.strokeStyle = 'rgba(255, 255, 200, 0.9)';
+        ctx.lineWidth = 2;
         
-        const missileSize = 6;
+        const missileSize = 8;
         ctx.beginPath();
-        ctx.moveTo(startPos.x, startPos.y - missileSize);
-        ctx.lineTo(startPos.x + missileSize, startPos.y + missileSize);
-        ctx.lineTo(startPos.x - missileSize, startPos.y + missileSize);
+        
+        // Obróć trójkąt w kierunku ruchu
+        if (missilePath.path.length > 0) {
+          const firstPos = missilePath.path[0];
+          const angle = Math.atan2(
+            firstPos.y - missilePath.startPosition.y,
+            firstPos.x - missilePath.startPosition.x
+          );
+          
+          ctx.translate(startPos.x, startPos.y);
+          ctx.rotate(angle - Math.PI / 2); // -90 stopni bo trójkąt domyślnie skierowany w górę
+          
+          ctx.moveTo(0, -missileSize);
+          ctx.lineTo(missileSize, missileSize);
+          ctx.lineTo(-missileSize, missileSize);
+        } else {
+          ctx.moveTo(startPos.x, startPos.y - missileSize);
+          ctx.lineTo(startPos.x + missileSize, startPos.y + missileSize);
+          ctx.lineTo(startPos.x - missileSize, startPos.y + missileSize);
+        }
+        
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+        ctx.restore();
       }
     });
-  }, [battleState, viewport, mapToScreen, loadedImages, playerFractionId]);
+  }, [battleState, viewport, mapToScreen, loadedImages, playerFractionId, orders]);
 
   // Główna funkcja renderująca
   const render = useCallback(() => {

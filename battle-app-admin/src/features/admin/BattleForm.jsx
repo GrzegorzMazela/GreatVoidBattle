@@ -33,7 +33,7 @@ export default function BattleForm() {
     mutationFn: (payload) => createBattle(payload),
     onSuccess: (battleId) => {
       qc.invalidateQueries(['battles']);
-      toaster.create({ title: 'Battle created', type: 'success' });
+      toaster.success({ title: 'Battle created' });
       nav(`/pustka-admin-panel/${battleId}`);
     }
   });

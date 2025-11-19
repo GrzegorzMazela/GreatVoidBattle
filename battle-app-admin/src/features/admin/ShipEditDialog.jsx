@@ -97,7 +97,7 @@ export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) 
     onSuccess: () => {
       qc.invalidateQueries(['ships', battleId, fractionId]);
       qc.invalidateQueries(['battle', battleId]);
-      toaster.create({ title: 'Ship updated', type: 'success' });
+      toaster.success({ title: 'Ship updated' });
       onClose();
     }
   });

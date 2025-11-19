@@ -61,9 +61,8 @@ export default function FractionForm() {
       : createFraction(battleId, payload),
     onSuccess: () => {
       qc.invalidateQueries(['battle', battleId]);
-      toaster.create({ 
-        title: isEditMode ? 'Fraction updated' : 'Fraction created', 
-        type: 'success' 
+      toaster.success({ 
+        title: isEditMode ? 'Fraction updated' : 'Fraction created'
       });
       nav(`/pustka-admin-panel/${battleId}`);
     }

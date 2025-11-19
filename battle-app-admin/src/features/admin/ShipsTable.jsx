@@ -1,12 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listShips, deleteShip, getBattle } from '../../services/api';
-import { Box, Heading, Button, Table, HStack, Spinner, createToaster, Toaster, Text, VStack, Badge, Breadcrumb } from '@chakra-ui/react';
-
-const toaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
+import { Box, Heading, Button, Table, HStack, Spinner, Text, VStack, Badge, Breadcrumb } from '@chakra-ui/react';
+import { useState } from 'react';
+import { ConfirmModal } from '../../components/modals/ConfirmModal';
 
 const statusColors = {
   'Draft': 'gray',
@@ -17,6 +14,7 @@ const statusColors = {
 export default function ShipsTable() {
   const { battleId, fractionId } = useParams();
   const qc = useQueryClient();
+  const [shipToDelete, setShipToDelete] = useState(null);
   
   const { data: ships, isLoading: shipsLoading } = useQuery({ 
     queryKey: ['ships', battleId, fractionId], 
@@ -32,10 +30,22 @@ export default function ShipsTable() {
     mutationFn: (shipId) => deleteShip(battleId, fractionId, shipId),
     onSuccess: () => { 
       qc.invalidateQueries(['ships', battleId, fractionId]); 
-      qc.invalidateQueries(['battle', battleId]);
-      toaster.create({ title: 'Ship deleted', type: 'success' }); 
+      qc.invalidateQueries(['battle', battleId]);     
+      setShipToDelete(null);
+    },
+    onError: (error) => {
+      console.error('Failed to delete ship:', error);
+      setShipToDelete(null);
     }
-  });
+  });  const handleDeleteClick = (ship) => {
+    setShipToDelete(ship);
+  };
+
+  const handleConfirmDelete = () => {
+    if (shipToDelete) {
+      del.mutate(shipToDelete.shipId);
+    }
+  };
 
   if (shipsLoading || battleLoading) return <Spinner />;
 
@@ -47,7 +57,6 @@ export default function ShipsTable() {
 
   return (
     <>
-      <Toaster toaster={toaster} />
       <Box>
         {/* Breadcrumb Navigation */}
         <Breadcrumb.Root mb="4" fontSize="sm">
@@ -129,7 +138,7 @@ export default function ShipsTable() {
                       >
                         Edit
                       </Button>
-                      <Button size="sm" colorScheme="red" variant="outline" onClick={() => del.mutate(s.shipId)}>
+                      <Button size="sm" colorScheme="red" variant="outline" onClick={() => handleDeleteClick(s)}>
                         Delete
                       </Button>
                     </HStack>
@@ -140,6 +149,17 @@ export default function ShipsTable() {
           </Table.Root>
         </Box>
       </Box>
+
+      <ConfirmModal
+        isOpen={!!shipToDelete}
+        onClose={() => setShipToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Potwierdzenie usunięcia"
+        message={`Czy na pewno chcesz usunąć statek "${shipToDelete?.name}"? Ta operacja jest nieodwracalna.`}
+        confirmText="Usuń"
+        cancelText="Anuluj"
+        colorScheme="red"
+      />
     </>
   );
 }

@@ -21,7 +21,8 @@ export const useOrders = (battleId, fractionId, turnNumber) => {
    */
   const addMoveOrder = useCallback((shipId, targetX, targetY) => {
     setOrders(prev => {
-      // Usuń poprzedni rozkaz dla tego statku
+      // Usuń wszystkie poprzednie rozkazy dla tego statku (ruchy i ataki)
+      // Nowy rozkaz ruchu anuluje wszystkie wcześniejsze akcje
       const filtered = prev.filter(o => o.shipId !== shipId);
       return [...filtered, {
         shipId,

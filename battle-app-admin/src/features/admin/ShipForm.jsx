@@ -80,14 +80,14 @@ export default function ShipForm() {
     const moduleCount = getModuleCountForShipType(shipType);
     const currentModules = fields.length;
     
-    // Only auto-generate modules if not in edit mode or if module count changed
-    if (!isEditMode || (isEditMode && currentModules !== moduleCount && currentModules === 0)) {
+    // Update modules when ship type changes
+    if (currentModules !== moduleCount) {
       const newModules = Array.from({ length: moduleCount }, () => ({
         weaponTypes: ['Missile', 'Laser', 'PointDefense']
       }));
       replace(newModules);
     }
-  }, [shipType, replace, fields.length, isEditMode]);
+  }, [shipType, replace, fields.length]);
 
   const mutation = useMutation({
     mutationFn: (payload) => isEditMode 
@@ -96,7 +96,7 @@ export default function ShipForm() {
     onSuccess: () => {
       qc.invalidateQueries(['ships', battleId, fractionId]);
       qc.invalidateQueries(['battle', battleId]);
-      toaster.create({ title: isEditMode ? 'Ship updated' : 'Ship created', type: 'success' });
+      toaster.success({ title: isEditMode ? 'Ship updated' : 'Ship created' });
       nav(`/pustka-admin-panel/${battleId}/fractions/${fractionId}/ships`);
     }
   });

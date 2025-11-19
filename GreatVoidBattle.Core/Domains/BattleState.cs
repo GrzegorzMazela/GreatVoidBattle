@@ -44,6 +44,7 @@ public class BattleState
 
     public DateTime LastUpdated { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
     public static BattleState CreateNew(string battleName, int width, int height)
     {
@@ -151,6 +152,7 @@ public class BattleState
 
         var movementPath = new ShipMovementPath(ship, targetPosition);
         movementPath.GeneratePath();
+        _shipMovementPaths.RemoveAll(x => x.ShipId == shipId);
         _shipMovementPaths.Add(movementPath);
         SetUpdated();
     }

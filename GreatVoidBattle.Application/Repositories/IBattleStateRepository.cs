@@ -12,4 +12,5 @@ public interface IBattleStateRepository
     Task<BattleState?> GetByIdAsync(Guid id);
 
     Task<IEnumerable<BattleDto>> GetBattles();
+    Task<bool> SoftDeleteAsync(Guid id);
 }

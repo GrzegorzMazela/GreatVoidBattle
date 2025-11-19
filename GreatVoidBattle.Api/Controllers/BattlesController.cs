@@ -479,4 +479,24 @@ public class BattlesController : ControllerBase
 
         return Ok(battleStateDto);
     }
+
+    [HttpDelete("{battleId}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> DeleteBattle(Guid battleId)
+    {
+        var battleState = await _battleStateRepository.GetByIdAsync(battleId);
+        if (battleState == null)
+        {
+            return NotFound("Battle not found");
+        }
+
+        var deleted = await _battleStateRepository.SoftDeleteAsync(battleId);
+        if (!deleted)
+        {
+            return NotFound("Battle could not be deleted");
+        }
+
+        return NoContent();
+    }
 }

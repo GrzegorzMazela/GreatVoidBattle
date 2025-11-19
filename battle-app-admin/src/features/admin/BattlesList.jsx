@@ -1,32 +1,43 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listBattles, deleteBattle } from '../../services/api';
 import {
-  Box, Heading, Table, Button, HStack, Spinner, createToaster, Toaster
+  Box, Heading, Table, Button, HStack, Spinner
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
-
-const toaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
+import { useState } from 'react';
+import { ConfirmModal } from '../../components/modals/ConfirmModal';
 
 export default function BattlesList() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ['battles'], queryFn: listBattles });
+  const [battleToDelete, setBattleToDelete] = useState(null);
 
   const del = useMutation({
     mutationFn: (id) => deleteBattle(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['battles'] });
-      toaster.create({ title: 'Battle deleted', type: 'success' });
+      setBattleToDelete(null);
+    },
+    onError: (error) => {
+      console.error('Failed to delete battle:', error);
+      setBattleToDelete(null);
     }
   });
+
+  const handleDeleteClick = (battle) => {
+    setBattleToDelete(battle);
+  };
+
+  const handleConfirmDelete = () => {
+    if (battleToDelete) {
+      del.mutate(battleToDelete.battleId);
+    }
+  };
 
   if (isLoading) return <Spinner />;
 
   return (
     <>
-      <Toaster toaster={toaster} />
       <Box>
         <HStack justify="space-between" mb="4">
           <Heading size="md">Battles</Heading>
@@ -56,14 +67,15 @@ export default function BattlesList() {
                 <Table.Cell>{b.fractions?.join(', ') || 'No fractions'}</Table.Cell>
                 <Table.Cell>
                   <HStack>
-                    <Button as={Link} to={`/pustka-admin-panel/${b.battleId}`} size="sm" colorScheme="blue">Details</Button>
+                    <Button as={Link} to={`/pustka-admin-panel/${b.battleId}`} size="sm" colorScheme="blue">
+                      <span role="img" aria-label="details">👁️</span>
+                    </Button>
                     <Button
                       size="sm"
                       colorScheme="red"
-                      variant="outline"
-                      onClick={() => del.mutate(b.battleId)}
+                      onClick={() => handleDeleteClick(b)}
                     >
-                      Delete
+                      <span role="img" aria-label="delete">🗑️</span>
                     </Button>
                   </HStack>
                 </Table.Cell>
@@ -73,6 +85,17 @@ export default function BattlesList() {
         </Table.Root>
       </Box>
     </Box>
+
+      <ConfirmModal
+        isOpen={!!battleToDelete}
+        onClose={() => setBattleToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Potwierdzenie usunięcia"
+        message={`Czy na pewno chcesz usunąć bitwę "${battleToDelete?.name || battleToDelete?.battleId}"? Ta operacja jest nieodwracalna.`}
+        confirmText="Usuń"
+        cancelText="Anuluj"
+        colorScheme="red"
+      />
     </>
   );
 }
