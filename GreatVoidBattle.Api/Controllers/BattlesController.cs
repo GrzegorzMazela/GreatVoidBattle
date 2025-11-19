@@ -499,4 +499,45 @@ public class BattlesController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet("{battleId}/fractions/{fractionId}/turn-logs/{turnNumber}")]
+    [FractionAuth]
+    [ProducesResponseType<TurnLogsResponseDto>(200)]
+    public async Task<IActionResult> GetTurnLogs(Guid battleId, Guid fractionId, int turnNumber)
+    {
+        var battleState = await _battleManagerFactory.GetBattleState(battleId);
+        if (battleState == null)
+        {
+            return NotFound("Battle not found");
+        }
+
+        var fraction = battleState.Fractions.FirstOrDefault(f => f.FractionId == fractionId);
+        if (fraction == null)
+        {
+            return NotFound("Fraction not found");
+        }
+
+        var logs = battleState.BattleLog.GetTurnLogsForFraction(turnNumber, fractionId);
+
+        var response = new TurnLogsResponseDto
+        {
+            TurnNumber = turnNumber,
+            Logs = logs.Select(log => new TurnLogDto
+            {
+                Type = log.Type.ToString(),
+                FractionId = log.FractionId,
+                FractionName = log.FractionName,
+                TargetFractionId = log.TargetFractionId,
+                TargetFractionName = log.TargetFractionName,
+                ShipId = log.ShipId,
+                ShipName = log.ShipName,
+                TargetShipId = log.TargetShipId,
+                TargetShipName = log.TargetShipName,
+                Message = log.Message,
+                Details = log.Details
+            }).ToList()
+        };
+
+        return Ok(response);
+    }
 }

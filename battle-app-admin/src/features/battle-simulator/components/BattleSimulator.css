@@ -220,6 +220,33 @@
   opacity: 0.6;
 }
 
+.logs-btn-inline {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.logs-btn-inline:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5dade2, #3498db);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+}
+
+.logs-btn-inline:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
 .refresh-btn-inline {
   padding: 0.5rem 0.75rem;
   background: #555;

@@ -9,6 +9,11 @@ public class BattleLog
 
     public IReadOnlyCollection<LogRecord> Logs => _logs.AsReadOnly();
 
+    [BsonElement("TurnLogs")]
+    private Dictionary<string, List<TurnLogEntry>> _turnLogs { get; set; } = new();
+
+    public IReadOnlyDictionary<string, List<TurnLogEntry>> TurnLogs => _turnLogs.AsReadOnly();
+
     /// <summary>
     /// Adds a log entry to the battle log.
     /// </summary>
@@ -47,6 +52,63 @@ public class BattleLog
         var adminLog = $"{targetId} : {targetName} is destroyed.";
         _logs.Add(new LogRecord(log, adminLog));
     }
+
+    /// <summary>
+    /// Adds a turn-specific log entry for a fraction.
+    /// </summary>
+    public void AddTurnLog(int turnNumber, TurnLogEntry entry)
+    {
+        var key = turnNumber.ToString();
+        if (!_turnLogs.ContainsKey(key))
+        {
+            _turnLogs[key] = new List<TurnLogEntry>();
+        }
+        _turnLogs[key].Add(entry);
+    }
+
+    /// <summary>
+    /// Gets turn logs for a specific fraction and turn.
+    /// </summary>
+    public List<TurnLogEntry> GetTurnLogsForFraction(int turnNumber, Guid fractionId)
+    {
+        var key = turnNumber.ToString();
+        if (!_turnLogs.ContainsKey(key))
+        {
+            return new List<TurnLogEntry>();
+        }
+
+        return _turnLogs[key]
+            .Where(log => log.FractionId == fractionId || log.TargetFractionId == fractionId)
+            .ToList();
+    }
 }
 
 public record LogRecord(string log, string adminLog);
+
+public class TurnLogEntry
+{
+    public TurnLogType Type { get; set; }
+    public Guid FractionId { get; set; }
+    public string FractionName { get; set; } = string.Empty;
+    public Guid? TargetFractionId { get; set; }
+    public string? TargetFractionName { get; set; }
+    public Guid ShipId { get; set; }
+    public string ShipName { get; set; } = string.Empty;
+    public Guid? TargetShipId { get; set; }
+    public string? TargetShipName { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public Dictionary<string, object> Details { get; set; } = new();
+}
+
+public enum TurnLogType
+{
+    ShipMove,
+    LaserHit,
+    LaserMiss,
+    MissileHit,
+    MissileMiss,
+    MissileIntercepted,
+    ShipDestroyed,
+    DamageDealt,
+    DamageReceived
+}

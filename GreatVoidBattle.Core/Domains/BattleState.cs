@@ -188,9 +188,11 @@ public class BattleState
 
     public void EndOfTurn()
     {
-        RunLaserShots();
-        RunMissileShot();
-        MoveShips();
+        var currentTurn = TurnNumber;
+
+        RunLaserShots(currentTurn);
+        RunMissileShot(currentTurn);
+        MoveShips(currentTurn);
         //TODO: Add extra actions processing
 
         foreach (var fraction in _fractions)
@@ -203,24 +205,111 @@ public class BattleState
         TurnNumber++;
     }
 
-    private void RunLaserShots()
+    private void RunLaserShots(int turnNumber)
     {
         foreach (var laserShot in _laserShots)
         {
+            var shootingShip = GetShip(laserShot.ShipId);
             var targetShip = GetShip(laserShot.TargetId);
-            if (targetShip is null) continue;
 
-            targetShip.TakeDamage(BattleLog, Const.LaserDamage);
+            if (targetShip is null || shootingShip is null) continue;
+
+            var hit = targetShip.TakeDamage(BattleLog, Const.LaserDamage);
+
+            // Log dla strzelającego
+            BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+            {
+                Type = hit ? TurnLogType.LaserHit : TurnLogType.LaserMiss,
+                FractionId = shootingShip.FractionId,
+                FractionName = GetFraction(shootingShip.FractionId).FractionName,
+                ShipId = shootingShip.ShipId,
+                ShipName = shootingShip.Name,
+                TargetShipId = targetShip.ShipId,
+                TargetShipName = targetShip.Name,
+                TargetFractionId = targetShip.FractionId,
+                TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
+                Message = hit
+                    ? $"{shootingShip.Name} trafił laserem w {targetShip.Name} ({Const.LaserDamage} dmg)"
+                    : $"{shootingShip.Name} nie trafił laserem w {targetShip.Name}",
+                Details = new Dictionary<string, object>
+                {
+                    ["damage"] = hit ? Const.LaserDamage : 0,
+                    ["weaponType"] = "laser"
+                }
+            });
+
+            // Log dla trafionego (jeśli inna frakcja)
+            if (hit && targetShip.FractionId != shootingShip.FractionId)
+            {
+                BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                {
+                    Type = TurnLogType.DamageReceived,
+                    FractionId = targetShip.FractionId,
+                    FractionName = GetFraction(targetShip.FractionId).FractionName,
+                    ShipId = targetShip.ShipId,
+                    ShipName = targetShip.Name,
+                    TargetShipId = shootingShip.ShipId,
+                    TargetShipName = shootingShip.Name,
+                    TargetFractionId = shootingShip.FractionId,
+                    TargetFractionName = GetFraction(shootingShip.FractionId).FractionName,
+                    Message = $"{targetShip.Name} otrzymał obrażenia od lasera {shootingShip.Name} ({Const.LaserDamage} dmg)",
+                    Details = new Dictionary<string, object>
+                    {
+                        ["damage"] = Const.LaserDamage,
+                        ["weaponType"] = "laser",
+                        ["remainingHP"] = targetShip.HitPoints,
+                        ["remainingShields"] = targetShip.Shields,
+                        ["remainingArmor"] = targetShip.Armor
+                    }
+                });
+            }
+
             if (targetShip.Status == ShipStatus.Destroyed)
             {
+                // Log zniszczenia dla obu stron
+                BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                {
+                    Type = TurnLogType.ShipDestroyed,
+                    FractionId = shootingShip.FractionId,
+                    FractionName = GetFraction(shootingShip.FractionId).FractionName,
+                    ShipId = shootingShip.ShipId,
+                    ShipName = shootingShip.Name,
+                    TargetShipId = targetShip.ShipId,
+                    TargetShipName = targetShip.Name,
+                    TargetFractionId = targetShip.FractionId,
+                    TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
+                    Message = $"{shootingShip.Name} zniszczył {targetShip.Name}!",
+                    Details = new Dictionary<string, object>
+                    {
+                        ["destroyedBy"] = "laser"
+                    }
+                });
+
+                if (targetShip.FractionId != shootingShip.FractionId)
+                {
+                    BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                    {
+                        Type = TurnLogType.ShipDestroyed,
+                        FractionId = targetShip.FractionId,
+                        FractionName = GetFraction(targetShip.FractionId).FractionName,
+                        ShipId = targetShip.ShipId,
+                        ShipName = targetShip.Name,
+                        Message = $"{targetShip.Name} został zniszczony przez laser {shootingShip.Name}!",
+                        Details = new Dictionary<string, object>
+                        {
+                            ["destroyedBy"] = "laser",
+                            ["attacker"] = shootingShip.Name
+                        }
+                    });
+                }
+
                 GetFraction(targetShip.FractionId).RemoveShip(targetShip);
             }
-            //TODO: add logs
         }
         _laserShots.Clear();
     }
 
-    private void RunMissileShot()
+    private void RunMissileShot(int turnNumber)
     {
         var completedMissiles = new List<MissileMovementPath>();
         foreach (var missileMovementPath in _missileMovementPaths)
@@ -228,15 +317,105 @@ public class BattleState
             missileMovementPath.MoveOneStep();
             if (!missileMovementPath.IsCompleted) continue;
 
+            var shootingShip = GetShip(missileMovementPath.ShipId);
             var targetShip = GetShip(missileMovementPath.TargetId);
-            if (targetShip is not null)
+
+            if (targetShip is not null && shootingShip is not null)
             {
-                targetShip.TakeDamage(BattleLog, Const.MissileDamage, GetAccuracy(missileMovementPath.Accuracy, targetShip));
+                var accuracy = GetAccuracy(missileMovementPath.Accuracy, targetShip);
+                var hit = targetShip.TakeDamage(BattleLog, Const.MissileDamage, accuracy);
+
+                // Log dla strzelającego
+                BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                {
+                    Type = hit ? TurnLogType.MissileHit : TurnLogType.MissileMiss,
+                    FractionId = shootingShip.FractionId,
+                    FractionName = GetFraction(shootingShip.FractionId).FractionName,
+                    ShipId = shootingShip.ShipId,
+                    ShipName = shootingShip.Name,
+                    TargetShipId = targetShip.ShipId,
+                    TargetShipName = targetShip.Name,
+                    TargetFractionId = targetShip.FractionId,
+                    TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
+                    Message = hit
+                        ? $"Rakieta z {shootingShip.Name} trafiła {targetShip.Name} ({Const.MissileDamage} dmg, celność: {accuracy}%)"
+                        : $"Rakieta z {shootingShip.Name} chybiła {targetShip.Name} (celność: {accuracy}%)",
+                    Details = new Dictionary<string, object>
+                    {
+                        ["damage"] = hit ? Const.MissileDamage : 0,
+                        ["accuracy"] = accuracy,
+                        ["weaponType"] = "missile"
+                    }
+                });
+
+                // Log dla trafionego
+                if (hit && targetShip.FractionId != shootingShip.FractionId)
+                {
+                    BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                    {
+                        Type = TurnLogType.DamageReceived,
+                        FractionId = targetShip.FractionId,
+                        FractionName = GetFraction(targetShip.FractionId).FractionName,
+                        ShipId = targetShip.ShipId,
+                        ShipName = targetShip.Name,
+                        TargetShipId = shootingShip.ShipId,
+                        TargetShipName = shootingShip.Name,
+                        TargetFractionId = shootingShip.FractionId,
+                        TargetFractionName = GetFraction(shootingShip.FractionId).FractionName,
+                        Message = $"{targetShip.Name} trafiony rakietą z {shootingShip.Name} ({Const.MissileDamage} dmg)",
+                        Details = new Dictionary<string, object>
+                        {
+                            ["damage"] = Const.MissileDamage,
+                            ["accuracy"] = accuracy,
+                            ["weaponType"] = "missile",
+                            ["remainingHP"] = targetShip.HitPoints,
+                            ["remainingShields"] = targetShip.Shields,
+                            ["remainingArmor"] = targetShip.Armor
+                        }
+                    });
+                }
+
                 if (targetShip.Status == ShipStatus.Destroyed)
                 {
+                    // Log zniszczenia
+                    BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                    {
+                        Type = TurnLogType.ShipDestroyed,
+                        FractionId = shootingShip.FractionId,
+                        FractionName = GetFraction(shootingShip.FractionId).FractionName,
+                        ShipId = shootingShip.ShipId,
+                        ShipName = shootingShip.Name,
+                        TargetShipId = targetShip.ShipId,
+                        TargetShipName = targetShip.Name,
+                        TargetFractionId = targetShip.FractionId,
+                        TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
+                        Message = $"Rakieta z {shootingShip.Name} zniszczyła {targetShip.Name}!",
+                        Details = new Dictionary<string, object>
+                        {
+                            ["destroyedBy"] = "missile"
+                        }
+                    });
+
+                    if (targetShip.FractionId != shootingShip.FractionId)
+                    {
+                        BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                        {
+                            Type = TurnLogType.ShipDestroyed,
+                            FractionId = targetShip.FractionId,
+                            FractionName = GetFraction(targetShip.FractionId).FractionName,
+                            ShipId = targetShip.ShipId,
+                            ShipName = targetShip.Name,
+                            Message = $"{targetShip.Name} zniszczony przez rakietę z {shootingShip.Name}!",
+                            Details = new Dictionary<string, object>
+                            {
+                                ["destroyedBy"] = "missile",
+                                ["attacker"] = shootingShip.Name
+                            }
+                        });
+                    }
+
                     GetFraction(targetShip.FractionId).RemoveShip(targetShip);
                 }
-                //TODO: add logs
             }
             completedMissiles.Add(missileMovementPath);
         }
@@ -246,7 +425,7 @@ public class BattleState
         }
     }
 
-    public void MoveShips()
+    public void MoveShips(int turnNumber)
     {
         foreach (var shipMovementPath in _shipMovementPaths)
         {
@@ -254,13 +433,33 @@ public class BattleState
             var ship = GetShip(shipMovementPath.ShipId);
             if (ship is not null)
             {
+                var oldPos = ship.Position;
                 shipMovementPath.MoveOneStep();
                 ship.UpdatePosition(shipMovementPath.StartPosition.X, shipMovementPath.StartPosition.Y);
+
+                // Log ruchu statku
+                BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
+                {
+                    Type = TurnLogType.ShipMove,
+                    FractionId = ship.FractionId,
+                    FractionName = GetFraction(ship.FractionId).FractionName,
+                    ShipId = ship.ShipId,
+                    ShipName = ship.Name,
+                    Message = $"{ship.Name} przesunął się z ({oldPos.X:F0}, {oldPos.Y:F0}) do ({ship.Position.X:F0}, {ship.Position.Y:F0})",
+                    Details = new Dictionary<string, object>
+                    {
+                        ["oldX"] = oldPos.X,
+                        ["oldY"] = oldPos.Y,
+                        ["newX"] = ship.Position.X,
+                        ["newY"] = ship.Position.Y,
+                        ["distance"] = Math.Sqrt(Math.Pow(ship.Position.X - oldPos.X, 2) + Math.Pow(ship.Position.Y - oldPos.Y, 2))
+                    }
+                });
             }
 
             //TODO: add logs
         }
-        
+
         // Po przesunięciu statków zaktualizuj ścieżki rakiet
         UpdateMissilesPaths();
     }
@@ -268,18 +467,18 @@ public class BattleState
     private void UpdateMissilesPaths()
     {
         var missilesToRemove = new List<MissileMovementPath>();
-        
+
         foreach (var missile in _missileMovementPaths)
         {
             var targetShip = GetShip(missile.TargetId);
-            
+
             // Jeśli statek docelowy nie istnieje (został zniszczony), usuń rakietę
             if (targetShip is null)
             {
                 missilesToRemove.Add(missile);
                 continue;
             }
-            
+
             // Zaktualizuj ścieżkę rakiety do nowej pozycji statku
             try
             {
@@ -291,7 +490,7 @@ public class BattleState
                 missilesToRemove.Add(missile);
             }
         }
-        
+
         // Usuń rakiety, które nie mają już celu lub cel jest poza zasięgiem
         foreach (var missile in missilesToRemove)
         {

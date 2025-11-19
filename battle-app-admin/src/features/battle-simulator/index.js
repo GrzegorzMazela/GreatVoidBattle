@@ -6,5 +6,6 @@ export { ShipCard } from './components/ShipCard';
 export { ShipDetailsModal } from './components/ShipDetailsModal';
 export { OrdersPanel } from './components/OrdersPanel';
 export { TurnController } from './components/TurnController';
+export { TurnLogsModal } from './components/TurnLogsModal';
 export { useBattleState } from './hooks/useBattleState';
 export { useOrders } from './hooks/useOrders';

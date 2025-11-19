@@ -53,3 +53,15 @@ export const endPlayerTurn = async (battleId, fractionId, token) => {
   );
   return response.data;
 };
+
+export const getTurnLogs = async (battleId, fractionId, turnNumber, token) => {
+  const response = await api.get(
+    `/api/battles/${battleId}/fractions/${fractionId}/turn-logs/${turnNumber}`,
+    {
+      headers: {
+        'X-Auth-Token': token
+      }
+    }
+  );
+  return response.data;
+};

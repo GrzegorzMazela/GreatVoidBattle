@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBattleState } from '../hooks/useBattleState';
 import { useOrders } from '../hooks/useOrders';
-import { setShipPosition, endPlayerTurn } from '../../../services/api';
+import { setShipPosition, endPlayerTurn, getTurnLogs } from '../../../services/api';
 import { getPlayerSession } from '../../../services/authApi';
 import { BattleCanvas } from './BattleCanvas';
 import { ShipBottomPanel } from './ShipBottomPanel';
@@ -10,6 +10,7 @@ import { OrdersPanel } from './OrdersPanel';
 import { TurnController } from './TurnController';
 import { WeaponCountDialog } from './WeaponCountDialog';
 import { TurnWaitingModal } from './TurnWaitingModal';
+import { TurnLogsModal } from './TurnLogsModal';
 import { useModal } from '../../../hooks/useModal';
 import { AlertModal } from '../../../components/modals/AlertModal';
 import { useTurnSystem } from '../hooks/useTurnSystem';
@@ -47,6 +48,12 @@ export const BattleSimulator = ({ sessionData }) => {
   // Modal dla komunikatów
   const alertModal = useModal();
 
+  // State dla logów tury
+  const [turnLogs, setTurnLogs] = useState(null);
+  const [showTurnLogs, setShowTurnLogs] = useState(false);
+  const [turnLogsNumber, setTurnLogsNumber] = useState(0);
+  const [maxTurnNumber, setMaxTurnNumber] = useState(1);
+
   // Hook do zarządzania rozkazami
   const ordersManager = useOrders(
     battleId,
@@ -55,8 +62,9 @@ export const BattleSimulator = ({ sessionData }) => {
   );
 
   // Callback dla nowej tury - używa ref aby mieć dostęp do aktualnych wartości
-  const handleNewTurn = useCallback((newTurnNumber) => {
+  const handleNewTurn = useCallback(async (newTurnNumber) => {
     console.log('New turn started:', newTurnNumber);
+    setMaxTurnNumber(prev => Math.max(prev, newTurnNumber));
     refresh(); // Odśwież stan bitwy
     
     // Wyczyść rozkazy i stan po nowej turze
@@ -67,15 +75,28 @@ export const BattleSimulator = ({ sessionData }) => {
     setWeaponMode(null);
     setWeaponDialog(null);
     
-    // Pokaż komunikat o nowej turze
-    alertModal.openModal({
-      title: 'Nowa tura!',
-      message: newTurnNumber 
-        ? `Wszyscy gracze zakończyli swoje rozkazy. Rozpoczyna się tura ${newTurnNumber}!`
-        : 'Wszyscy gracze zakończyli swoje rozkazy. Rozpoczyna się nowa tura!',
-      variant: 'success'
-    });
-  }, [refresh, ordersManager, alertModal]);
+    // Pobierz logi z poprzedniej tury
+    if (newTurnNumber > 1) {
+      try {
+        const previousTurn = newTurnNumber - 1;
+        const session = getPlayerSession();
+        const logsData = await getTurnLogs(battleId, playerFractionId, previousTurn, session.authToken);
+        
+        // Zawsze pokaż modal z logami (nawet jeśli pusta lista)
+        setTurnLogs(logsData?.logs || []);
+        setTurnLogsNumber(previousTurn);
+        setShowTurnLogs(true);
+      } catch (error) {
+        console.error('Error fetching turn logs:', error);
+        // W przypadku błędu pokaż komunikat
+        alertModal.openModal({
+          title: 'Nowa tura!',
+          message: `Rozpoczyna się tura ${newTurnNumber}! (Nie udało się pobrać logów)`,
+          variant: 'warning'
+        });
+      }
+    }
+  }, [refresh, ordersManager, alertModal, battleId, playerFractionId]);
 
   // System turowy z SignalR
   const turnSystem = useTurnSystem(battleId, playerFractionId, handleNewTurn, battleState);
@@ -514,6 +535,35 @@ export const BattleSimulator = ({ sessionData }) => {
                 </button>
                 
                 <button 
+                  className="logs-btn-inline"
+                  onClick={async () => {
+                    if (battleState.turnNumber > 1) {
+                      try {
+                        const session = getPlayerSession();
+                        const logsData = await getTurnLogs(
+                          battleId,
+                          playerFractionId,
+                          battleState.turnNumber - 1,
+                          session.authToken
+                        );
+
+                        if (logsData?.logs) {
+                          setTurnLogs(logsData.logs);
+                          setTurnLogsNumber(battleState.turnNumber - 1);
+                          setShowTurnLogs(true);
+                        }
+                      } catch (error) {
+                        console.error('Error fetching turn logs:', error);
+                      }
+                    }
+                  }}
+                  disabled={battleState.turnNumber <= 1}
+                  title="Pokaż logi z poprzedniej tury"
+                >
+                  📋 Logi
+                </button>
+                
+                <button 
                   className="refresh-btn-inline"
                   onClick={refresh}
                   disabled={isExecuting}
@@ -579,6 +629,17 @@ export const BattleSimulator = ({ sessionData }) => {
       <TurnWaitingModal
         isOpen={turnSystem.turnFinished && turnSystem.isWaitingForPlayers}
         waitingPlayers={turnSystem.waitingPlayers}
+      />
+
+      <TurnLogsModal
+        isOpen={showTurnLogs}
+        onClose={() => setShowTurnLogs(false)}
+        logs={turnLogs}
+        turnNumber={turnLogsNumber}
+        battleId={battleId}
+        fractionId={playerFractionId}
+        authToken={getPlayerSession()?.authToken}
+        maxTurn={maxTurnNumber}
       />
 
       <AlertModal

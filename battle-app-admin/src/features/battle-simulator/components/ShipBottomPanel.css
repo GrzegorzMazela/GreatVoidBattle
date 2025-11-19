@@ -18,15 +18,16 @@
 }
 
 /* Kontener dla listy statków */
-.ship-panel-content {
+.ship-bottom-panel .ship-panel-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   height: 100%;
 }
+
 /* Kontener kart statków */
-.ship-cards-container {
+.ship-bottom-panel .ship-cards-container {
   display: flex;
   gap: 12px;
   overflow-x: auto;
@@ -37,26 +38,26 @@
   flex: 1;
 }
 
-.ship-cards-container::-webkit-scrollbar {
+.ship-bottom-panel .ship-cards-container::-webkit-scrollbar {
   height: 6px;
 }
 
-.ship-cards-container::-webkit-scrollbar-track {
+.ship-bottom-panel .ship-cards-container::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 3px;
 }
 
-.ship-cards-container::-webkit-scrollbar-thumb {
+.ship-bottom-panel .ship-cards-container::-webkit-scrollbar-thumb {
   background: rgba(100, 150, 255, 0.5);
   border-radius: 3px;
 }
 
-.ship-cards-container::-webkit-scrollbar-thumb:hover {
+.ship-bottom-panel .ship-cards-container::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 150, 255, 0.7);
 }
 
 /* Przyciski broni */
-.weapon-controls {
+.ship-bottom-panel .weapon-controls {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -66,7 +67,7 @@
   height: 100%;
 }
 
-.weapon-btn {
+.ship-bottom-panel .weapon-btn {
   width: 56px;
   height: 56px;
   display: flex;
@@ -82,73 +83,73 @@
   padding: 6px;
 }
 
-.weapon-btn svg {
+.ship-bottom-panel .weapon-btn svg {
   width: 24px;
   height: 24px;
 }
 
-.weapon-btn span {
+.ship-bottom-panel .weapon-btn span {
   font-size: 11px;
   font-weight: 600;
   color: white;
 }
 
-.weapon-btn:hover:not(:disabled) {
+.ship-bottom-panel .weapon-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.weapon-btn:disabled {
+.ship-bottom-panel .weapon-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-.weapon-btn.laser {
+.ship-bottom-panel .weapon-btn.laser {
   color: #ff5252;
   border-color: rgba(255, 82, 82, 0.3);
 }
 
-.weapon-btn.laser:hover:not(:disabled) {
+.ship-bottom-panel .weapon-btn.laser:hover:not(:disabled) {
   border-color: #ff5252;
   background: rgba(255, 82, 82, 0.1);
   box-shadow: 0 4px 16px rgba(255, 82, 82, 0.3);
 }
 
-.weapon-btn.laser.active {
+.ship-bottom-panel .weapon-btn.laser.active {
   background: rgba(255, 82, 82, 0.2);
   border-color: #ff5252;
   box-shadow: 0 0 20px rgba(255, 82, 82, 0.5);
 }
 
-.weapon-btn.missile {
+.ship-bottom-panel .weapon-btn.missile {
   color: #ff9800;
   border-color: rgba(255, 152, 0, 0.3);
 }
 
-.weapon-btn.missile:hover:not(:disabled) {
+.ship-bottom-panel .weapon-btn.missile:hover:not(:disabled) {
   border-color: #ff9800;
   background: rgba(255, 152, 0, 0.1);
   box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);
 }
 
-.weapon-btn.missile.active {
+.ship-bottom-panel .weapon-btn.missile.active {
   background: rgba(255, 152, 0, 0.2);
   border-color: #ff9800;
   box-shadow: 0 0 20px rgba(255, 152, 0, 0.5);
 }
 
-.weapon-btn.clear {
+.ship-bottom-panel .weapon-btn.clear {
   color: #f44336;
   border-color: rgba(244, 67, 54, 0.3);
 }
 
-.weapon-btn.clear:hover {
+.ship-bottom-panel .weapon-btn.clear:hover {
   border-color: #f44336;
   background: rgba(244, 67, 54, 0.1);
   box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
 }
 
-.weapon-btn.clear svg {
+.ship-bottom-panel .weapon-btn.clear svg {
   width: 28px;
   height: 28px;
 }
