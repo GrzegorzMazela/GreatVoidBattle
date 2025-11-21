@@ -11,7 +11,7 @@ RUN npm install
 COPY . .
 
 # Argument budowania dla URL API (można override podczas docker build)
-ARG VITE_API_URL=http://109.173.167.125:32001
+ARG VITE_API_URL=https://api.wielkapustka.pl
 ENV VITE_API_URL=$VITE_API_URL
 
 # Budujemy aplikację (Vite -> domyślnie /dist)
