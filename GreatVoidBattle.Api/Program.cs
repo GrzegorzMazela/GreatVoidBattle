@@ -39,7 +39,7 @@ builder.Services.AddCors(options =>
                 "http://109.173.167.125:32000",
                 "http://109.173.167.125:32001",
                 "https://api.wielkapustka.pl",
-                "https://wielkapustka.pl",)
+                "https://wielkapustka.pl")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials(); // Wymagane dla SignalR
