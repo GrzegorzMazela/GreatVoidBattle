@@ -1,5 +1,6 @@
 using GreatVoidBattle.Application.Hubs;
 using GreatVoidBattle.Application.Factories;
+using GreatVoidBattle.Application.Services;
 using GreatVoidBattle.Infrastructure;
 using GreatVoidBattle.Infrastructure.Repository;
 using GreatVoidBattle.Application.Repositories;
@@ -19,6 +20,18 @@ builder.Services.AddSingleton(sp => MongoDbFactory.Create(mongoConn, mongoDbName
 builder.Services.AddScoped<IBattleStateRepository, BattleStateRepository>();
 builder.Services.AddScoped<IBattleEventRepository, BattleEventRepository>();
 
+// Discord OAuth
+builder.Services.AddHttpClient<IDiscordService, DiscordService>();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -33,6 +46,7 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173", 
                 "http://localhost:5174",
+                "http://localhost:5175",
                 "http://localhost:5112",
                 "https://localhost:7295",
                 "http://109.173.167.125",
@@ -58,6 +72,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 app.UseHttpsRedirection();
+app.UseSession();
+app.UseMiddleware<DiscordAuthMiddleware>();
 app.UseFractionAuthorization();
 
 // Health check endpoint

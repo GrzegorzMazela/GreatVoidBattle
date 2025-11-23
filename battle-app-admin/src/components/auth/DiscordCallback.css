@@ -1,0 +1,136 @@
+.discord-callback-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20px;
+}
+
+.discord-callback-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 60px 80px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  min-width: 400px;
+}
+
+.discord-callback-processing,
+.discord-callback-success,
+.discord-callback-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.discord-callback-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid #5865f2;
+  border-radius: 50%;
+  animation: discord-callback-spin 1s linear infinite;
+}
+
+@keyframes discord-callback-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.discord-callback-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+}
+
+.discord-callback-icon.success {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+  animation: discord-callback-success-pop 0.5s ease;
+}
+
+.discord-callback-icon.error {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+  animation: discord-callback-error-shake 0.5s ease;
+}
+
+@keyframes discord-callback-success-pop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes discord-callback-error-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.discord-callback-card h2 {
+  color: white;
+  font-size: 28px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.discord-callback-card p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  margin: 0;
+}
+
+.discord-callback-retry {
+  margin-top: 20px;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+}
+
+.discord-callback-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(88, 101, 242, 0.4);
+}
+
+.discord-callback-retry:active {
+  transform: translateY(0);
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+  .discord-callback-card {
+    padding: 40px 30px;
+    min-width: unset;
+    width: 100%;
+  }
+
+  .discord-callback-card h2 {
+    font-size: 24px;
+  }
+
+  .discord-callback-card p {
+    font-size: 14px;
+  }
+
+  .discord-callback-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 36px;
+  }
+}

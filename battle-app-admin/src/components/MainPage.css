@@ -8,10 +8,134 @@
   margin: 0;
   padding: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .main-image {
   max-width: 90%;
   max-height: 90%;
   object-fit: contain;
+}
+
+.user-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 320px;
+  background: linear-gradient(135deg, rgba(30, 30, 50, 0.95), rgba(20, 20, 40, 0.95));
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.user-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.2), rgba(88, 101, 242, 0.05));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-panel-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid #5865f2;
+  box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+}
+
+.user-panel-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-panel-username {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.user-panel-fraction {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, rgba(67, 233, 123, 0.2), rgba(56, 249, 215, 0.2));
+  border-radius: 12px;
+  border: 1px solid rgba(67, 233, 123, 0.3);
+  width: fit-content;
+}
+
+.fraction-icon {
+  font-size: 14px;
+}
+
+.fraction-name {
+  color: #43e97b;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-panel-content {
+  padding: 20px;
+}
+
+.user-panel-message {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  text-align: center;
+}
+
+.user-panel-logout {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  background: linear-gradient(135deg, rgba(255, 70, 70, 0.2), rgba(255, 70, 70, 0.1));
+  color: #ff6b6b;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-panel-logout:hover {
+  background: linear-gradient(135deg, rgba(255, 70, 70, 0.3), rgba(255, 70, 70, 0.2));
+  color: #ff8888;
+}
+
+.user-panel-logout:active {
+  transform: scale(0.98);
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+  .user-panel {
+    width: calc(100% - 40px);
+    left: 20px;
+    right: 20px;
+  }
 }

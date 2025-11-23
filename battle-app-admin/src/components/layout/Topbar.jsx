@@ -1,8 +1,15 @@
 import { Flex, Heading } from '@chakra-ui/react';
+import { UserProfile } from '../auth/UserProfile';
+import './Topbar.css';
+
 export default function Topbar() {
   return (
-    <Flex h="14" align="center" px="6" borderBottom="1px solid" borderColor="gray.200" bg="white">
-      <Heading size="md">Battle Admin</Heading>
+    <Flex className="topbar">
+      <div className="topbar-brand">
+        <div className="topbar-icon">⚔️</div>
+        <Heading size="md" className="topbar-title">Panel Administratora</Heading>
+      </div>
+      <UserProfile />
     </Flex>
   );
 }

@@ -1,0 +1,202 @@
+.user-profile {
+  position: relative;
+}
+
+.user-profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-profile-trigger:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(88, 101, 242, 0.5);
+  transition: border-color 0.3s ease;
+}
+
+.user-profile-trigger:hover .user-avatar {
+  border-color: #5865f2;
+}
+
+.user-info {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.user-name {
+  color: #1a1a2e;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.user-discriminator {
+  color: rgba(26, 26, 46, 0.6);
+  font-size: 12px;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  background: rgba(30, 30, 50, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdown-appear 0.2s ease;
+}
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-dropdown-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #5865f2;
+}
+
+.user-dropdown-name {
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.user-dropdown-email {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
+.user-badge {
+  margin: 12px 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-badge {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.fraction-badge {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.user-roles {
+  margin: 12px 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.user-roles-title {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.user-role-item {
+  color: white;
+  font-size: 13px;
+  padding: 6px 8px;
+  background: rgba(88, 101, 242, 0.2);
+  border-radius: 4px;
+  margin-bottom: 4px;
+  border: 1px solid rgba(88, 101, 242, 0.3);
+}
+
+.user-role-item:last-child {
+  margin-bottom: 0;
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: rgba(255, 70, 70, 0.1);
+  color: #ff4646;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout-button:hover {
+  background: rgba(255, 70, 70, 0.2);
+  color: #ff6666;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+  .user-profile-trigger {
+    padding: 6px 12px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .user-name {
+    font-size: 12px;
+  }
+
+  .user-discriminator {
+    display: none;
+  }
+
+  .user-dropdown {
+    width: 280px;
+  }
+}

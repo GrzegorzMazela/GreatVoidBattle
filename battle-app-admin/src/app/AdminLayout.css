@@ -1,0 +1,70 @@
+.admin-content {
+  padding: 32px;
+  overflow: auto;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  min-height: calc(100vh - 70px);
+}
+
+/* Stylizacja kart w panelu */
+.admin-content .chakra-card,
+.admin-content .css-1idwzxb {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.admin-content .chakra-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Stylizacja przycisków */
+.admin-content button {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.admin-content button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Stylizacja tabel */
+.admin-content table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.admin-content th {
+  background: linear-gradient(135deg, #2d3561 0%, #3d2f5b 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.admin-content tr:hover {
+  background-color: rgba(45, 53, 97, 0.08);
+}
+
+/* Scrollbar */
+.admin-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.admin-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.admin-content::-webkit-scrollbar-thumb {
+  background: rgba(45, 53, 97, 0.4);
+  border-radius: 5px;
+}
+
+.admin-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(45, 53, 97, 0.6);
+}

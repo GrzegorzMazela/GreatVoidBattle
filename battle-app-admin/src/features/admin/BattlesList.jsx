@@ -40,20 +40,20 @@ export default function BattlesList() {
     <>
       <Box>
         <HStack justify="space-between" mb="4">
-          <Heading size="md">Battles</Heading>
-          <Button as={Link} to="/pustka-admin-panel/new" colorScheme="green">New</Button>
+          <Heading size="md">Bitwy</Heading>
+          <Button as={Link} to="/pustka-admin-panel/new" colorScheme="green">Nowa Bitwa</Button>
         </HStack>
 
       <Box bg="white" rounded="lg" shadow="sm" overflow="hidden">
         <Table.Root striped>
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
-              <Table.ColumnHeader>Turn</Table.ColumnHeader>
+              <Table.ColumnHeader>Nazwa</Table.ColumnHeader>
+              <Table.ColumnHeader>Tura</Table.ColumnHeader>
               <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader>Size</Table.ColumnHeader>
-              <Table.ColumnHeader>Fractions</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+              <Table.ColumnHeader>Rozmiar</Table.ColumnHeader>
+              <Table.ColumnHeader>Frakcje</Table.ColumnHeader>
+              <Table.ColumnHeader>Akcje</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
 
@@ -62,20 +62,20 @@ export default function BattlesList() {
               <Table.Row key={b.battleId}>
                 <Table.Cell>{b.name || b.battleId}</Table.Cell>
                 <Table.Cell>{b.turnNumber || 0}</Table.Cell>
-                <Table.Cell>{b.status || 'Unknown'}</Table.Cell>
+                <Table.Cell>{b.status || 'Nieznany'}</Table.Cell>
                 <Table.Cell>{b.width}×{b.height}</Table.Cell>
-                <Table.Cell>{b.fractions?.join(', ') || 'No fractions'}</Table.Cell>
+                <Table.Cell>{b.fractions?.join(', ') || 'Brak frakcji'}</Table.Cell>
                 <Table.Cell>
                   <HStack>
                     <Button as={Link} to={`/pustka-admin-panel/${b.battleId}`} size="sm" colorScheme="blue">
-                      <span role="img" aria-label="details">👁️</span>
+                      <span role="img" aria-label="szczegóły">👁️</span>
                     </Button>
                     <Button
                       size="sm"
                       colorScheme="red"
                       onClick={() => handleDeleteClick(b)}
                     >
-                      <span role="img" aria-label="delete">🗑️</span>
+                      <span role="img" aria-label="usuń">🗑️</span>
                     </Button>
                   </HStack>
                 </Table.Cell>
