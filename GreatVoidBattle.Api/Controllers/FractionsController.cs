@@ -95,11 +95,20 @@ public class FractionsController(BattleManagerFactory battleManagerFactory) : Co
             {
                 ShipId = s.ShipId,
                 Name = s.Name,
+                Type = s.Type.ToString(),
                 X = s.Position.X,
                 Y = s.Position.Y,
+                Speed = s.Speed,
                 Armor = s.Armor,
                 Shields = s.Shields,
-                HitPoints = s.HitPoints
+                HitPoints = s.HitPoints,
+                Modules = s.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
+                NumberOfMissiles = s.NumberOfMissiles,
+                NumberOfLasers = s.NumberOfLasers,
+                NumberOfPointsDefense = s.NumberOfPointsDefense,
+                MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+                MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+                LaserMaxRange = Core.Domains.Const.LaserMaxRange
             }).ToList()
         });
         return Ok(fractions);
@@ -128,11 +137,20 @@ public class FractionsController(BattleManagerFactory battleManagerFactory) : Co
             {
                 ShipId = s.ShipId,
                 Name = s.Name,
+                Type = s.Type.ToString(),
                 X = s.Position.X,
                 Y = s.Position.Y,
+                Speed = s.Speed,
                 Armor = s.Armor,
                 Shields = s.Shields,
-                HitPoints = s.HitPoints
+                HitPoints = s.HitPoints,
+                Modules = s.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
+                NumberOfMissiles = s.NumberOfMissiles,
+                NumberOfLasers = s.NumberOfLasers,
+                NumberOfPointsDefense = s.NumberOfPointsDefense,
+                MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+                MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+                LaserMaxRange = Core.Domains.Const.LaserMaxRange
             }).ToList()
         };
         

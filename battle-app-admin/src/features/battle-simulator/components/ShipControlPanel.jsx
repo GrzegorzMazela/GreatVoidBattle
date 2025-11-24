@@ -122,9 +122,9 @@ export const ShipControlPanel = ({
               {weaponMode && (
                 <div className="weapon-hint">
                   {weaponMode === 'missile' ? (
-                    <p>💡 Zasięg rakiet: 35-55</p>
+                    <p>💡 Zasięg rakiet: {selectedShip.missileEffectiveRange || 35}-{selectedShip.missileMaxRange || 55}</p>
                   ) : (
-                    <p>💡 Zasięg laserów: 0-20</p>
+                    <p>💡 Zasięg laserów: 0-{selectedShip.laserMaxRange || 15}</p>
                   )}
                 </div>
               )}

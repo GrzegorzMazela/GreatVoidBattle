@@ -61,9 +61,9 @@ export const ShipContextMenu = ({
       {weaponMode && (
         <div className="context-menu-hint-compact">
           {weaponMode === 'missile' ? (
-            <p>💡 Zasięg rakiet: 35-55</p>
+            <p>💡 Zasięg rakiet: {ship.missileEffectiveRange || 35}-{ship.missileMaxRange || 55}</p>
           ) : (
-            <p>💡 Zasięg laserów: 0-20</p>
+            <p>💡 Zasięg laserów: 0-{ship.laserMaxRange || 15}</p>
           )}
         </div>
       )}
