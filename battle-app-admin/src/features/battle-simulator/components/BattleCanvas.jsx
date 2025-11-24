@@ -288,8 +288,8 @@ export const BattleCanvas = forwardRef(({
     const shipX = Math.floor(selectedShip.x);
     const shipY = Math.floor(selectedShip.y);
     
-    const MISSILE_MIN_RANGE = 35;
-    const MISSILE_MAX_RANGE = 55;
+    const MISSILE_MIN_RANGE = selectedShip.missileEffectiveRange || 35;
+    const MISSILE_MAX_RANGE = selectedShip.missileMaxRange || 55;
 
     // Rysuj zasięg rakiet w kolorze niebieskim
     for (let x = visibleArea.startX; x <= visibleArea.endX; x++) {
@@ -302,7 +302,7 @@ export const BattleCanvas = forwardRef(({
           const screenY = (y - viewport.y) * scaledCellSize;
 
           // Różne odcienie w zależności od efektywnego zasięgu
-          if (distance <= 35) {
+          if (distance <= MISSILE_MIN_RANGE) {
             // Efektywny zasięg - intensywniejszy niebieski
             ctx.fillStyle = 'rgba(50, 150, 255, 0.25)';
           } else {
@@ -358,7 +358,7 @@ export const BattleCanvas = forwardRef(({
     const shipX = selectedShip.x;
     const shipY = selectedShip.y;
     
-    const LASER_MAX_RANGE = 20;
+    const LASER_MAX_RANGE = selectedShip.laserMaxRange || 15;
 
     // Rysuj zasięg laserów w kolorze czerwonym
     for (let x = visibleArea.startX; x <= visibleArea.endX; x++) {
@@ -664,12 +664,12 @@ export const BattleCanvas = forwardRef(({
   const drawMissilePaths = useCallback((ctx) => {
     if (!battleState?.missileMovementPaths || battleState.missileMovementPaths.length === 0) return;
 
-    const { cellSize, zoom } = viewport;
-
     battleState.missileMovementPaths.forEach(missilePath => {
       if (!missilePath.path || missilePath.path.length === 0) return;
 
       // Sprawdź czy to rakieta gracza lub rakieta wymierzona w statek gracza
+      let fractionColor = '#FF9800'; // Domyślny kolor pomarańczowy
+      
       if (playerFractionId) {
         let isPlayerMissile = false;
         let isTargetingPlayer = false;
@@ -678,7 +678,10 @@ export const BattleCanvas = forwardRef(({
         for (const fraction of battleState.fractions) {
           if (fraction.fractionId === playerFractionId) {
             isPlayerMissile = fraction.ships.some(s => s.shipId === missilePath.shipId);
-            if (isPlayerMissile) break;
+            if (isPlayerMissile) {
+              fractionColor = fraction.fractionColor || fractionColor;
+              break;
+            }
           }
         }
 
@@ -694,6 +697,17 @@ export const BattleCanvas = forwardRef(({
 
         // Pokazuj tylko rakiety gracza lub rakiety wymierzone w gracza
         if (!isPlayerMissile && !isTargetingPlayer) return;
+        
+        // Dla rakiet nie-gracza, znajdź kolor frakcji źródłowej
+        if (!isPlayerMissile) {
+          for (const fraction of battleState.fractions) {
+            const sourceShip = fraction.ships.find(s => s.shipId === missilePath.shipId);
+            if (sourceShip) {
+              fractionColor = fraction.fractionColor || fractionColor;
+              break;
+            }
+          }
+        }
       }
 
       // Nie rysuj zatwierdzonych trajektorii rakiet jeśli statek źródłowy ma nowy lokalny rozkaz
@@ -702,89 +716,65 @@ export const BattleCanvas = forwardRef(({
         return;
       }
 
-      // Rysuj całą planowaną ścieżkę jako półprzezroczystą linię
-      ctx.strokeStyle = 'rgba(255, 150, 0, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([5, 3]);
-
-      // Podświetl komórki przez które przechodzi pocisk (całą przyszłą ścieżkę)
-      ctx.fillStyle = 'rgba(255, 150, 0, 0.1)';
-      missilePath.path.forEach(pos => {
-        const screenX = (Math.floor(pos.x) - viewport.x) * cellSize * zoom;
-        const screenY = (Math.floor(pos.y) - viewport.y) * cellSize * zoom;
-        ctx.fillRect(screenX, screenY, cellSize * zoom, cellSize * zoom);
-      });
-
-      // Rysuj linię całej trajektorii
-      ctx.beginPath();
       const startPos = mapToScreen(missilePath.startPosition.x + 0.5, missilePath.startPosition.y + 0.5);
-      ctx.moveTo(startPos.x, startPos.y);
 
-      missilePath.path.forEach(pos => {
-        const screenPos = mapToScreen(pos.x + 0.5, pos.y + 0.5);
-        ctx.lineTo(screenPos.x, screenPos.y);
-      });
-
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Podświetl komórkę, w której znajduje się rakieta (aktualną pozycję)
-      const currentCellScreenX = (Math.floor(missilePath.startPosition.x) - viewport.x) * cellSize * zoom;
-      const currentCellScreenY = (Math.floor(missilePath.startPosition.y) - viewport.y) * cellSize * zoom;
+      // Rysuj linię przez 4 pierwsze elementy ścieżki
+      const { cellSize, zoom } = viewport;
+      const scaledCellSize = cellSize * zoom;
       
-      // Pulsujące podświetlenie komórki z rakietą
-      ctx.fillStyle = 'rgba(255, 200, 50, 0.4)';
-      ctx.fillRect(currentCellScreenX, currentCellScreenY, cellSize * zoom, cellSize * zoom);
-      
-      // Dodatkowa ramka wokół komórki z rakietą
-      ctx.strokeStyle = 'rgba(255, 220, 100, 0.8)';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([]);
-      ctx.strokeRect(currentCellScreenX, currentCellScreenY, cellSize * zoom, cellSize * zoom);
-
-      // Rysuj ślad rakiety (trail) - ostatnie kilka pozycji
-      const trailLength = Math.min(5, missilePath.speed || 2); // Długość śladu zależna od prędkości
-      ctx.strokeStyle = 'rgba(255, 200, 50, 0.9)';
-      ctx.lineWidth = 4;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      // Gradient śladu - od aktualnej pozycji do przeszłości
-      ctx.beginPath();
-      ctx.moveTo(startPos.x, startPos.y);
-      
-      // Rysuj ślad z malejącą intensywnością
-      for (let i = 0; i < trailLength && i < missilePath.path.length; i++) {
-        const pos = missilePath.path[i];
-        const screenPos = mapToScreen(pos.x + 0.5, pos.y + 0.5);
-        const alpha = 1 - (i / trailLength) * 0.7; // Od 1.0 do 0.3
-        ctx.strokeStyle = `rgba(255, 200, 50, ${alpha})`;
-        ctx.lineTo(screenPos.x, screenPos.y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(screenPos.x, screenPos.y);
-      }
-
-      // Rysuj jaskrawą linię pokazującą bezpośredni ruch rakiety
       if (missilePath.path.length > 0) {
-        const nextPos = missilePath.path[0];
-        const nextScreenPos = mapToScreen(nextPos.x + 0.5, nextPos.y + 0.5);
+        // Rysuj linię z gradientem od rakiety przez 4 następne komórki
+        const pathLength = Math.min(4, missilePath.path.length);
         
-        // Główna linia śladu
-        ctx.strokeStyle = 'rgba(255, 220, 100, 1)';
-        ctx.lineWidth = 5;
+        ctx.strokeStyle = 'rgba(255, 220, 0, 0.60)';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
         ctx.beginPath();
         ctx.moveTo(startPos.x, startPos.y);
-        ctx.lineTo(nextScreenPos.x, nextScreenPos.y);
-        ctx.stroke();
-
-        // Dodatkowy efekt świecenia
-        ctx.strokeStyle = 'rgba(255, 255, 200, 0.6)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(startPos.x, startPos.y);
-        ctx.lineTo(nextScreenPos.x, nextScreenPos.y);
-        ctx.stroke();
+        
+        let lastPos = null;
+        for (let i = 0; i < pathLength; i++) {
+          const pos = missilePath.path[i];
+          const screenPos = mapToScreen(pos.x + 0.5, pos.y + 0.5);
+          
+          // Coraz mniejsza intensywność
+          const alpha = 0.60 - (i * 0.12); // 0.60, 0.48, 0.36, 0.24
+          ctx.strokeStyle = `rgba(255, 220, 0, ${alpha})`;
+          ctx.lineTo(screenPos.x, screenPos.y);
+          ctx.stroke();
+          
+          // Kontynuuj od tego punktu
+          ctx.beginPath();
+          ctx.moveTo(screenPos.x, screenPos.y);
+          
+          lastPos = screenPos;
+        }
+        
+        // Rysuj strzałkę na końcu
+        if (lastPos && pathLength > 0) {
+          const prevPos = pathLength > 1 
+            ? mapToScreen(missilePath.path[pathLength - 2].x + 0.5, missilePath.path[pathLength - 2].y + 0.5)
+            : startPos;
+          
+          const angle = Math.atan2(lastPos.y - prevPos.y, lastPos.x - prevPos.x);
+          const arrowSize = 10;
+          
+          ctx.fillStyle = `rgba(255, 220, 0, ${0.60 - ((pathLength - 1) * 0.12)})`;
+          ctx.beginPath();
+          ctx.moveTo(lastPos.x, lastPos.y);
+          ctx.lineTo(
+            lastPos.x - arrowSize * Math.cos(angle - Math.PI / 6),
+            lastPos.y - arrowSize * Math.sin(angle - Math.PI / 6)
+          );
+          ctx.lineTo(
+            lastPos.x - arrowSize * Math.cos(angle + Math.PI / 6),
+            lastPos.y - arrowSize * Math.sin(angle + Math.PI / 6)
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
       }
 
       // Rysuj ikonę rakiety na aktualnej pozycji
@@ -805,26 +795,37 @@ export const BattleCanvas = forwardRef(({
           ctx.translate(startPos.x, startPos.y);
           ctx.rotate(angle);
           
-          // Dodaj efekt świecenia wokół rakiety
-          ctx.shadowColor = 'rgba(255, 200, 50, 0.8)';
-          ctx.shadowBlur = 15;
+          // Rysuj tło w kolorze frakcji
+          ctx.fillStyle = fractionColor;
+          ctx.fillRect(-iconSize / 2, -iconSize / 2, iconSize, iconSize);
+          
+          // Rysuj żółty zarys
+          ctx.strokeStyle = 'rgba(255, 220, 0, 1)';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(-iconSize / 2, -iconSize / 2, iconSize, iconSize);
+          
+          // Rysuj ikonę rakiety
           ctx.drawImage(missileIcon, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
-          ctx.shadowBlur = 0;
         } else {
-          ctx.shadowColor = 'rgba(255, 200, 50, 0.8)';
-          ctx.shadowBlur = 15;
+          // Rysuj tło w kolorze frakcji
+          ctx.fillStyle = fractionColor;
+          ctx.fillRect(startPos.x - iconSize / 2, startPos.y - iconSize / 2, iconSize, iconSize);
+          
+          // Rysuj żółty zarys
+          ctx.strokeStyle = 'rgba(255, 220, 0, 1)';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(startPos.x - iconSize / 2, startPos.y - iconSize / 2, iconSize, iconSize);
+          
+          // Rysuj ikonę rakiety
           ctx.drawImage(missileIcon, startPos.x - iconSize / 2, startPos.y - iconSize / 2, iconSize, iconSize);
-          ctx.shadowBlur = 0;
         }
         ctx.restore();
       } else {
-        // Fallback - rysuj trójkąt ze świeceniem
+        // Fallback - rysuj trójkąt w kolorze frakcji z żółtym zarysem
         ctx.save();
-        ctx.shadowColor = 'rgba(255, 200, 50, 0.8)';
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = 'rgba(255, 180, 0, 1)';
-        ctx.strokeStyle = 'rgba(255, 255, 200, 0.9)';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = fractionColor;
+        ctx.strokeStyle = 'rgba(255, 220, 0, 1)';
+        ctx.lineWidth = 3;
         
         const missileSize = 8;
         ctx.beginPath();

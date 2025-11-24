@@ -163,8 +163,24 @@ public class BattleState
         var targetShip = GetFraction(targetFractionId).GetShip(targetShipId);
 
         ship.FireMissile();
-        var missilePath = new MissileMovementPath(ship, targetShip, Const.MissileSpeed);
+        var missilePath = new MissileMovementPath(ship, targetShip, Const.MissileSpeed, TurnNumber);
         _missileMovementPaths.Add(missilePath);
+
+        // Log wystrzelenia rakiety dla administratora
+        BattleLog.AddTurnLog(TurnNumber, new TurnLogEntry
+        {
+            Type = TurnLogType.MissileFired,
+            FractionId = ship.FractionId,
+            FractionName = GetFraction(ship.FractionId).FractionName,
+            ShipId = ship.ShipId,
+            ShipName = ship.Name,
+            TargetShipId = targetShip.ShipId,
+            TargetShipName = targetShip.Name,
+            TargetFractionId = targetShip.FractionId,
+            TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
+            Message = $"{ship.Name} wystrzelił rakietę w {targetShip.Name}",
+            AdminLog = $"[Admin] Missile {missilePath.MissileId} fired at turn {TurnNumber}, initialAccuracy={missilePath.Accuracy}, distance={missilePath.Path.Count}"
+        });
 
         SetUpdated();
     }
@@ -214,7 +230,7 @@ public class BattleState
 
             if (targetShip is null || shootingShip is null) continue;
 
-            var hit = targetShip.TakeDamage(BattleLog, Const.LaserDamage);
+            var (hit, rolledValue) = targetShip.TakeDamage(BattleLog, Const.LaserDamage);
 
             // Log dla strzelającego
             BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
@@ -231,11 +247,7 @@ public class BattleState
                 Message = hit
                     ? $"{shootingShip.Name} trafił laserem w {targetShip.Name} ({Const.LaserDamage} dmg)"
                     : $"{shootingShip.Name} nie trafił laserem w {targetShip.Name}",
-                Details = new Dictionary<string, object>
-                {
-                    ["damage"] = hit ? Const.LaserDamage : 0,
-                    ["weaponType"] = "laser"
-                }
+                AdminLog = $"[Admin] Laser shot: damage={( hit ? Const.LaserDamage : 0)}, rolledValue={rolledValue}, hit={hit}"
             });
 
             // Log dla trafionego (jeśli inna frakcja)
@@ -252,15 +264,7 @@ public class BattleState
                     TargetShipName = shootingShip.Name,
                     TargetFractionId = shootingShip.FractionId,
                     TargetFractionName = GetFraction(shootingShip.FractionId).FractionName,
-                    Message = $"{targetShip.Name} otrzymał obrażenia od lasera {shootingShip.Name} ({Const.LaserDamage} dmg)",
-                    Details = new Dictionary<string, object>
-                    {
-                        ["damage"] = Const.LaserDamage,
-                        ["weaponType"] = "laser",
-                        ["remainingHP"] = targetShip.HitPoints,
-                        ["remainingShields"] = targetShip.Shields,
-                        ["remainingArmor"] = targetShip.Armor
-                    }
+                    Message = $"{targetShip.Name} otrzymał obrażenia od lasera {shootingShip.Name} ({Const.LaserDamage} dmg)"
                 });
             }
 
@@ -278,11 +282,7 @@ public class BattleState
                     TargetShipName = targetShip.Name,
                     TargetFractionId = targetShip.FractionId,
                     TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
-                    Message = $"{shootingShip.Name} zniszczył {targetShip.Name}!",
-                    Details = new Dictionary<string, object>
-                    {
-                        ["destroyedBy"] = "laser"
-                    }
+                    Message = $"Laser z {shootingShip.Name} zniszczył {targetShip.Name}!"
                 });
 
                 if (targetShip.FractionId != shootingShip.FractionId)
@@ -294,12 +294,7 @@ public class BattleState
                         FractionName = GetFraction(targetShip.FractionId).FractionName,
                         ShipId = targetShip.ShipId,
                         ShipName = targetShip.Name,
-                        Message = $"{targetShip.Name} został zniszczony przez laser {shootingShip.Name}!",
-                        Details = new Dictionary<string, object>
-                        {
-                            ["destroyedBy"] = "laser",
-                            ["attacker"] = shootingShip.Name
-                        }
+                        Message = $"{targetShip.Name} został zniszczony przez laser {shootingShip.Name}!"
                     });
                 }
 
@@ -323,9 +318,9 @@ public class BattleState
             if (targetShip is not null && shootingShip is not null)
             {
                 var accuracy = GetAccuracy(missileMovementPath.Accuracy, targetShip);
-                var hit = targetShip.TakeDamage(BattleLog, Const.MissileDamage, accuracy);
+                var (hit, rolledValue) = targetShip.TakeDamage(BattleLog, Const.MissileDamage, accuracy);
 
-                // Log dla strzelającego
+                // Log dla strzelającego z rozszerzonymi informacjami dla admina
                 BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
                 {
                     Type = hit ? TurnLogType.MissileHit : TurnLogType.MissileMiss,
@@ -338,14 +333,9 @@ public class BattleState
                     TargetFractionId = targetShip.FractionId,
                     TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
                     Message = hit
-                        ? $"Rakieta z {shootingShip.Name} trafiła {targetShip.Name} ({Const.MissileDamage} dmg, celność: {accuracy}%)"
-                        : $"Rakieta z {shootingShip.Name} chybiła {targetShip.Name} (celność: {accuracy}%)",
-                    Details = new Dictionary<string, object>
-                    {
-                        ["damage"] = hit ? Const.MissileDamage : 0,
-                        ["accuracy"] = accuracy,
-                        ["weaponType"] = "missile"
-                    }
+                        ? $"{shootingShip.Name} trafił rakietą w {targetShip.Name} ({Const.MissileDamage} dmg)"
+                        : $"{shootingShip.Name} nie trafił rakietą w {targetShip.Name}",
+                    AdminLog = $"[Admin] Missile {missileMovementPath.MissileId}: firedAt={missileMovementPath.FiredAtTurn}, hitAt={turnNumber}, travel={turnNumber - missileMovementPath.FiredAtTurn} turns, initAcc={missileMovementPath.Accuracy}, finalAcc={accuracy}, rolled={rolledValue}, hit={hit}, dmg={( hit ? Const.MissileDamage : 0)}"
                 });
 
                 // Log dla trafionego
@@ -362,16 +352,7 @@ public class BattleState
                         TargetShipName = shootingShip.Name,
                         TargetFractionId = shootingShip.FractionId,
                         TargetFractionName = GetFraction(shootingShip.FractionId).FractionName,
-                        Message = $"{targetShip.Name} trafiony rakietą z {shootingShip.Name} ({Const.MissileDamage} dmg)",
-                        Details = new Dictionary<string, object>
-                        {
-                            ["damage"] = Const.MissileDamage,
-                            ["accuracy"] = accuracy,
-                            ["weaponType"] = "missile",
-                            ["remainingHP"] = targetShip.HitPoints,
-                            ["remainingShields"] = targetShip.Shields,
-                            ["remainingArmor"] = targetShip.Armor
-                        }
+                        Message = $"{targetShip.Name} trafiony rakietą z {shootingShip.Name} ({Const.MissileDamage} dmg)"
                     });
                 }
 
@@ -389,11 +370,7 @@ public class BattleState
                         TargetShipName = targetShip.Name,
                         TargetFractionId = targetShip.FractionId,
                         TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
-                        Message = $"Rakieta z {shootingShip.Name} zniszczyła {targetShip.Name}!",
-                        Details = new Dictionary<string, object>
-                        {
-                            ["destroyedBy"] = "missile"
-                        }
+                        Message = $"Rakieta z {shootingShip.Name} zniszczyła {targetShip.Name}!"
                     });
 
                     if (targetShip.FractionId != shootingShip.FractionId)
@@ -405,12 +382,7 @@ public class BattleState
                             FractionName = GetFraction(targetShip.FractionId).FractionName,
                             ShipId = targetShip.ShipId,
                             ShipName = targetShip.Name,
-                            Message = $"{targetShip.Name} zniszczony przez rakietę z {shootingShip.Name}!",
-                            Details = new Dictionary<string, object>
-                            {
-                                ["destroyedBy"] = "missile",
-                                ["attacker"] = shootingShip.Name
-                            }
+                            Message = $"{targetShip.Name} zniszczony przez rakietę z {shootingShip.Name}!"
                         });
                     }
 
@@ -445,15 +417,7 @@ public class BattleState
                     FractionName = GetFraction(ship.FractionId).FractionName,
                     ShipId = ship.ShipId,
                     ShipName = ship.Name,
-                    Message = $"{ship.Name} przesunął się z ({oldPos.X:F0}, {oldPos.Y:F0}) do ({ship.Position.X:F0}, {ship.Position.Y:F0})",
-                    Details = new Dictionary<string, object>
-                    {
-                        ["oldX"] = oldPos.X,
-                        ["oldY"] = oldPos.Y,
-                        ["newX"] = ship.Position.X,
-                        ["newY"] = ship.Position.Y,
-                        ["distance"] = Math.Sqrt(Math.Pow(ship.Position.X - oldPos.X, 2) + Math.Pow(ship.Position.Y - oldPos.Y, 2))
-                    }
+                    Message = $"{ship.Name} przesunął się z ({oldPos.X:F0}, {oldPos.Y:F0}) do ({ship.Position.X:F0}, {ship.Position.Y:F0})"
                 });
             }
 

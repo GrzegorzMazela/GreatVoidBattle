@@ -146,43 +146,46 @@ public class ShipStateTests
     public void TakeDamage_OnlyShilds_ShouldReduceHitPoints()
     {
         var ship = CreateTestShip();
+        var battleLog = new BattleLog();
         var initialHp = ship.HitPoints + ship.Shields + ship.Armor;
         var initialShilds = ship.Shields;
-        var result = ship.TakeDamage(10);
+        var (hit, rolledValue) = ship.TakeDamage(battleLog, 10);
         var allHP = ship.HitPoints + ship.Shields + ship.Armor;
 
         allHP.ShouldBe(initialHp - 10);
         ship.Shields.ShouldBe(initialShilds - 10);
-        result.ShouldBeTrue();
+        hit.ShouldBeTrue();
     }
 
     [Fact]
     public void TakeDamage_ShildsAndArmors_ShouldReduceHitPoints()
     {
         var ship = CreateTestShip();
+        var battleLog = new BattleLog();
         var initialHp = ship.HitPoints + ship.Shields + ship.Armor;
-        var result = ship.TakeDamage(40);
+        var (hit, rolledValue) = ship.TakeDamage(battleLog, 40);
         var allHP = ship.HitPoints + ship.Shields + ship.Armor;
 
         allHP.ShouldBe(initialHp - 40);
         ship.Shields.ShouldBe(0);
         ship.Armor.ShouldBe(10);
-        result.ShouldBeTrue();
+        hit.ShouldBeTrue();
     }
 
     [Fact]
     public void TakeDamage_ShildsAndArmorsAndHp_ShouldReduceHitPoints()
     {
         var ship = CreateTestShip();
+        var battleLog = new BattleLog();
         var initialHp = ship.HitPoints + ship.Shields + ship.Armor;
-        var result = ship.TakeDamage(100);
+        var (hit, rolledValue) = ship.TakeDamage(battleLog, 100);
         var allHP = ship.HitPoints + ship.Shields + ship.Armor;
 
         allHP.ShouldBe(initialHp - 100);
         ship.Shields.ShouldBe(0);
         ship.Armor.ShouldBe(0);
         ship.HitPoints.ShouldBe(50);
-        result.ShouldBeTrue();
+        hit.ShouldBeTrue();
     }
 
     [Fact]

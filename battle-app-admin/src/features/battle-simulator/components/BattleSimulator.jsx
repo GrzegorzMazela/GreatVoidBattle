@@ -190,7 +190,7 @@ export const BattleSimulator = ({ sessionData }) => {
           const distance = Math.abs(Math.floor(clickedShip.x) - Math.floor(selectedShip.x)) + 
                           Math.abs(Math.floor(clickedShip.y) - Math.floor(selectedShip.y));
           
-          const MISSILE_MAX_RANGE = 55;
+          const MISSILE_MAX_RANGE = selectedShip.missileMaxRange || 55;
           
           if (distance <= MISSILE_MAX_RANGE) {
             // Sprawdź ile ma dostępnych rakiet
@@ -227,7 +227,7 @@ export const BattleSimulator = ({ sessionData }) => {
             Math.pow(clickedShip.y - selectedShip.y, 2)
           );
           
-          const LASER_MAX_RANGE = 20;
+          const LASER_MAX_RANGE = selectedShip.laserMaxRange || 15;
           
           if (distance <= LASER_MAX_RANGE) {
             const firedCount = getWeaponFiredCount(selectedShip.shipId, 'laser');

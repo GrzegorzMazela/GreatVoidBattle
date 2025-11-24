@@ -64,10 +64,17 @@ public class ShipsController(BattleManagerFactory battleManagerFactory) : Contro
                 Type = s.Type.ToString(),
                 X = s.Position.X,
                 Y = s.Position.Y,
+                Speed = s.Speed,
                 Armor = s.Armor,
                 Shields = s.Shields,
                 HitPoints = s.HitPoints,
-                Modules = s.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType.ToString()).ToList())).ToList()
+                Modules = s.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
+                NumberOfMissiles = s.NumberOfMissiles,
+                NumberOfLasers = s.NumberOfLasers,
+                NumberOfPointsDefense = s.NumberOfPointsDefense,
+                MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+                MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+                LaserMaxRange = Core.Domains.Const.LaserMaxRange
             });
         return Ok(ships);
     }
@@ -90,10 +97,17 @@ public class ShipsController(BattleManagerFactory battleManagerFactory) : Contro
             Type = shipState.Type.ToString(),
             X = shipState.Position.X,
             Y = shipState.Position.Y,
+            Speed = shipState.Speed,
             Armor = shipState.Armor,
             Shields = shipState.Shields,
             HitPoints = shipState.HitPoints,
-            Modules = shipState.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType.ToString()).ToList())).ToList()
+            Modules = shipState.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
+            NumberOfMissiles = shipState.NumberOfMissiles,
+            NumberOfLasers = shipState.NumberOfLasers,
+            NumberOfPointsDefense = shipState.NumberOfPointsDefense,
+            MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+            MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+            LaserMaxRange = Core.Domains.Const.LaserMaxRange
         });
     }
 

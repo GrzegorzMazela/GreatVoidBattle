@@ -101,6 +101,15 @@ export default function BattleDetails() {
               </Button>
             </>
           )}
+          {battle.status === 'InProgress' && (
+            <Button 
+              as={Link} 
+              to={`/pustka-admin-panel/${battleId}/admin-logs`} 
+              colorScheme="cyan"
+            >
+              📊 Admin Logs
+            </Button>
+          )}
           <Button as={Link} to="/pustka-admin-panel" variant="outline">
             Back to List
           </Button>

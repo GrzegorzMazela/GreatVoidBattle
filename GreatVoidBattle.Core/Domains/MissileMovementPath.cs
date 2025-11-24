@@ -7,14 +7,16 @@ public class MissileMovementPath : MovementPath
     public string ShipName { get; private set; }
     public Guid TargetId { get; private set; }
     public int Accuracy { get; private set; }
+    public int FiredAtTurn { get; private set; }
 
-    public MissileMovementPath(ShipState ship, ShipState targetShip, int speed)
+    public MissileMovementPath(ShipState ship, ShipState targetShip, int speed, int firedAtTurn)
         : base(speed, ship.Position, targetShip.Position)
     {
         MissileId = Guid.NewGuid();
         ShipId = ship.ShipId;
         ShipName = ship.Name;
         TargetId = targetShip.ShipId;
+        FiredAtTurn = firedAtTurn;
         GeneratePath();
         SetAccuracy();
     }
@@ -27,12 +29,9 @@ public class MissileMovementPath : MovementPath
     {
         // Zaktualizuj pozycję docelową
         NewTargetPosition(newTargetPosition);
-        
+
         // Przelicz ścieżkę od aktualnej pozycji rakiety do nowej pozycji celu
         GeneratePath();
-        
-        // Przelicz celność na podstawie nowej odległości
-        SetAccuracy();
     }
 
     private void SetAccuracy()

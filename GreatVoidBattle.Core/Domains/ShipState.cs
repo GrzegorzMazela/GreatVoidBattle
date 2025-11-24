@@ -101,14 +101,14 @@ public class ShipState
         NumberOfMissilesFiredPerTurn = 0;
     }
 
-    public bool TakeDamage(BattleLog battleLog, int damage, int accuracy = 100)
+    public (bool hit, int rolledValue) TakeDamage(BattleLog battleLog, int damage, int accuracy = 100)
     {
         var rand = new Random(DateTime.UtcNow.Microsecond);
         var shotAccuracy = rand.Next(1, 101);
         if (shotAccuracy > accuracy)
         {
             battleLog.AddMissedLog(ShipId, Name, accuracy, shotAccuracy);
-            return false;
+            return (false, shotAccuracy);
         }
 
         battleLog.AddTakeDamageLog(ShipId, Name, damage, accuracy, shotAccuracy);
@@ -149,7 +149,7 @@ public class ShipState
             Status = ShipStatus.Destroyed;
             battleLog.ShipIsDestroyLog(ShipId, Name);
         }
-        return true;
+        return (true, shotAccuracy);
     }
 
     public int GetPointDefenseAccuracy()

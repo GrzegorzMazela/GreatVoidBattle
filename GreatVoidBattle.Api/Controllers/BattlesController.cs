@@ -81,7 +81,10 @@ public class BattlesController : ControllerBase
                     HitPoints = s.HitPoints,
                     NumberOfMissiles = s.NumberOfMissiles,
                     NumberOfLasers = s.NumberOfLasers,
-                    NumberOfPointsDefense = s.NumberOfPointsDefense
+                    NumberOfPointsDefense = s.NumberOfPointsDefense,
+                    MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+                    MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+                    LaserMaxRange = Core.Domains.Const.LaserMaxRange
                 }).ToList()
             }).ToList(),
             ShipMovementPaths = battleState.ShipMovementPaths.Select(smp => new ShipMovementPathDto
@@ -153,7 +156,10 @@ public class BattlesController : ControllerBase
                     HitPoints = s.HitPoints,
                     NumberOfMissiles = s.NumberOfMissiles,
                     NumberOfLasers = s.NumberOfLasers,
-                    NumberOfPointsDefense = s.NumberOfPointsDefense
+                    NumberOfPointsDefense = s.NumberOfPointsDefense,
+                    MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+                    MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+                    LaserMaxRange = Core.Domains.Const.LaserMaxRange
                 }).ToList()
             }).ToList(),
             ShipMovementPaths = battleState.ShipMovementPaths.Select(smp => new ShipMovementPathDto
@@ -296,7 +302,10 @@ public class BattlesController : ControllerBase
                     HitPoints = s.HitPoints,
                     NumberOfMissiles = s.NumberOfMissiles,
                     NumberOfLasers = s.NumberOfLasers,
-                    NumberOfPointsDefense = s.NumberOfPointsDefense
+                    NumberOfPointsDefense = s.NumberOfPointsDefense,
+                    MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+                    MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+                    LaserMaxRange = Core.Domains.Const.LaserMaxRange
                 }).ToList()
             }).ToList(),
             ShipMovementPaths = updatedBattleState.ShipMovementPaths.Select(smp => new ShipMovementPathDto
@@ -472,7 +481,10 @@ public class BattlesController : ControllerBase
                     HitPoints = s.HitPoints,
                     NumberOfMissiles = s.NumberOfMissiles,
                     NumberOfLasers = s.NumberOfLasers,
-                    NumberOfPointsDefense = s.NumberOfPointsDefense
+                    NumberOfPointsDefense = s.NumberOfPointsDefense,
+                    MissileMaxRange = Core.Domains.Const.MissileMaxRage,
+                    MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
+                    LaserMaxRange = Core.Domains.Const.LaserMaxRange
                 }).ToList()
             }).ToList()
         };
@@ -533,10 +545,39 @@ public class BattlesController : ControllerBase
                 ShipName = log.ShipName,
                 TargetShipId = log.TargetShipId,
                 TargetShipName = log.TargetShipName,
-                Message = log.Message,
-                Details = log.Details
+                Message = log.Message
             }).ToList()
         };
+
+        return Ok(response);
+    }
+
+    [HttpGet("{battleId}/admin-logs/{turnNumber}")]
+    [ProducesResponseType<TurnLogsResponseDto>(200)]
+    public async Task<IActionResult> GetAdminTurnLogs(Guid battleId, int turnNumber)
+    {
+        var battleState = await _battleManagerFactory.GetBattleState(battleId);
+        if (battleState == null)
+        {
+            return NotFound("Battle not found");
+        }
+
+        var logs = battleState.BattleLog.GetTurnLogs(turnNumber);
+
+        var response = logs.Select(log => new TurnLogDto
+        {
+            Type = log.Type.ToString(),
+            FractionId = log.FractionId,
+            FractionName = log.FractionName,
+            TargetFractionId = log.TargetFractionId,
+            TargetFractionName = log.TargetFractionName,
+            ShipId = log.ShipId,
+            ShipName = log.ShipName,
+            TargetShipId = log.TargetShipId,
+            TargetShipName = log.TargetShipName,
+            Message = log.Message,
+            AdminLog = log.AdminLog
+        }).ToList();
 
         return Ok(response);
     }
