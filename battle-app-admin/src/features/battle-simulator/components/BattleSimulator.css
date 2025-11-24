@@ -1,0 +1,363 @@
+.battle-simulator {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  color: #fff;
+  overflow: hidden;
+  /* Zapobiega zmianie szerokości przy otwieraniu modali */
+  position: relative;
+}
+
+/* Zapobiega przesuwaniu się zawartości przy otwieraniu modali */
+.battle-simulator * {
+  box-sizing: border-box;
+}
+
+.battle-simulator.loading,
+.battle-simulator.error {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.battle-simulator.error h2 {
+  color: #F44336;
+  margin-bottom: 1rem;
+}
+
+.battle-simulator.error button {
+  padding: 0.75rem 1.5rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.battle-simulator.error button:hover {
+  background: #45a049;
+}
+
+.battle-header {
+  padding: 1rem 1.5rem;
+  background: #2a2a2a;
+  border-bottom: 2px solid #444;
+}
+
+.battle-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  padding: 0.5rem 1rem;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #555;
+}
+
+.battle-title h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.battle-size {
+  padding: 0.25rem 0.75rem;
+  background: #444;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+/* Informacja o graczu */
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4CAF50;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.player-label {
+  color: #aaa;
+}
+
+.player-name {
+  font-weight: bold;
+  color: #fff;
+}
+
+.player-fraction {
+  font-style: italic;
+  font-weight: 600;
+}
+
+/* Status frakcji w jednej linii */
+.fractions-status-inline {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.fraction-status-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.fraction-status-inline .fraction-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.fraction-status-inline .fraction-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.fraction-status-inline .ships-count {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.fraction-status-inline .defeated-badge {
+  padding: 0.1rem 0.4rem;
+  background: #F44336;
+  color: white;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Kontrolki tury w jednej linii */
+.turn-controls-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 1rem;
+}
+
+.turn-number-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.turn-number-inline .label {
+  color: #aaa;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.turn-number-inline .value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+.execute-turn-btn-inline {
+  padding: 0.5rem 1rem;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.9rem;
+}
+
+.execute-turn-btn-inline:hover:not(:disabled) {
+  background: #1976D2;
+}
+
+.execute-turn-btn-inline:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.logs-btn-inline {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.logs-btn-inline:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5dade2, #3498db);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+}
+
+.logs-btn-inline:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.refresh-btn-inline {
+  padding: 0.5rem 0.75rem;
+  background: #555;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 1.1rem;
+}
+
+.refresh-btn-inline:hover:not(:disabled) {
+  background: #666;
+}
+
+.refresh-btn-inline:disabled {
+  background: #333;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+.fraction-selector {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.fraction-selector p {
+  margin: 0 0 0.75rem 0;
+  color: #aaa;
+}
+
+.fraction-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.fraction-select-btn {
+  padding: 0.75rem 1.5rem;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.fraction-select-btn:hover {
+  opacity: 0.9;
+}
+
+.battle-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.battle-main {
+  flex: 1;
+  min-width: 0;
+  background: #0a0a0a;
+  position: relative; /* Dla absolutnego pozycjonowania dolnego panelu */
+}
+
+.battle-sidebar {
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: #1a1a1a;
+  border-left: 2px solid #444;
+  overflow-y: auto;
+}
+
+.orders-error {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 1.5rem;
+  background: #F44336;
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .battle-sidebar {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .battle-content {
+    flex-direction: column;
+  }
+
+  .battle-sidebar {
+    width: 100%;
+    max-height: 40vh;
+    border-left: none;
+    border-top: 2px solid #444;
+  }
+
+  .battle-main {
+    min-height: 60vh;
+  }
+}

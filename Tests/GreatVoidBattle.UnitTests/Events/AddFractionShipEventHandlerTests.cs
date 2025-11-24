@@ -1,8 +1,7 @@
-﻿using GreatVoidBattle.Application.Events;
+using GreatVoidBattle.Application.Events;
 using GreatVoidBattle.Application.Managers;
 using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
-using GreatVoidBattle.Events;
 using Shouldly;
 
 namespace GreatVoidBattle.UnitTests.Events;
@@ -14,9 +13,9 @@ public class AddFractionShipEventHandlerTests
 
     public AddFractionShipEventHandlerTests()
     {
-        var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
-        var battleState = BattleState.CreateNew(battleEvent.Name);
-        var fraction = FractionState.CreateNew("Fraction 1");
+        var battleEvent = new CreateBattleEvent { Name = "Test Battle", Width = 500, Height = 500 };
+        var battleState = BattleState.CreateNew(battleEvent.Name, battleEvent.Width, battleEvent.Height);
+        var fraction = FractionState.CreateNew("Fraction 1", "Player 1", "#FF0000");
         battleState.AddFraction(fraction);
         _fractionId = fraction.FractionId;
         _battleManager = new BattleManager(battleState);
@@ -174,7 +173,7 @@ public class AddFractionShipEventHandlerTests
         ship.Name.ShouldBe(addShipEvent.Name);
         ship.Type.ShouldBe(ShipType.Battleship);
         ship.NumberOfLasers.ShouldBe(10);
-        ship.NumberOfMissiles.ShouldBe(10);  
+        ship.NumberOfMissiles.ShouldBe(10);
         ship.NumberOfPointsDefense.ShouldBe(4);
     }
 
@@ -248,11 +247,11 @@ public class AddFractionShipEventHandlerTests
     public async Task AddFractionShipEventHandler_AddShipsToTwoFractions_Success()
     {
         // Arrange: create battle with two fractions
-        var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
-        var battleState = BattleState.CreateNew(battleEvent.Name);
+        var battleEvent = new CreateBattleEvent { Name = "Test Battle", Width = 500, Height = 500 };
+        var battleState = BattleState.CreateNew(battleEvent.Name, battleEvent.Width, battleEvent.Height);
 
-        var fraction1 = FractionState.CreateNew("Fraction 1");
-        var fraction2 = FractionState.CreateNew("Fraction 2");
+        var fraction1 = FractionState.CreateNew("Fraction 1", "Player 1", "#FF0000");
+        var fraction2 = FractionState.CreateNew("Fraction 2", "Player 2", "#00FF00");
         battleState.AddFraction(fraction1);
         battleState.AddFraction(fraction2);
 

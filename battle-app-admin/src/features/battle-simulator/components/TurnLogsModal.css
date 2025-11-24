@@ -1,0 +1,371 @@
+/* ===== GŁÓWNE STYLE MODALA ===== */
+.log-section {
+  background: linear-gradient(145deg, rgba(22, 33, 62, 0.5), rgba(15, 52, 96, 0.3));
+  border: 1px solid rgba(52, 152, 219, 0.3);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.log-section-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(52, 152, 219, 0.3);
+  letter-spacing: 0.5px;
+}
+
+/* ===== NAWIGACJA TUR ===== */
+.turn-navigation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(15, 52, 96, 0.6);
+  padding: 0.5rem 1.5rem;
+  border-radius: 25px;
+  border: 1px solid rgba(52, 152, 219, 0.4);
+}
+
+.turn-nav-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.turn-nav-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5dade2, #3498db);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.5);
+}
+
+.turn-nav-btn:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.turn-indicator {
+  color: #eee;
+  font-weight: bold;
+  font-size: 1.1rem;
+  min-width: 140px;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== STATYSTYKI ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 2px solid;
+  background: linear-gradient(135deg, rgba(22, 33, 62, 0.8), rgba(15, 52, 96, 0.6));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-move {
+  border-color: #3498db;
+  color: #5dade2;
+}
+
+.stat-hit {
+  border-color: #2ecc71;
+  color: #58d68d;
+}
+
+.stat-damage {
+  border-color: #e74c3c;
+  color: #ec7063;
+}
+
+.stat-destroyed {
+  border-color: #e67e22;
+  color: #f39c12;
+}
+
+/* ===== TABELE LOGÓW ===== */
+.log-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.log-table-header {
+  display: grid;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(52, 152, 219, 0.2);
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #5dade2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.log-table-row {
+  display: grid;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid;
+  align-items: center;
+}
+
+.log-table-row:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Layout dla ruchów statków */
+.log-section:has(.log-move) .log-table-header,
+.log-section:has(.log-move) .log-table-row {
+  grid-template-columns: 200px 1fr;
+}
+
+/* Layout dla ataków (lasery/rakiety) */
+.log-section:has(.log-hit, .log-miss) .log-table-header,
+.log-section:has(.log-hit, .log-miss) .log-table-row {
+  grid-template-columns: 60px 180px 180px 1fr;
+}
+
+/* Layout dla obrażeń */
+.log-section:has(.log-damage) .log-table-header,
+.log-section:has(.log-damage) .log-table-row {
+  grid-template-columns: 180px 100px 1fr;
+}
+
+/* Layout dla zniszczonych */
+.log-section:has(.log-destroyed) .log-table-header,
+.log-section:has(.log-destroyed) .log-table-row {
+  grid-template-columns: 60px 180px 1fr;
+}
+
+/* Kolumny */
+.col-icon {
+  font-size: 1.3rem;
+  text-align: center;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+.col-ship,
+.col-attacker,
+.col-target {
+  font-weight: 600;
+  color: #5dade2;
+}
+
+.col-action,
+.col-result {
+  color: #eee;
+}
+
+.col-dmg {
+  font-weight: bold;
+  color: #e74c3c;
+  font-size: 1.05rem;
+}
+
+.col-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Typy logów */
+.log-move {
+  border-left-color: #3498db;
+  background: rgba(52, 152, 219, 0.1);
+}
+
+.log-hit {
+  border-left-color: #2ecc71;
+  background: rgba(46, 204, 113, 0.1);
+}
+
+.log-miss {
+  border-left-color: #95a5a6;
+  background: rgba(149, 165, 166, 0.1);
+  opacity: 0.8;
+}
+
+.log-damage {
+  border-left-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+}
+
+.log-destroyed {
+  border-left-color: #e67e22;
+  background: rgba(230, 126, 34, 0.15);
+  font-weight: bold;
+}
+
+/* Style dla statystyk inline */
+.stat-hp,
+.stat-shield,
+.stat-armor {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.stat-hp {
+  color: #e74c3c;
+  border-color: rgba(231, 76, 60, 0.4);
+}
+
+.stat-shield {
+  color: #3498db;
+  border-color: rgba(52, 152, 219, 0.4);
+}
+
+.stat-armor {
+  color: #95a5a6;
+  border-color: rgba(149, 165, 166, 0.4);
+}
+
+/* ===== PRZYCISKI ===== */
+.btn-close-logs {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-close-logs:hover {
+  background: linear-gradient(135deg, #ec7063, #e74c3c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(231, 76, 60, 0.5);
+}
+
+/* ===== LOADING SPINNER ===== */
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(52, 152, 219, 0.2);
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSYWNOŚĆ ===== */
+@media (max-width: 1024px) {
+  .log-section:has(.log-hit, .log-miss) .log-table-header,
+  .log-section:has(.log-hit, .log-miss) .log-table-row {
+    grid-template-columns: 50px 140px 140px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .turn-navigation {
+    padding: 0.5rem 1rem;
+  }
+  
+  .turn-indicator {
+    font-size: 0.95rem;
+    min-width: 120px;
+  }
+
+  /* Uproszczone layouty na mobile */
+  .log-section:has(.log-hit, .log-miss) .log-table-header,
+  .log-section:has(.log-hit, .log-miss) .log-table-row {
+    grid-template-columns: 40px 1fr 120px;
+  }
+
+  .log-section:has(.log-damage) .log-table-header,
+  .log-section:has(.log-damage) .log-table-row {
+    grid-template-columns: 1fr 100px;
+  }
+
+  .log-section:has(.log-move) .log-table-header,
+  .log-section:has(.log-move) .log-table-row {
+    grid-template-columns: 140px 1fr;
+  }
+
+  .col-attacker,
+  .col-target {
+    display: none;
+  }
+
+  .col-stats {
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}

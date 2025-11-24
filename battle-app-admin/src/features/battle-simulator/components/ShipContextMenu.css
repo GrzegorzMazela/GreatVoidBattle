@@ -1,0 +1,277 @@
+.ship-context-menu {
+  position: fixed;
+  background: linear-gradient(135deg, #2a2a3e 0%, #1f1f2e 100%);
+  border: 2px solid #4CAF50;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  color: white;
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.context-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.context-menu-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #4CAF50;
+}
+
+.context-menu-weapons-compact {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.weapon-btn-compact {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.weapon-btn-compact:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.weapon-btn-compact.active {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4CAF50;
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+}
+
+.weapon-btn-compact.disabled,
+.weapon-btn-compact:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.weapon-btn-compact .weapon-icon {
+  font-size: 24px;
+}
+
+.weapon-count-compact {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.weapon-btn-compact.disabled .weapon-count-compact {
+  color: #F44336;
+}
+
+.context-menu-hint-compact {
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  background: rgba(76, 175, 80, 0.15);
+  border-left: 3px solid #4CAF50;
+  border-radius: 4px;
+}
+
+.context-menu-hint-compact p {
+  margin: 0;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.weapon-btn-compact.active .weapon-icon {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.context-menu-stats {
+  margin-bottom: 16px;
+}
+
+.context-menu-stats .stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.stat-icon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+.stat-label {
+  flex: 1;
+  color: #ccc;
+}
+
+.stat-value {
+  font-weight: bold;
+  color: white;
+  min-width: 40px;
+  text-align: right;
+}
+
+.context-menu-weapons {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.context-menu-weapons h5 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.weapon-section {
+  margin-bottom: 12px;
+}
+
+.weapon-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.weapon-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.weapon-btn.active {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4CAF50;
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+}
+
+.weapon-btn.disabled,
+.weapon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.weapon-icon {
+  font-size: 20px;
+}
+
+.weapon-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+}
+
+.weapon-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 12px;
+  margin-top: 4px;
+  padding-left: 36px;
+}
+
+.weapon-count span {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.weapon-count span.depleted {
+  color: #F44336;
+}
+
+.weapon-hint {
+  color: #aaa;
+  font-size: 11px;
+  font-weight: normal;
+  margin-top: 2px;
+}
+
+.context-menu-hint {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(76, 175, 80, 0.15);
+  border-left: 3px solid #4CAF50;
+  border-radius: 4px;
+}
+
+.context-menu-hint p {
+  margin: 0;
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* Animacja migania dla aktywnego trybu */
+.weapon-btn.active .weapon-icon {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}

@@ -1,0 +1,214 @@
+.weapon-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.weapon-dialog {
+  background: linear-gradient(135deg, #2a2a3e 0%, #1f1f2e 100%);
+  border: 2px solid #4CAF50;
+  border-radius: 12px;
+  padding: 0;
+  min-width: 350px;
+  max-width: 450px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.weapon-dialog-header {
+  background: rgba(76, 175, 80, 0.2);
+  border-bottom: 1px solid rgba(76, 175, 80, 0.3);
+  padding: 16px 20px;
+  border-radius: 10px 10px 0 0;
+}
+
+.weapon-dialog-header h3 {
+  margin: 0;
+  color: #4CAF50;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weapon-dialog-icon {
+  font-size: 24px;
+}
+
+.weapon-dialog-content {
+  padding: 24px 20px;
+}
+
+.target-info {
+  margin: 0 0 20px 0;
+  color: #ccc;
+  font-size: 14px;
+}
+
+.target-info strong {
+  color: #fff;
+}
+
+.count-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.count-selector label {
+  color: #aaa;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.count-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.count-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(76, 175, 80, 0.5);
+  background: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.count-btn:hover:not(:disabled) {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+  transform: scale(1.05);
+}
+
+.count-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.count-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.count-controls input[type="number"] {
+  width: 80px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(76, 175, 80, 0.5);
+  border-radius: 8px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  padding: 0;
+}
+
+.count-controls input[type="number"]:focus {
+  outline: none;
+  border-color: #4CAF50;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Ukryj strzałki w input number */
+.count-controls input[type="number"]::-webkit-inner-spin-button,
+.count-controls input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.count-controls input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.count-info {
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+}
+
+.weapon-dialog-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dialog-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.confirm-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

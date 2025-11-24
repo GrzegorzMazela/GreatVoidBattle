@@ -5,10 +5,9 @@ namespace GreatVoidBattle.Application.Events.Handler;
 
 public class AddFractionEventHandler : BasePreparationEventHandler<AddFractionEvent>
 {
-
     public override Task HandlePreparationEventAsync(AddFractionEvent battleEvent, BattleState battleState)
     {
-        battleState.AddFraction(FractionState.CreateNew(battleEvent.Name));
+        battleState.AddFraction(FractionState.CreateNew(battleEvent.Name, battleEvent.PlayerName, battleEvent.FractionColor));
         return Task.CompletedTask;
     }
 }

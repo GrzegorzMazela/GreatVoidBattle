@@ -1,0 +1,27 @@
+services:
+  great-void-battle-api:
+    image: drazel/great-void-battle-api:latest
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      Mongo__ConnectionString: "mongodb://mongodb:27017/warehouse"
+    depends_on:
+      - mongodb
+
+  great-void-battle-app:
+    image: drazel/great-void-battle-app:latest
+    ports:
+      - "4000:80"
+    depends_on:
+      - great-void-battle-api
+
+  mongodb:
+    image: mongodb/mongodb-community-server:7.0.25-ubi9
+    ports:
+      - '27017:27017'
+    volumes:
+      - dbdata7:/data/db
+volumes:
+  dbdata7:

@@ -2,6 +2,7 @@
 using GreatVoidBattle.Application.Events.Handler;
 using GreatVoidBattle.Application.Factories;
 using GreatVoidBattle.Core.Domains;
+using System.Collections.Generic;
 
 namespace GreatVoidBattle.Application.Managers;
 
@@ -10,9 +11,9 @@ public class BattleManager
     public Guid BattleId => _battleState.BattleId;
     public BattleState BattleState => _battleState;
     public IReadOnlyList<BattleEvent> Events => _events.AsReadOnly();
-    private BattleState _battleState;
-    private List<BattleEvent> _events = new();
-    private EventDispatcher _eventDispatcher = new();
+    private readonly BattleState _battleState;
+    private readonly List<BattleEvent> _events = [];
+    private readonly EventDispatcher _eventDispatcher = new();
 
     public BattleManager(BattleState battleState)
     {

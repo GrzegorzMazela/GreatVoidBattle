@@ -1,7 +1,7 @@
 ﻿using GreatVoidBattle.Application.Events.Base;
 using GreatVoidBattle.Core.Domains.Enums;
 
-namespace GreatVoidBattle.Events;
+namespace GreatVoidBattle.Application.Events;
 
 public class AddFractionShipEvent : BattleEvent
 {

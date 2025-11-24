@@ -1,0 +1,121 @@
+/* Przyciski zoom */
+.zoom-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.zoom-btn {
+  width: 40px;
+  height: 40px;
+  background: rgba(42, 42, 42, 0.95);
+  border: 2px solid #4CAF50;
+  border-radius: 8px;
+  color: #4CAF50;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.zoom-btn:hover {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #66BB6A;
+  transform: scale(1.05);
+}
+
+.zoom-btn:active {
+  transform: scale(0.95);
+}
+
+/* Tooltip dla rakiet */
+.missile-tooltip {
+  background: linear-gradient(135deg, rgba(30, 30, 45, 0.98), rgba(40, 40, 60, 0.98));
+  border: 2px solid rgba(255, 150, 0, 0.6);
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.missile-tooltip-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff9800;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 150, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.missile-tooltip-item {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.missile-tooltip-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.missile-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 3px 0;
+  font-size: 12px;
+}
+
+.missile-label {
+  color: rgba(255, 255, 255, 0.6);
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.missile-value {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+}
+
+.missile-fraction {
+  font-weight: 500;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+/* Tooltip dla okrętów */
+.ship-tooltip {
+  background: linear-gradient(135deg, rgba(30, 30, 45, 0.98), rgba(40, 40, 60, 0.98));
+  border: 2px solid rgba(76, 175, 80, 0.6);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  min-width: 180px;
+}
+
+.ship-tooltip-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ship-tooltip-damage {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}

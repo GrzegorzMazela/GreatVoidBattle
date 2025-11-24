@@ -18,7 +18,7 @@ public class AddFractionEventHandlerTests
     public AddFractionEventHandlerTests()
     {
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
-        var battleState = BattleState.CreateNew(battleEvent.Name);
+        var battleState = BattleState.CreateNew(battleEvent.Name, 500, 500);
         _battleManager = new BattleManager(battleState);
     }
 

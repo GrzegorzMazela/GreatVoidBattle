@@ -21,9 +21,9 @@ public class SetShipPositionEventHandlerTests
     public SetShipPositionEventHandlerTests()
     {
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
-        var battleState = BattleState.CreateNew(battleEvent.Name);
-        var fraction1 = FractionState.CreateNew("Fraction 1");
-        var fraction2 = FractionState.CreateNew("Fraction 2");
+        var battleState = BattleState.CreateNew(battleEvent.Name, 500, 500);
+        var fraction1 = FractionState.CreateNew("Fraction 1", "Player 1", "#FF0000");
+        var fraction2 = FractionState.CreateNew("Fraction 2", "Player 2", "#00FF00");
         battleState.AddFraction(fraction1);
         _fraction1Id = fraction1.FractionId;
         battleState.AddFraction(fraction2);
@@ -34,6 +34,7 @@ public class SetShipPositionEventHandlerTests
     private Guid CreateShip(Guid fractionId, double posX = 0, double posY = 0)
     {
         var ship = ShipState.Create(
+            fractionId: fractionId,
             name: "Test Ship",
             type: ShipType.Corvette,
             positionX: posX,
@@ -45,7 +46,8 @@ public class SetShipPositionEventHandlerTests
             numberOfModules: 1,
             modules: [
                 ModuleState.Create(new List<SystemSlot> { SystemSlot.Create(WeaponType.Laser) })
-                ]
+                ],
+            battleLog: new BattleLog()
         );
         _battleManager.BattleState.AddFractionShip(fractionId, ship);
         return ship.ShipId;
@@ -75,8 +77,8 @@ public class SetShipPositionEventHandlerTests
             .First(f => f.FractionId == _fraction1Id)
             .Ships.First(s => s.ShipId == shipId);
 
-        ship.PositionX.ShouldBe(x);
-        ship.PositionY.ShouldBe(y);
+        ship.Position.X.ShouldBe(x);
+        ship.Position.Y.ShouldBe(y);
     }
 
     [Fact]
@@ -103,8 +105,9 @@ public class SetShipPositionEventHandlerTests
         // Act
         await _battleManager.ApplyEventAsync(@startBattlerEvent);
 
-        //zmien to tak aby sprawdzalo czy zwraca dobry blad: 
-        await Should.ThrowAsync<WrongBattleStatusException>(async () => await _battleManager.ApplyEventAsync(@event));
+        //zmien to tak aby sprawdzalo czy zwraca dobry blad:
+        var exception = await Should.ThrowAsync<Exception>(async () => await _battleManager.ApplyEventAsync(@event));
+        (exception.InnerException ?? exception).ShouldBeOfType<WrongBattleStatusException>();
     }
 
     [Fact]
@@ -134,7 +137,6 @@ public class SetShipPositionEventHandlerTests
             NewPositionY = y2
         };
 
-
         // Act
         await _battleManager.ApplyEventAsync(@event1);
         await _battleManager.ApplyEventAsync(@event2);
@@ -144,14 +146,14 @@ public class SetShipPositionEventHandlerTests
             .First(f => f.FractionId == _fraction1Id)
             .Ships.First(s => s.ShipId == ship1Id);
 
-        ship1.PositionX.ShouldBe(x1);
-        ship1.PositionY.ShouldBe(y1);
+        ship1.Position.X.ShouldBe(x1);
+        ship1.Position.Y.ShouldBe(y1);
 
         var ship2 = _battleManager.BattleState.Fractions
            .First(f => f.FractionId == _fraction2Id)
            .Ships.First(s => s.ShipId == ship2Id);
 
-        ship2.PositionX.ShouldBe(x2);
-        ship2.PositionY.ShouldBe(y2);
+        ship2.Position.X.ShouldBe(x2);
+        ship2.Position.Y.ShouldBe(y2);
     }
 }

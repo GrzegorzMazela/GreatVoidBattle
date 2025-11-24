@@ -1,7 +1,7 @@
 ﻿using GreatVoidBattle.Application.Events.Base;
-namespace GreatVoidBattle.Application.Events
+
+namespace GreatVoidBattle.Application.Events;
+
+public class StartBattleEvent : BattleEvent
 {
-    public class StartBattleEvent : BattleEvent
-    {
-    }
 }

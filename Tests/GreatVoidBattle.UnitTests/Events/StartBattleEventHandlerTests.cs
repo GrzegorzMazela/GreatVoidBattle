@@ -3,10 +3,7 @@ using GreatVoidBattle.Application.Exceptions;
 using GreatVoidBattle.Application.Managers;
 using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
-using Microsoft.Extensions.Logging;
 using Shouldly;
-using System;
-using System.Threading.Tasks;
 
 namespace GreatVoidBattle.UnitTests.Events;
 
@@ -16,7 +13,7 @@ public class StartBattleEventHandlerTests
     public async Task StartBattleEventHandler_StartsBattle_Success()
     {
         // Arrange
-        var battleState = BattleState.CreateNew("Test Battle");
+        var battleState = BattleState.CreateNew("Test Battle", 500, 500);
         var battleManager = new BattleManager(battleState);
 
         // Ensure initial status is Preparation
@@ -38,7 +35,7 @@ public class StartBattleEventHandlerTests
     public async Task StartBattleEventHandler_DoesNotChangeStatusIfAlreadyStarted()
     {
         // Arrange
-        var battleState = BattleState.CreateNew("Test Battle");
+        var battleState = BattleState.CreateNew("Test Battle", 500, 500);
         battleState.StartBattle(); // Set status to InProgress
         var battleManager = new BattleManager(battleState);
 
@@ -47,10 +44,8 @@ public class StartBattleEventHandlerTests
             BattleId = battleManager.BattleId
         };
 
-
-
         // Assert
-        //zmien to tak aby sprawdzalo czy zwraca dobry blad: 
-        await Should.ThrowAsync<WrongBattleStatusException>(async () => await battleManager.ApplyEventAsync(startBattleEvent));
+        var exception = await Should.ThrowAsync<Exception>(async () => await battleManager.ApplyEventAsync(startBattleEvent));
+        (exception.InnerException ?? exception).ShouldBeOfType<WrongBattleStatusException>();
     }
 }

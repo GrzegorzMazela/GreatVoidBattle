@@ -12,7 +12,7 @@ public class CreateBattleEventTests
     {
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
 
-        var battleState = BattleState.CreateNew(battleEvent.Name);
+        var battleState = BattleState.CreateNew(battleEvent.Name, 500, 500);
         var battleManager = new BattleManager(battleState);
 
         battleManager.BattleId.ShouldNotBe(Guid.Empty);
