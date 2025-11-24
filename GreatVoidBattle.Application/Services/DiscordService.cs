@@ -7,9 +7,13 @@ namespace GreatVoidBattle.Application.Services;
 public interface IDiscordService
 {
     string GetAuthorizationUrl(string state);
+
     Task<DiscordTokenResponse?> ExchangeCodeForTokenAsync(string code);
+
     Task<DiscordUser?> GetUserInfoAsync(string accessToken);
+
     Task<List<DiscordGuildMember>?> GetGuildMemberAsync(string userId, string accessToken);
+
     Task<List<DiscordRole>?> GetGuildRolesAsync(string botToken);
 }
 
@@ -30,7 +34,7 @@ public class DiscordService : IDiscordService
         _clientSecret = configuration["Discord:ClientSecret"] ?? throw new Exception("Discord:ClientSecret not configured");
         _redirectUri = configuration["Discord:RedirectUri"] ?? throw new Exception("Discord:RedirectUri not configured");
         _guildId = configuration["Discord:GuildId"] ?? throw new Exception("Discord:GuildId not configured");
-        
+
         _httpClient.BaseAddress = new Uri("https://discord.com/api/v10/");
     }
 
@@ -69,9 +73,10 @@ public class DiscordService : IDiscordService
 
     public async Task<DiscordUser?> GetUserInfoAsync(string accessToken)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        
-        var response = await _httpClient.GetAsync("users/@me");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "users/@me");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        var response = await _httpClient.SendAsync(request);
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -84,14 +89,15 @@ public class DiscordService : IDiscordService
 
     public async Task<List<DiscordGuildMember>?> GetGuildMemberAsync(string userId, string accessToken)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        
-        var response = await _httpClient.GetAsync($"users/@me/guilds/{_guildId}/member");
-        
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"users/@me/guilds/{_guildId}/member");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        var response = await _httpClient.SendAsync(request);
+
         var json = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"Discord API Response Status: {response.StatusCode}");
         Console.WriteLine($"Discord API Response Body: {json}");
-        
+
         if (!response.IsSuccessStatusCode)
         {
             Console.WriteLine($"Failed to fetch guild member. Status: {response.StatusCode}, Response: {json}");
@@ -102,17 +108,17 @@ public class DiscordService : IDiscordService
         {
             PropertyNameCaseInsensitive = true
         });
-        
+
         Console.WriteLine($"Deserialized member roles count: {member?.Roles?.Count ?? 0}");
         Console.WriteLine($"Deserialized member roles: {string.Join(", ", member?.Roles ?? new List<string>())}");
-        
+
         return member != null ? new List<DiscordGuildMember> { member } : null;
     }
 
     public async Task<List<DiscordRole>?> GetGuildRolesAsync(string botToken)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bot", botToken);
-        
+
         var response = await _httpClient.GetAsync($"guilds/{_guildId}/roles");
         if (!response.IsSuccessStatusCode)
             return null;
@@ -158,4 +164,3 @@ public class DiscordRole
     public int Color { get; set; }
     public int Position { get; set; }
 }
-

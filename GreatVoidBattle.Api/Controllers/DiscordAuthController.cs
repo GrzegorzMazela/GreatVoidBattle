@@ -76,11 +76,15 @@ public class DiscordAuthController : ControllerBase
             }
 
             // Pobierz role użytkownika z serwera Discord
-            var guildMembers = await _discordService.GetGuildMemberAsync(user.Id, tokenResponse.Access_Token);
-            var roles = guildMembers?.FirstOrDefault()?.Roles ?? new List<string>();
+            var guildMember = (await _discordService.GetGuildMemberAsync(user.Id, tokenResponse.Access_Token))!
+                .FirstOrDefault();
+            if (guildMember is null)
+            {
+                return BadRequest(new { message = "User is not a member of the guild" });
+            }
 
             // Mapuj role Discord na role aplikacji
-            var userDto = await MapDiscordUserToDto(user, roles);
+            var userDto = await MapDiscordUserToDto(user, guildMember);
 
             var response = new DiscordAuthResponseDto
             {
@@ -123,10 +127,13 @@ public class DiscordAuthController : ControllerBase
                 return Ok(new { valid = false, message = "Invalid token" });
             }
 
-            var guildMembers = await _discordService.GetGuildMemberAsync(user.Id, token);
-            var roles = guildMembers?.FirstOrDefault()?.Roles ?? new List<string>();
+            var guildMember = (await _discordService.GetGuildMemberAsync(user.Id, token))!.FirstOrDefault();
+            if (guildMember is null)
+            {
+                return Ok(new { valid = false, message = "User is not a member of the guild" });
+            }
 
-            var userDto = await MapDiscordUserToDto(user, roles);
+            var userDto = await MapDiscordUserToDto(user, guildMember);
 
             return Ok(new
             {
@@ -158,10 +165,15 @@ public class DiscordAuthController : ControllerBase
                 return Unauthorized(new { message = "Invalid token" });
             }
 
-            var guildMembers = await _discordService.GetGuildMemberAsync(user.Id, token);
-            var roles = guildMembers?.FirstOrDefault()?.Roles ?? new List<string>();
+            var guildMember = (await _discordService.GetGuildMemberAsync(user.Id, token))!
+                .FirstOrDefault();
 
-            var userDto = await MapDiscordUserToDto(user, roles);
+            if (guildMember is null)
+            {
+                return Unauthorized(new { message = "User is not a member of the guild" });
+            }
+
+            var userDto = await MapDiscordUserToDto(user, guildMember);
 
             return Ok(userDto);
         }
@@ -172,10 +184,10 @@ public class DiscordAuthController : ControllerBase
         }
     }
 
-    private async Task<DiscordUserDto> MapDiscordUserToDto(DiscordUser user, List<string> roleIds)
+    private async Task<DiscordUserDto> MapDiscordUserToDto(DiscordUser user, DiscordGuildMember discordGuildMember)
     {
         // Log role IDs for debugging
-        _logger.LogInformation("User {UserId} has role IDs: {RoleIds}", user.Id, string.Join(", ", roleIds));
+        _logger.LogInformation("User {UserId} has role IDs: {RoleIds}", user.Id, string.Join(", ", discordGuildMember.Roles));
 
         // Pobierz mapowanie ID ról na nazwy
         var roleMapping = _configuration.GetSection("Discord:RoleMapping")
@@ -192,7 +204,7 @@ public class DiscordAuthController : ControllerBase
         _logger.LogInformation("Role Mapping: {Mapping}", string.Join(", ", roleMapping.Select(kvp => $"{kvp.Key}={kvp.Value}")));
 
         // Mapuj ID ról na nazwy
-        var roleNames = roleIds
+        var roleNames = discordGuildMember.Roles
             .Select(roleId => roleMapping.TryGetValue(roleId, out var name) ? name : null)
             .Where(name => !string.IsNullOrEmpty(name))
             .Cast<string>()
@@ -201,7 +213,7 @@ public class DiscordAuthController : ControllerBase
         _logger.LogInformation("Mapped role names: {RoleNames}", string.Join(", ", roleNames));
 
         // Sprawdź czy użytkownik ma rolę admina (po ID lub nazwie)
-        var isAdmin = roleIds.Contains(adminRoleId) ||
+        var isAdmin = discordGuildMember.Roles.Contains(adminRoleId) ||
                       roleNames.Any(r => r != null && r.Equals(adminRoleName, StringComparison.OrdinalIgnoreCase));
 
         _logger.LogInformation("User {UserId} isAdmin: {IsAdmin}", user.Id, isAdmin);
@@ -221,7 +233,7 @@ public class DiscordAuthController : ControllerBase
         return new DiscordUserDto
         {
             Id = user.Id,
-            Username = user.Username,
+            Username = discordGuildMember.Nick,
             Discriminator = user.Discriminator,
             Avatar = user.Avatar,
             Email = user.Email,

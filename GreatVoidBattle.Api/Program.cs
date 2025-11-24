@@ -34,7 +34,15 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
+    {
+        Title = "Great Void Battle API",
+        Version = "v1",
+        Description = "API for Great Void Battle game"
+    });
+});
 builder.Services.AddMemoryCache();
 builder.Services.AddTransient<BattleManagerFactory>();
 
@@ -44,7 +52,7 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:5173", 
+                "http://localhost:5173",
                 "http://localhost:5174",
                 "http://localhost:5175",
                 "http://localhost:5112",
