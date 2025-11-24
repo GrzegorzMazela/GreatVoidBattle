@@ -17,4 +17,9 @@ public class ShipDto
     public int NumberOfMissiles { get; set; }
     public int NumberOfLasers { get; set; }
     public int NumberOfPointsDefense { get; set; }
+    
+    // Weapon ranges (from Const)
+    public int MissileMaxRange { get; set; }
+    public int MissileEffectiveRange { get; set; }
+    public int LaserMaxRange { get; set; }
 }

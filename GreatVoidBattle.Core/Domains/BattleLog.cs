@@ -81,6 +81,20 @@ public class BattleLog
             .Where(log => log.FractionId == fractionId || log.TargetFractionId == fractionId)
             .ToList();
     }
+
+    /// <summary>
+    /// Gets all turn logs for a specific turn (admin view).
+    /// </summary>
+    public List<TurnLogEntry> GetTurnLogs(int turnNumber)
+    {
+        var key = turnNumber.ToString();
+        if (!_turnLogs.ContainsKey(key))
+        {
+            return new List<TurnLogEntry>();
+        }
+
+        return _turnLogs[key];
+    }
 }
 
 public record LogRecord(string log, string adminLog);
@@ -97,7 +111,7 @@ public class TurnLogEntry
     public Guid? TargetShipId { get; set; }
     public string? TargetShipName { get; set; }
     public string Message { get; set; } = string.Empty;
-    public Dictionary<string, object> Details { get; set; } = new();
+    public string? AdminLog { get; set; }
 }
 
 public enum TurnLogType
@@ -105,6 +119,7 @@ public enum TurnLogType
     ShipMove,
     LaserHit,
     LaserMiss,
+    MissileFired,
     MissileHit,
     MissileMiss,
     MissileIntercepted,

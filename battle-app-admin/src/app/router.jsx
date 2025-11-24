@@ -4,6 +4,7 @@ import SimulatorLayout from './SimulatorLayout';
 import BattlesList from '../features/admin/BattlesList';
 import BattleForm from '../features/admin/BattleForm';
 import BattleDetails from '../features/admin/BattleDetails';
+import BattleAdminLogs from '../features/admin/BattleAdminLogs';
 import FractionForm from '../features/admin/FractionForm';
 import ShipsTable from '../features/admin/ShipsTable';
 import ShipForm from '../features/admin/ShipForm';
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { index: true, element: <BattlesList /> },
       { path: 'new', element: <BattleForm /> },
       { path: ':battleId', element: <BattleDetails /> },
+      { path: ':battleId/admin-logs', element: <BattleAdminLogs /> },
       { path: ':battleId/fractions/new', element: <FractionForm /> },
       { path: ':battleId/fractions/:fractionId/edit', element: <FractionForm /> },
       { path: ':battleId/fractions/:fractionId/ships', element: <ShipsTable /> },

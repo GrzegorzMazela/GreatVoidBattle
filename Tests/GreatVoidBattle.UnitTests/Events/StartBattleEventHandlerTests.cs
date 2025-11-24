@@ -45,7 +45,7 @@ public class StartBattleEventHandlerTests
         };
 
         // Assert
-        //zmien to tak aby sprawdzalo czy zwraca dobry blad:
-        await Should.ThrowAsync<WrongBattleStatusException>(async () => await battleManager.ApplyEventAsync(startBattleEvent));
+        var exception = await Should.ThrowAsync<Exception>(async () => await battleManager.ApplyEventAsync(startBattleEvent));
+        (exception.InnerException ?? exception).ShouldBeOfType<WrongBattleStatusException>();
     }
 }

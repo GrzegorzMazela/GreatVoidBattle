@@ -22,8 +22,8 @@ public class SetShipPositionEventHandlerTests
     {
         var battleEvent = new CreateBattleEvent { Name = "Test Battle" };
         var battleState = BattleState.CreateNew(battleEvent.Name, 500, 500);
-        var fraction1 = FractionState.CreateNew("Fraction 1", battleState.BattleLog);
-        var fraction2 = FractionState.CreateNew("Fraction 2", battleState.BattleLog);
+        var fraction1 = FractionState.CreateNew("Fraction 1", "Player 1", "#FF0000");
+        var fraction2 = FractionState.CreateNew("Fraction 2", "Player 2", "#00FF00");
         battleState.AddFraction(fraction1);
         _fraction1Id = fraction1.FractionId;
         battleState.AddFraction(fraction2);
@@ -106,7 +106,8 @@ public class SetShipPositionEventHandlerTests
         await _battleManager.ApplyEventAsync(@startBattlerEvent);
 
         //zmien to tak aby sprawdzalo czy zwraca dobry blad:
-        await Should.ThrowAsync<WrongBattleStatusException>(async () => await _battleManager.ApplyEventAsync(@event));
+        var exception = await Should.ThrowAsync<Exception>(async () => await _battleManager.ApplyEventAsync(@event));
+        (exception.InnerException ?? exception).ShouldBeOfType<WrongBattleStatusException>();
     }
 
     [Fact]

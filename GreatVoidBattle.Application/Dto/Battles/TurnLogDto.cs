@@ -12,7 +12,7 @@ public class TurnLogDto
     public Guid? TargetShipId { get; set; }
     public string? TargetShipName { get; set; }
     public string Message { get; set; } = string.Empty;
-    public Dictionary<string, object> Details { get; set; } = new();
+    public string? AdminLog { get; set; }
 }
 
 public class TurnLogsResponseDto

@@ -65,3 +65,10 @@ export const getTurnLogs = async (battleId, fractionId, turnNumber, token) => {
   );
   return response.data;
 };
+
+export const getAdminTurnLogs = async (battleId, turnNumber) => {
+  const response = await api.get(
+    `/api/battles/${battleId}/admin-logs/${turnNumber}`
+  );
+  return response.data;
+};
