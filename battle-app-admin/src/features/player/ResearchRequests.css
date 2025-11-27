@@ -1,0 +1,12 @@
+.research-requests {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.research-requests .chakra-card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.research-requests .chakra-badge {
+  font-size: 0.75rem;
+}

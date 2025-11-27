@@ -19,4 +19,10 @@
     <ProjectReference Include="..\GreatVoidBattle.Infrastructure\GreatVoidBattle.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="technologies.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

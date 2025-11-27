@@ -70,6 +70,21 @@
   background: linear-gradient(135deg, rgba(45, 53, 97, 0.7) 0%, rgba(61, 47, 91, 0.7) 100%);
 }
 
+.sidebar-item.submenu {
+  font-size: 14px;
+  padding: 8px 12px;
+  margin-left: 8px;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-item.submenu:hover {
+  transform: translateX(2px);
+}
+
+.sidebar-item.submenu.active {
+  border-left-color: rgba(45, 53, 97, 0.8);
+}
+
 /* Scrollbar styling */
 .sidebar::-webkit-scrollbar {
   width: 6px;

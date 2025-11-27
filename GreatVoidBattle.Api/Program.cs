@@ -1,13 +1,14 @@
-using GreatVoidBattle.Application.Hubs;
+using GreatVoidBattle.Api.Middleware;
+using GreatVoidBattle.Api.Services;
 using GreatVoidBattle.Application.Factories;
+using GreatVoidBattle.Application.Hubs;
+using GreatVoidBattle.Application.Repositories;
 using GreatVoidBattle.Application.Services;
 using GreatVoidBattle.Infrastructure;
 using GreatVoidBattle.Infrastructure.Repository;
-using GreatVoidBattle.Application.Repositories;
-using GreatVoidBattle.Api.Middleware;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Bson;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,13 @@ var mongoDbName = builder.Configuration.GetValue<string>("Mongo:Database") ?? "g
 builder.Services.AddSingleton(sp => MongoDbFactory.Create(mongoConn, mongoDbName));
 builder.Services.AddScoped<IBattleStateRepository, BattleStateRepository>();
 builder.Services.AddScoped<IBattleEventRepository, BattleEventRepository>();
+builder.Services.AddScoped<IFractionGameStateRepository, FractionGameStateRepository>();
+builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
+builder.Services.AddSingleton<TechnologyConfigService>();
+builder.Services.AddScoped<GameStateService>();
+
+// Game initialization service - runs on startup
+builder.Services.AddHostedService<GameInitializationService>();
 
 // Discord OAuth
 builder.Services.AddHttpClient<IDiscordService, DiscordService>();

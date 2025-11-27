@@ -1,0 +1,970 @@
+{
+  "technologies": [
+    {
+      "id": "t1_crypto_basic",
+      "name": "Kryptoanaliza poziomu podstawowego",
+      "description": "Możliwość przechwytywania prostych komunikatów wroga na polu bitwy",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_orbital_mapping",
+      "name": "Mapowanie orbitalne",
+      "description": "Pierwsze skanery do tworzenia map terenu planety",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_composite_armor",
+      "name": "Pancerze kompozytowe",
+      "description": "Lekkie zbroje piechoty zapewniające minimalną ochronę",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_armor_mk1",
+      "name": "Pancerz Mk I",
+      "description": "Pierwsza generacja wzmocnionego pancerza okrętów zwiększa jego skuteczność o 25%",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_shields_mk1",
+      "name": "Tarcze energetyczne Mk I",
+      "description": "Pierwsza generacja wzmocnionych tarcz zwiększa ich skuteczność o 25%",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_missiles_mk1",
+      "name": "Wyrzutnie rakiet Mk I",
+      "description": "Zwiększa obrażenia rakiet do 25 (z bazowych 20)",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_lasers_mk1",
+      "name": "Lasery Mk I",
+      "description": "Zwiększa zasięg laserów z 15j do 18j",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_engineering_tools",
+      "name": "Zaawansowane narzędzia inżynieryjne",
+      "description": "Ustawianie barykad/min na powierzchni planet oraz na pokładach okrętów/stacji kosmicznych",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_plasma_cutting",
+      "name": "Systemy cięcia plazmowego",
+      "description": "Przecinanie kadłuba/stref - umożliwia abordaż i wejście do zabarykadowanego budynku",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_drop_pods",
+      "name": "Kapsuły Desantowe",
+      "description": "Bezpośredni zrzut piechoty z orbity na pole bitwy",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_tactical_medical",
+      "name": "Taktyczne Jednostki Medyczne",
+      "description": "Medycy polowi i przenośne zestawy ratunkowe",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_scout_drones",
+      "name": "Drony Zwiadowcze",
+      "description": "Małe drony powietrzne i lądowe do rozpoznania na polu walki",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_planetary_sensors",
+      "name": "Planetarne Systemy Sensorowe",
+      "description": "Naziemne systemy wczesnego ostrzegania",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_tactical_network",
+      "name": "Sieć komunikacyjna klasy taktycznej",
+      "description": "Umożliwia rozkazy awaryjne i koordynację działań jednostek piechoty na polu walki",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_orbital_forts_1",
+      "name": "Fortyfikacje Orbitalne I",
+      "description": "Możliwość budowy do +2 fortów na planetę (max 6 na orbicie). Limit systemowy zwiększa się do 8",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_basic_navigation",
+      "name": "Astronawigacja podstawowa",
+      "description": "Minimalizacja ryzyka zgubienia się podczas podróży międzygwiezdnych",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_system_mapping",
+      "name": "Mapowanie systemowe",
+      "description": "Wykrywanie asteroid, księżyców i obiektów w układzie gwiezdnym przez jednostki badawcze",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_observation_stations",
+      "name": "Stacje obserwacyjne",
+      "description": "Małe posterunki systemowe zwiększające zasięg wykrywania",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_research_modules",
+      "name": "Moduły badawcze w stoczniach",
+      "description": "Odblokowanie możliwości tworzenia statków badawczych",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_night_vision",
+      "name": "Systemy noktowizyjne i termowizja",
+      "description": "Wyposażenie oddziałów pozwalające na skuteczną walkę w nocy",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_encrypted_comms",
+      "name": "Zaszyfrowane łącza polowe",
+      "description": "Odporne na przechwytywanie rozmowy w warunkach bojowych",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_noise_detection",
+      "name": "Systemy detekcji hałasu",
+      "description": "Pomagają wykryć wrogich zwiadowców",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_ballistic_shields",
+      "name": "Tarcze balistyczne",
+      "description": "Klasyczne tarcze ochronne dla oddziałów szturmowych, skuteczne w przypadku otwartego szturmu na pozycje wroga",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_temp_colonies",
+      "name": "Kolonie tymczasowe",
+      "description": "Możliwość stawiania niewielkich baz naukowych i górniczych poza zamieszkałymi systemami",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_destroyer",
+      "name": "Niszczyciel",
+      "description": "Odblokowuje możliwość budowania niszczycieli w stoczni",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_orbital_mining",
+      "name": "Kopalnia Orbitalna",
+      "description": "Odblokowuje budynek – Kopalnie na Asteroidach",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_manual_refineries",
+      "name": "Rafinerie Ręczne",
+      "description": "−10% kosztu budowy budynków podstawowych",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_plasma_drills_mk1",
+      "name": "Wiertnie Plazmowe Mk I",
+      "description": "+5% wydajności kopalń",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_orbital_energy_1",
+      "name": "Energetyka Orbitalna I",
+      "description": "Odblokowuje budynek Elektrownia Orbitalna",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_gas_reactors_mk1",
+      "name": "Reaktory Chłodzone Gazem Mk I",
+      "description": "Koszt budowy elektrowni −10% KE",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_voltage_stabilization",
+      "name": "Systemy Stabilizacji Napięcia",
+      "description": "+5% do globalnej produkcji kredytów energetycznych",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_orbital_protein",
+      "name": "Produkcja Białka Orbitalna",
+      "description": "Wersja orbitalna, +300 żywności/turę",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_green_zones",
+      "name": "Zielone Strefy",
+      "description": "+1% zadowolenia za każdą farmę",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_irrigation",
+      "name": "Techniki Nawadniania",
+      "description": "+5% produkcji żywności na wszystkich planetach",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_basic_docks",
+      "name": "Podstawowe Doki",
+      "description": "+1 doko-miesiąc w stoczni",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_modular_hulls_mk1",
+      "name": "Konstrukcje Modułowe Kadłubów Mk I",
+      "description": "Koszt budowy okrętów −5% KE",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_nanometallurgy_mk1",
+      "name": "Nanohutnictwo Mk I",
+      "description": "Koszt modułów okrętów −5% MIN",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t1_convoy_protection",
+      "name": "Standardy Ochrony Konwojów",
+      "description": "−10% ryzyka strat zasobów w wyniku ataków piratów",
+      "tier": 1,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_spy_satellites",
+      "name": "Satelity zwiadowcze",
+      "description": "Monitorowanie ruchów przeciwnika w obrębie systemu",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_fast_transport",
+      "name": "Szybki transportowiec piechoty",
+      "description": "Prędkość krążownika, koszt jak za niszczyciel",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_spy_network",
+      "name": "Sieć szpiegowska",
+      "description": "Przeciwdziała satelitom przeciwnika",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_exoskeletons",
+      "name": "Egzoszkielety wspomagane",
+      "description": "Zwiększają siłę i wytrzymałość żołnierzy",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_heavy_infantry_weapons",
+      "name": "Ciężka Broń Piechoty",
+      "description": "Przenośne wyrzutnie rakiet, ciężkie karabiny maszynowe, miotacze plazmy",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_fast_shuttles",
+      "name": "Szybkie Wahadłowce",
+      "description": "Małe jednostki zdolne do desantu atmosferycznego i wycofania jednostek w ogniu walki",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_repair_unit",
+      "name": "Jednostka warsztatowa",
+      "description": "Tworzenie jednostki, która potrafi naprawiać uszkodzenia okrętów poza stocznią",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_personal_camo",
+      "name": "Kamuflaż osobisty",
+      "description": "Lekkie systemy maskowania dla zwiadowców",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_energy_redistribution",
+      "name": "Redystrybucja energii okrętów",
+      "description": "Możliwość ograniczonego wzmacniania tarcz/silników/laserów na okrętach floty",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_shields_mk2",
+      "name": "Tarcze energetyczne Mk II",
+      "description": "Druga generacja wzmocnionych tarcz zwiększa ich skuteczność o 50% w stosunku do bazowej pojemności",
+      "tier": 2,
+      "requiredTechnologies": ["t1_shields_mk1"]
+    },
+    {
+      "id": "t2_armor_mk2",
+      "name": "Pancerz Mk II",
+      "description": "Druga generacja wzmocnionego pancerza okrętów zwiększa jego skuteczność o 50% w stosunku do bazowej pojemności",
+      "tier": 2,
+      "requiredTechnologies": ["t1_armor_mk1"]
+    },
+    {
+      "id": "t2_point_defense_mk1",
+      "name": "Obrona punktowa Mk I",
+      "description": "Zwiększa redukcję skuteczności rakiet przeciwnika z 2 PP do 3pp",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_missiles_mk2",
+      "name": "Wyrzutnie rakiet Mk II",
+      "description": "Zwiększa obrażenia rakiet do 30",
+      "tier": 2,
+      "requiredTechnologies": ["t1_missiles_mk1"]
+    },
+    {
+      "id": "t2_lasers_mk2",
+      "name": "Lasery Mk II",
+      "description": "Zwiększa zasięg laserów do 21j",
+      "tier": 2,
+      "requiredTechnologies": ["t1_lasers_mk1"]
+    },
+    {
+      "id": "t2_cruiser",
+      "name": "Krążowniki",
+      "description": "Odblokowanie budowy jednostek średniej klasy (4 moduły)",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_orbital_forts_2",
+      "name": "Fortyfikacje Orbitalne II",
+      "description": "Możliwość budowy do +2 fortów na planetę (max 8). Limit systemowy zwiększa się do 12",
+      "tier": 2,
+      "requiredTechnologies": ["t1_orbital_forts_1"]
+    },
+    {
+      "id": "t2_courier_probe",
+      "name": "Sonda kurierska",
+      "description": "Pozwala na szybsze przekazywanie informacji pomiędzy flotami i planetami",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_anomaly_scanner",
+      "name": "Skaner anomalii",
+      "description": "Statki badawcze zostają wyposażone w moduły do tropienia zjawisk kosmicznych",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_archaeology",
+      "name": "Ekspedycje archeologiczne",
+      "description": "Pozwalają statkom badawczym znajdować starożytne technologie lub bonusy na odkrytych planetach",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_orbital_mines",
+      "name": "Miny orbitalne",
+      "description": "Defensywna technologia, możliwość zastawiania pułapek w systemie lub wokół planety",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_defense_turrets",
+      "name": "Samodzielne wieżyczki obronne",
+      "description": "System obronny wspierający piechotę w defensywie",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_nano_injectors",
+      "name": "Nanowstrzykiwacze medyczne",
+      "description": "Samoczynne uszczelnianie ran, skrócenie czasu leczenia na polu walki",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_trap_detection",
+      "name": "Sprzęt wykrywający pułapki",
+      "description": "Wykrywa miny i bomby zostawione przez wrogich inżynierów",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_orbital_artillery",
+      "name": "Wsparcie artyleryjskie orbitalne",
+      "description": "Pozwala na skoordynowany ostrzał z okrętów zaparkowanych na orbicie w celu osłabienia obrony na powierzchni planety",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_engine_upgrade_mk1",
+      "name": "Ulepszenie silników MK I",
+      "description": "Zwiększa podstawową prędkość okrętów o 1",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_automated_refineries_mk2",
+      "name": "Rafinerie Zautomatyzowane Mk II",
+      "description": "−20% kosztu budowy budynków podstawowych i zaawansowanych",
+      "tier": 2,
+      "requiredTechnologies": ["t1_manual_refineries"]
+    },
+    {
+      "id": "t2_plasma_drills_mk2",
+      "name": "Wiertnie Plazmowe Mk II",
+      "description": "+10% wydajności kopalń Orbitalnych",
+      "tier": 2,
+      "requiredTechnologies": ["t1_plasma_drills_mk1"]
+    },
+    {
+      "id": "t2_redundant_networks",
+      "name": "Sieci Redundantne",
+      "description": "Sabotaż sieci energetycznej ma −50% skuteczności",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_genetic_crops_mk2",
+      "name": "Uprawy Genetyczne Mk II",
+      "description": "Farmy +10% produkcji",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t2_green_zones_2",
+      "name": "Zielone Strefy II",
+      "description": "+2% zadowolenia globalnie",
+      "tier": 2,
+      "requiredTechnologies": ["t1_green_zones"]
+    },
+    {
+      "id": "t2_extended_docks_mk2",
+      "name": "Doki Rozszerzone Mk II",
+      "description": "+2 doko-miesiące",
+      "tier": 2,
+      "requiredTechnologies": ["t1_basic_docks"]
+    },
+    {
+      "id": "t2_modular_hulls_mk2",
+      "name": "Konstrukcje Modułowe Kadłubów Mk II",
+      "description": "Koszt budowy okrętów −10% KE",
+      "tier": 2,
+      "requiredTechnologies": ["t1_modular_hulls_mk1"]
+    },
+    {
+      "id": "t2_nanometallurgy_mk2",
+      "name": "Nanohutnictwo II",
+      "description": "Koszt przebudowy okrętów −10% MIN",
+      "tier": 2,
+      "requiredTechnologies": ["t1_nanometallurgy_mk1"]
+    },
+    {
+      "id": "t2_fortified_convoys_mk2",
+      "name": "Konwoje Ufortyfikowane Mk II",
+      "description": "−25% ryzyka strat zasobów w atakach piratów",
+      "tier": 2,
+      "requiredTechnologies": ["t1_convoy_protection"]
+    },
+    {
+      "id": "t2_logistics_security",
+      "name": "Zabezpieczenia Logistyczne",
+      "description": "Sabotaż i szpiegostwo w logistyce trudniejsze o +25% KE kontrwywiadu",
+      "tier": 2,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_quantum_comms",
+      "name": "Kwantowa komunikacja",
+      "description": "Natychmiastowy przepływ danych między flotami w zasięgu terytorium danej frakcji",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_ai_scout_drones",
+      "name": "Drony zwiadowcze z AI",
+      "description": "Samodzielne prowadzenie badań i unikanie zagrożeń",
+      "tier": 3,
+      "requiredTechnologies": ["t1_scout_drones"]
+    },
+    {
+      "id": "t3_crypto_advanced",
+      "name": "Kryptoanaliza poziomu zaawansowanego",
+      "description": "Możliwość przechwytywania i deszyfrowania większości komunikatów wroga na polu bitwy",
+      "tier": 3,
+      "requiredTechnologies": ["t1_crypto_basic"]
+    },
+    {
+      "id": "t3_bio_scanners",
+      "name": "Skanery biologiczne",
+      "description": "Identyfikacja ukrytych jednostek piechoty i sabotażystów",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_energy_armor",
+      "name": "Pancerze energetyczne",
+      "description": "Osobiste tarcze ochronne dla piechoty",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_mechs",
+      "name": "Mechy bojowe",
+      "description": "Ciężkie jednostki wsparcia piechoty",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_plasma_weapons",
+      "name": "Broń Plazmowa",
+      "description": "Zaawansowane systemy broni energetycznej dla piechoty",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_battleship",
+      "name": "Pancerniki",
+      "description": "Budowa jednostek ciężkich (8 modułów)",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_point_defense_mk2",
+      "name": "Obrona punktowa Mk II",
+      "description": "Zwiększa redukcję skuteczności rakiet przeciwnika do 4pp",
+      "tier": 3,
+      "requiredTechnologies": ["t2_point_defense_mk1"]
+    },
+    {
+      "id": "t3_missiles_mk3",
+      "name": "Wyrzutnie rakiet Mk III",
+      "description": "Zwiększa obrażenia rakiet do 35, zasięg maksymalny 65J, zasięg skuteczny 45J",
+      "tier": 3,
+      "requiredTechnologies": ["t2_missiles_mk2"]
+    },
+    {
+      "id": "t3_lasers_mk3",
+      "name": "Lasery Mk III",
+      "description": "Zwiększa zasięg laserów do 24j",
+      "tier": 3,
+      "requiredTechnologies": ["t2_lasers_mk2"]
+    },
+    {
+      "id": "t3_shields_mk3",
+      "name": "Tarcze energetyczne Mk III",
+      "description": "Trzecia generacja wzmocnionych tarcz zwiększa ich skuteczność o 75% w stosunku do bazowej pojemności",
+      "tier": 3,
+      "requiredTechnologies": ["t2_shields_mk2"]
+    },
+    {
+      "id": "t3_armor_mk3",
+      "name": "Pancerz Mk III",
+      "description": "Trzecia generacja wzmocnionego pancerza okrętów zwiększa jego skuteczność o 75% w stosunku do bazowej pojemności",
+      "tier": 3,
+      "requiredTechnologies": ["t2_armor_mk2"]
+    },
+    {
+      "id": "t3_orbital_forts_3",
+      "name": "Fortyfikacje Orbitalne III",
+      "description": "Możliwość budowy do +2 fortów na planetę (max 10). Limit systemowy zwiększa się do 16",
+      "tier": 3,
+      "requiredTechnologies": ["t2_orbital_forts_2"]
+    },
+    {
+      "id": "t3_subspace_scanners",
+      "name": "Skanery subprzestrzenne",
+      "description": "Zdolność wykrywania obcych flot w hiperprzestrzeni, jeszcze zanim pojawią się w systemie",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_quantum_navigation",
+      "name": "Zaawansowana astronawigacja kwantowa",
+      "description": "Eliminacja błędów podczas podróży nadprzestrzennej",
+      "tier": 3,
+      "requiredTechnologies": ["t1_basic_navigation"]
+    },
+    {
+      "id": "t3_electronic_masking",
+      "name": "System maskowania elektronicznego",
+      "description": "Małe drony generujące sygnatury floty, aby mylić rakiety wroga tworząc okręty-duchy",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_towed_pods",
+      "name": "Zasobniki holowane",
+      "description": "Pozwala okrętom ciągnąć jednorazowe zasobniki z rakietami (jeden za każdy moduł okrętu), które zwiększają pierwszą salwę o dodatkowe 4 rakiety",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_ecm",
+      "name": "ECM",
+      "description": "Rakiety omijają część obrony punktowej obniżając jej skuteczność o 1pp",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_scout_ship",
+      "name": "Okręt zwiadowczy",
+      "description": "Jednostka wielkości korwety (1 moduł) wyposażona w technologię stealth. Zdolna do samodzielnego działania na terenie wroga",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_engine_upgrade_mk2",
+      "name": "Ulepszenie silników MK II",
+      "description": "Zwiększa podstawową prędkość okrętów o 1",
+      "tier": 3,
+      "requiredTechnologies": ["t2_engine_upgrade_mk1"]
+    },
+    {
+      "id": "t3_automated_refineries_mk3",
+      "name": "Rafinerie Zautomatyzowane Mk III",
+      "description": "−30% kosztu budowy budynków podstawowych i zaawansowanych",
+      "tier": 3,
+      "requiredTechnologies": ["t2_automated_refineries_mk2"]
+    },
+    {
+      "id": "t3_plasma_drills_mk3",
+      "name": "Wiertnie Plazmowe Mk III",
+      "description": "+20% wydajności kopalń orbitalnych",
+      "tier": 3,
+      "requiredTechnologies": ["t2_plasma_drills_mk2"]
+    },
+    {
+      "id": "t3_mega_energy_network",
+      "name": "Mega-Sieć Energetyczna",
+      "description": "+5% globalnej produkcji KE",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_genetic_crops_mk3",
+      "name": "Uprawy Genetyczne Mk III",
+      "description": "Farmy +20% produkcji",
+      "tier": 3,
+      "requiredTechnologies": ["t2_genetic_crops_mk2"]
+    },
+    {
+      "id": "t3_protein_production_mk2",
+      "name": "Produkcja Białka Mk II",
+      "description": "Produkcja +20% (orbitalne)",
+      "tier": 3,
+      "requiredTechnologies": ["t1_orbital_protein"]
+    },
+    {
+      "id": "t3_large_orbital_farms",
+      "name": "Farmy Orbitalne Wielkoskalowe",
+      "description": "+1000 żywności/turę, limit 1/frakcje",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_advanced_docks_mk3",
+      "name": "Doki Zaawansowane Mk III",
+      "description": "+3 doko-miesiące",
+      "tier": 3,
+      "requiredTechnologies": ["t2_extended_docks_mk2"]
+    },
+    {
+      "id": "t3_modular_hulls_mk3",
+      "name": "Konstrukcje Modułowe Kadłubów Mk III",
+      "description": "Koszt budowy okrętów −20% KE",
+      "tier": 3,
+      "requiredTechnologies": ["t2_modular_hulls_mk2"]
+    },
+    {
+      "id": "t3_nanometallurgy_mk3",
+      "name": "Nanohutnictwo Mk III",
+      "description": "Koszt przebudowy okrętów −20% MIN",
+      "tier": 3,
+      "requiredTechnologies": ["t2_nanometallurgy_mk2"]
+    },
+    {
+      "id": "t3_hyperconvoys_mk3",
+      "name": "Hiperkonwoje Mk III",
+      "description": "Możliwość transportu zasobów bez ryzyka ataku piratów",
+      "tier": 3,
+      "requiredTechnologies": ["t2_fortified_convoys_mk2"]
+    },
+    {
+      "id": "t3_industrial_parks",
+      "name": "Parki Przemysłowe Orbitalne",
+      "description": "Jeśli w systemie ≥3 budynki orbitalne przemysłowe +10% produkcji (KE, Minerały, Żywność)",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t3_quantum_lab",
+      "name": "Laboratorium Kwantowe",
+      "description": "Odblokowuje budynek",
+      "tier": 3,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_ai_analytics",
+      "name": "SI analityczne",
+      "description": "Sztuczna inteligencja analizująca ruchy przeciwnika i przewidująca strategie na polu walki",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_quantum_crypto",
+      "name": "Kwantowa kryptografia ofensywna",
+      "description": "Łamanie wszystkich standardowych szyfrów wroga",
+      "tier": 4,
+      "requiredTechnologies": ["t3_crypto_advanced"]
+    },
+    {
+      "id": "t4_nanobot_repair",
+      "name": "Nanoroboty naprawcze",
+      "description": "Samoregenerujące się pancerze i kadłub okrętów wojennych",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_super_battleship",
+      "name": "Superpancerniki",
+      "description": "Kolosalne jednostki (12 modułów)",
+      "tier": 4,
+      "requiredTechnologies": ["t3_battleship"]
+    },
+    {
+      "id": "t4_ftl_comms",
+      "name": "Komunikacja FTL",
+      "description": "Pozwala na natychmiastowy kontakt z innymi frakcjami na dalekie odległości",
+      "tier": 4,
+      "requiredTechnologies": ["t3_quantum_comms"]
+    },
+    {
+      "id": "t4_point_defense_mk3",
+      "name": "Obrona punktowa Mk III",
+      "description": "Zwiększa redukcję skuteczności rakiet przeciwnika do 5pp",
+      "tier": 4,
+      "requiredTechnologies": ["t3_point_defense_mk2"]
+    },
+    {
+      "id": "t4_shields_mk4",
+      "name": "Tarcze energetyczne Mk IV",
+      "description": "Czwarta generacja wzmocnionych tarcz zwiększa ich skuteczność o 100% w stosunku do bazowej pojemności, czyli podwaja moc tarcz",
+      "tier": 4,
+      "requiredTechnologies": ["t3_shields_mk3"]
+    },
+    {
+      "id": "t4_armor_mk4",
+      "name": "Pancerz Mk IV",
+      "description": "Czwarta generacja wzmocnionego pancerza okrętów zwiększa jego skuteczność o 100% w stosunku do bazowej pojemności",
+      "tier": 4,
+      "requiredTechnologies": ["t3_armor_mk3"]
+    },
+    {
+      "id": "t4_missiles_mk4",
+      "name": "Wyrzutnie rakiet Mk IV",
+      "description": "Zwiększa obrażenia rakiet do 40. Zasięg maksymalny 75J, zasięg skuteczny 55J",
+      "tier": 4,
+      "requiredTechnologies": ["t3_missiles_mk3"]
+    },
+    {
+      "id": "t4_lasers_mk4",
+      "name": "Lasery Mk IV",
+      "description": "Zwiększa zasięg laserów do 27j i zwiększa ich obrażenia do 50",
+      "tier": 4,
+      "requiredTechnologies": ["t3_lasers_mk3"]
+    },
+    {
+      "id": "t4_ecm_mk2",
+      "name": "ECM MK II",
+      "description": "Rakiety omijają część obrony punktowej obniżając jej skuteczność o 2pp",
+      "tier": 4,
+      "requiredTechnologies": ["t3_ecm"]
+    },
+    {
+      "id": "t4_orbital_forts_4",
+      "name": "Fortyfikacje Orbitalne IV",
+      "description": "Limit per planetę i system się nie zmieniają (10/16), ale wszystkie forty zostają ulepszone i ich rozmiar zwiększa się z 2 modułów do 4 (wielkość krążownika)",
+      "tier": 4,
+      "requiredTechnologies": ["t3_orbital_forts_3"]
+    },
+    {
+      "id": "t4_subspace_masking",
+      "name": "Systemy maskowania subprzestrzennego",
+      "description": "Flota niewidoczna w trakcie podróży nadprzestrzennej, trudna do przechwycenia",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_augmented_soldiers",
+      "name": "Żołnierze augmentowani genetycznie",
+      "description": "Wytrzymalsi, szybsi, o większej odporności",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_engine_upgrade_mk3",
+      "name": "Ulepszenie silników MK III",
+      "description": "Zwiększa podstawową prędkość okrętów o 1",
+      "tier": 4,
+      "requiredTechnologies": ["t3_engine_upgrade_mk2"]
+    },
+    {
+      "id": "t4_asteroid_processors_mk6",
+      "name": "Statki do przetwarzania asteroid Mk VI",
+      "description": "+2000 MIN/turę, limit 1/frakcja",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_stellar_refinery_mk6",
+      "name": "Rafineria Gwiezdna Mk VI",
+      "description": "Wszystkie budynki kosztują −50% MIN",
+      "tier": 4,
+      "requiredTechnologies": ["t3_automated_refineries_mk3"]
+    },
+    {
+      "id": "t4_ai_industry_mk6",
+      "name": "Przemysł Sterowany przez IA Mk VI",
+      "description": "Wszystkie budynki produkują +50%",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_antimatter_reactor",
+      "name": "Reaktor Antymaterii",
+      "description": "Odblokowuje budynek Reaktor Antymaterii (+3000 KE/turę, limit 1/frakcja)",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_energy_catalysts",
+      "name": "Katalizatory Energetyczne",
+      "description": "Wszystkie elektrownie produkują +50% KE",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_self_repair_networks",
+      "name": "Systemy Samonaprawiające Sieci",
+      "description": "Awarie/sabotaże nie mają już wpływu na produkcję KE",
+      "tier": 4,
+      "requiredTechnologies": ["t2_redundant_networks"]
+    },
+    {
+      "id": "t4_mega_orbital_farm",
+      "name": "Mega-Farma Orbitalna",
+      "description": "+5000 żywności/turę, limit 1/frakcja",
+      "tier": 4,
+      "requiredTechnologies": ["t3_large_orbital_farms"]
+    },
+    {
+      "id": "t4_ai_genetic_mods",
+      "name": "Modyfikacje genetyczne kierowane przez IA",
+      "description": "Wszystkie farmy +100% produkcji",
+      "tier": 4,
+      "requiredTechnologies": ["t3_genetic_crops_mk3"]
+    },
+    {
+      "id": "t4_large_orbital_farms_system",
+      "name": "Farmy Orbitalne Wielkoskalowe",
+      "description": "+1000 żywności/turę, limit 1/system",
+      "tier": 4,
+      "requiredTechnologies": ["t3_large_orbital_farms"]
+    },
+    {
+      "id": "t4_green_planetary_network",
+      "name": "Zielona Sieć Planetarna",
+      "description": "+20% zadowolenia globalnie",
+      "tier": 4,
+      "requiredTechnologies": ["t2_green_zones_2"]
+    },
+    {
+      "id": "t4_terraforming",
+      "name": "Terraformacja Planetarna",
+      "description": "Planeta produkuje +2000 żywności, +1000 minerałów",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_automated_ai_docks",
+      "name": "Zautomatyzowane Doki IA",
+      "description": "Wszystkie stocznie produkują okręty 2× szybciej",
+      "tier": 4,
+      "requiredTechnologies": ["t3_advanced_docks_mk3"]
+    },
+    {
+      "id": "t4_quantum_hyperconvoys",
+      "name": "Hiperkonwoje Kwantowe",
+      "description": "Wszystkie transporty zasobów są natychmiastowe i bezstratne",
+      "tier": 4,
+      "requiredTechnologies": ["t3_hyperconvoys_mk3"]
+    },
+    {
+      "id": "t4_supraorbital_parks",
+      "name": "Parki Przemysłowe Supraorbitalne",
+      "description": "Wszystkie budynki orbitalne w systemie +50% wydajności",
+      "tier": 4,
+      "requiredTechnologies": ["t3_industrial_parks"]
+    },
+    {
+      "id": "t4_ai_brokers",
+      "name": "Brokerzy Sztucznej Inteligencji",
+      "description": "Każda wymiana pomiędzy graczami daje dodatkowe +10% KE. Gildia przestaje być potrzebna",
+      "tier": 4,
+      "requiredTechnologies": []
+    },
+    {
+      "id": "t4_super_fortress",
+      "name": "Super Forteca Orbitalna",
+      "description": "Stacjonarna jednostka klasy super-pancernik (jedna /system)",
+      "tier": 4,
+      "requiredTechnologies": ["t4_orbital_forts_4"]
+    },
+    {
+      "id": "t5_dyson_sphere",
+      "name": "Strefa Dysona",
+      "description": "Zautomatyzowana giga struktura, która sprawia, że frakcja przestaje się martwić o zasoby. Sterowane przez IA doskonałe miejsce do życia",
+      "tier": 5,
+      "requiredTechnologies": []
+    }
+  ]
+}

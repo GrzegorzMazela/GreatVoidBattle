@@ -19,6 +19,10 @@ import HegemoniaPage from '../features/admin/HegemoniaPage';
 import ShimuraPage from '../features/admin/ShimuraPage';
 import ProtektoratPage from '../features/admin/ProtektoratPage';
 import AdminPanelPage from '../features/admin/AdminPanelPage';
+import { TechnologyAdmin } from '../features/admin/TechnologyAdminSimple';
+import { FractionTechnologyView } from '../features/admin/FractionTechnologyView';
+import ResearchRequests from '../features/player/ResearchRequests';
+import TurnManagementSimple from '../features/admin/TurnManagementSimple';
 
 export const router = createBrowserRouter([
   // Strona logowania Discord
@@ -66,10 +70,42 @@ export const router = createBrowserRouter([
         )
       },
       { 
+        path: 'hegemonia/technologies', 
+        element: (
+          <ProtectedRoute allowedRoles={["Hegemonia Titanum"]}>
+            <FractionTechnologyView fractionId="hegemonia_titanum" />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'hegemonia/research', 
+        element: (
+          <ProtectedRoute allowedRoles={["Hegemonia Titanum"]}>
+            <ResearchRequests />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: 'shimura', 
         element: (
           <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
             <ShimuraPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'shimura/technologies', 
+        element: (
+          <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
+            <FractionTechnologyView fractionId="shimura_incorporated" />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'shimura/research', 
+        element: (
+          <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
+            <ResearchRequests />
           </ProtectedRoute>
         )
       },
@@ -82,10 +118,42 @@ export const router = createBrowserRouter([
         )
       },
       { 
+        path: 'protektorat/technologies', 
+        element: (
+          <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
+            <FractionTechnologyView fractionId="protektorat_pogranicza" />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'protektorat/research', 
+        element: (
+          <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
+            <ResearchRequests />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: 'admin-panel', 
         element: (
           <ProtectedRoute requireAdmin={true}>
             <AdminPanelPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'admin-panel/technologies', 
+        element: (
+          <ProtectedRoute requireAdmin={true}>
+            <TechnologyAdmin />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'admin-panel/turn-management', 
+        element: (
+          <ProtectedRoute requireAdmin={true}>
+            <TurnManagementSimple />
           </ProtectedRoute>
         )
       },
