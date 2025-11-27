@@ -15,7 +15,7 @@ public class Const
     public const int MissileMaxRage = 55;
     public const int MissileEffectiveRage = 35;
 
-    public const int LaserDamage = 40;
+    public const int LaserDamage = 30;
     public const int LaserMaxRange = 15;
 
     public const int PointDefenseBonus = 2;
