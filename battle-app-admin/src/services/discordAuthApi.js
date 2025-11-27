@@ -1,19 +1,10 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const discordApi = axios.create({
-  baseURL: `${API_URL}/api/auth/discord`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import apiClient from './apiClient';
 
 /**
  * Pobiera URL do logowania przez Discord
  */
 export const getDiscordLoginUrl = async () => {
-  const response = await discordApi.get('/login');
+  const response = await apiClient.get('/api/auth/discord/login');
   return response.data;
 };
 
@@ -21,7 +12,7 @@ export const getDiscordLoginUrl = async () => {
  * Waliduje token Discord
  */
 export const validateDiscordToken = async (token) => {
-  const response = await discordApi.get('/validate', {
+  const response = await apiClient.get('/api/auth/discord/validate', {
     headers: {
       'X-Discord-Token': token,
     },
@@ -33,7 +24,7 @@ export const validateDiscordToken = async (token) => {
  * Pobiera informacje o aktualnie zalogowanym użytkowniku Discord
  */
 export const getCurrentDiscordUser = async (token) => {
-  const response = await discordApi.get('/user', {
+  const response = await apiClient.get('/api/auth/discord/user', {
     headers: {
       'X-Discord-Token': token,
     },

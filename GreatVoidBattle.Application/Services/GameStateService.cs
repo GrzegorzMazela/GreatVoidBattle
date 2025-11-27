@@ -1,7 +1,6 @@
 using GreatVoidBattle.Application.Dto.GameState;
 using GreatVoidBattle.Application.Repositories;
 using GreatVoidBattle.Core.Domains.GameState;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GreatVoidBattle.Application.Services;
@@ -10,17 +9,20 @@ public class GameStateService
 {
     private readonly IGameSessionRepository _sessionRepository;
     private readonly IFractionGameStateRepository _stateRepository;
+    private readonly FractionTechnologyService _technologyService;
     private readonly TechnologyConfigService _technologyConfig;
     private readonly ILogger<GameStateService> _logger;
 
     public GameStateService(
         IGameSessionRepository sessionRepository,
         IFractionGameStateRepository stateRepository,
+        FractionTechnologyService technologyService,
         TechnologyConfigService technologyConfig,
         ILogger<GameStateService> logger)
     {
         _sessionRepository = sessionRepository;
         _stateRepository = stateRepository;
+        _technologyService = technologyService;
         _technologyConfig = technologyConfig;
         _logger = logger;
     }
@@ -63,6 +65,17 @@ public class GameStateService
         var state = await _stateRepository.GetByFractionIdAsync(fractionId);
         return state == null ? null : await MapToDto(state);
     }
+    
+    public async Task<List<FractionGameStateDto>> GetAllFractionStatesAsync()
+    {
+        var states = await _stateRepository.GetAllAsync();
+        var result = new List<FractionGameStateDto>();
+        foreach (var state in states)
+        {
+            result.Add(await MapToDto(state));
+        }
+        return result;
+    }
 
     public async Task<List<TechnologiesForTierDto>> GetAvailableTechnologiesAsync(string fractionId)
     {
@@ -71,22 +84,40 @@ public class GameStateService
 
         var result = new List<TechnologiesForTierDto>();
         var ownedTechIds = state.Technologies.Select(t => t.TechnologyId).ToHashSet();
+        var pendingTechIds = state.ResearchRequests
+            .Where(r => r.Status == ResearchRequestStatus.Pending)
+            .Select(r => r.TechnologyId)
+            .ToHashSet();
 
-        // Tylko naukowcy widzą tier+1, inni tylko current tier
-        var visibleTiers = new List<int> { state.CurrentTier };
-        // TODO: Dodać sprawdzanie roli - jeśli naukowiec, dodaj tier+1
-        // if (isScientist) visibleTiers.Add(state.CurrentTier + 1);
+        // Helper do pobierania tieru technologii
+        int GetTechTier(string techId) => _technologyConfig.GetTechnologyById(techId)?.Tier ?? 1;
+        
+        // Znajdujemy widoczne tiery: od 1 do najwyższego dostępnego + 1 (preview)
+        var maxVisibleTier = 1;
+        while (state.CanResearchTier(GetTechTier, maxVisibleTier + 1))
+        {
+            maxVisibleTier++;
+        }
+        maxVisibleTier++; // +1 do preview następnego tieru
 
-        foreach (var tier in visibleTiers)
+        for (int tier = 1; tier <= maxVisibleTier; tier++)
         {
             var techs = _technologyConfig.GetTechnologiesByTier(tier);
+            if (!techs.Any()) continue; // Pomiń puste tiery
+            
+            var canResearchThisTier = state.CanResearchTier(GetTechTier, tier);
+            var canViewThisTier = state.CanViewTier(GetTechTier, tier);
+            var researchedInTier = state.GetResearchedCountForTier(GetTechTier, tier);
+            
             var techsWithStatus = techs.Select(t =>
             {
                 var isOwned = ownedTechIds.Contains(t.Id);
+                var isPending = pendingTechIds.Contains(t.Id);
                 var missingReqs = t.RequiredTechnologies
                     .Where(req => !ownedTechIds.Contains(req))
                     .ToList();
-                var canResearch = !isOwned && missingReqs.Count == 0;
+                // Można badać jeśli: nie ma technologii, nie jest w kolejce, ma wymagania, i tier jest dostępny
+                var canResearch = !isOwned && !isPending && missingReqs.Count == 0 && canResearchThisTier;
 
                 return new TechnologyWithStatusDto
                 {
@@ -97,6 +128,8 @@ public class GameStateService
                     RequiredTechnologies = t.RequiredTechnologies,
                     IsOwned = isOwned,
                     CanResearch = canResearch,
+                    IsPendingResearch = isPending,
+                    SlotsCost = t.Tier, // Koszt slotów = tier
                     MissingRequirements = missingReqs
                 };
             }).ToList();
@@ -104,6 +137,10 @@ public class GameStateService
             result.Add(new TechnologiesForTierDto
             {
                 Tier = tier,
+                CanResearch = canResearchThisTier,
+                CanView = canViewThisTier,
+                ResearchedCount = researchedInTier,
+                RequiredForNextTier = 15,
                 Technologies = techsWithStatus
             });
         }
@@ -113,33 +150,10 @@ public class GameStateService
 
     public async Task<bool> AddTechnologyToFractionAsync(AddTechnologyRequestDto request)
     {
-        var state = await _stateRepository.GetByFractionIdAsync(request.FractionId);
-        if (state == null)
+        var validation = await ValidateTechnologyRequest(request.FractionId, request.TechnologyId);
+        if (!validation.IsValid)
         {
-            _logger.LogWarning($"Fraction state not found for {request.FractionId}");
-            return false;
-        }
-
-        var tech = _technologyConfig.GetTechnologyById(request.TechnologyId);
-        if (tech == null)
-        {
-            _logger.LogWarning($"Technology not found: {request.TechnologyId}");
-            return false;
-        }
-
-        // Sprawdź czy już posiada
-        if (state.Technologies.Any(t => t.TechnologyId == request.TechnologyId))
-        {
-            _logger.LogWarning($"Fraction {request.FractionId} already has technology {request.TechnologyId}");
-            return false;
-        }
-
-        // Sprawdź wymagania
-        var ownedTechIds = state.Technologies.Select(t => t.TechnologyId).ToHashSet();
-        var missingReqs = tech.RequiredTechnologies.Where(r => !ownedTechIds.Contains(r)).ToList();
-        if (missingReqs.Any())
-        {
-            _logger.LogWarning($"Missing requirements for {request.TechnologyId}: {string.Join(", ", missingReqs)}");
+            _logger.LogWarning(validation.ErrorMessage);
             return false;
         }
 
@@ -154,58 +168,51 @@ public class GameStateService
             AcquiredDate = DateTime.UtcNow
         };
 
-        await _stateRepository.AddTechnologyAsync(request.FractionId, fractionTech);
+        await _technologyService.AddTechnologyAsync(request.FractionId, fractionTech);
         return true;
     }
 
     public async Task<bool> RemoveTechnologyFromFractionAsync(string fractionId, string technologyId)
     {
-        await _stateRepository.RemoveTechnologyAsync(fractionId, technologyId);
+        await _technologyService.RemoveTechnologyAsync(fractionId, technologyId);
         return true;
     }
 
     public async Task<bool> AdvanceTierAsync(string fractionId)
     {
-        var state = await _stateRepository.GetByFractionIdAsync(fractionId);
-        if (state == null || !state.CanAdvanceToNextTier())
-        {
-            return false;
-        }
-
-        await _stateRepository.AdvanceTierAsync(fractionId);
-        return true;
+        return await _technologyService.AdvanceTierAsync(fractionId);
     }
 
     // Research Request Management
     public async Task<bool> RequestResearchAsync(string fractionId, string technologyId)
     {
-        var state = await _stateRepository.GetByFractionIdAsync(fractionId);
-        if (state == null)
+        var validation = await ValidateTechnologyRequest(fractionId, technologyId);
+        if (!validation.IsValid)
         {
-            _logger.LogWarning($"Fraction state not found for {fractionId}");
+            _logger.LogWarning(validation.ErrorMessage);
             return false;
         }
 
-        var tech = _technologyConfig.GetTechnologyById(technologyId);
-        if (tech == null)
+        var state = validation.State!;
+        var tech = validation.Technology!;
+        
+        // Helper do pobierania tieru technologii
+        int GetTechTier(string techId) => _technologyConfig.GetTechnologyById(techId)?.Tier ?? 1;
+        
+        // Sprawdź czy tier jest dostępny do badania
+        if (!state.CanResearchTier(GetTechTier, tech.Tier))
         {
-            _logger.LogWarning($"Technology not found: {technologyId}");
+            _logger.LogWarning($"Cannot research tier {tech.Tier}. Need 15 researched technologies from tier {tech.Tier - 1}");
             return false;
         }
-
-        // Sprawdź czy już posiada
-        if (state.Technologies.Any(t => t.TechnologyId == technologyId))
+        
+        // Sprawdź czy są dostępne sloty
+        var usedSlots = state.GetUsedResearchSlots(GetTechTier);
+        var requiredSlots = tech.Tier; // Tier = koszt slotów
+        
+        if (usedSlots + requiredSlots > state.ResearchSlots)
         {
-            _logger.LogWarning($"Fraction {fractionId} already has technology {technologyId}");
-            return false;
-        }
-
-        // Sprawdź wymagania
-        var ownedTechIds = state.Technologies.Select(t => t.TechnologyId).ToHashSet();
-        var missingReqs = tech.RequiredTechnologies.Where(r => !ownedTechIds.Contains(r)).ToList();
-        if (missingReqs.Any())
-        {
-            _logger.LogWarning($"Missing requirements for {technologyId}: {string.Join(", ", missingReqs)}");
+            _logger.LogWarning($"Not enough research slots. Used: {usedSlots}, Required: {requiredSlots}, Available: {state.ResearchSlots}");
             return false;
         }
 
@@ -216,26 +223,42 @@ public class GameStateService
             Status = ResearchRequestStatus.Pending
         };
 
-        await _stateRepository.AddResearchRequestAsync(fractionId, request);
-        _logger.LogInformation($"Research request added: {fractionId} -> {technologyId}");
+        var result = await _technologyService.AddResearchRequestAsync(fractionId, request);
+        if (result)
+        {
+            _logger.LogInformation($"Research request added: {fractionId} -> {technologyId}");
+        }
+        return result;
+    }
+    
+    // Admin: Set research slots for fraction
+    public async Task<bool> SetResearchSlotsAsync(string fractionId, int slots)
+    {
+        if (slots < 0)
+        {
+            _logger.LogWarning($"Invalid slots count: {slots}");
+            return false;
+        }
+        
+        var state = await _stateRepository.GetByFractionIdAsync(fractionId);
+        if (state == null)
+        {
+            _logger.LogWarning($"Fraction state not found for {fractionId}");
+            return false;
+        }
+        
+        state.ResearchSlots = slots;
+        state.UpdatedAt = DateTime.UtcNow;
+        await _stateRepository.UpdateAsync(state);
+        
+        _logger.LogInformation($"Research slots for {fractionId} set to {slots}");
         return true;
     }
 
     public async Task<List<ResearchRequestDto>> GetPendingResearchRequestsAsync(string fractionId)
     {
-        var requests = await _stateRepository.GetPendingResearchRequestsAsync(fractionId);
-        return requests.Select(r =>
-        {
-            var tech = _technologyConfig.GetTechnologyById(r.TechnologyId);
-            return new ResearchRequestDto
-            {
-                TechnologyId = r.TechnologyId,
-                TechnologyName = tech?.Name ?? "Unknown",
-                RequestedAt = r.RequestedAt,
-                Status = r.Status.ToString(),
-                AdminComment = r.AdminComment
-            };
-        }).ToList();
+        var requests = await _technologyService.GetPendingResearchRequestsAsync(fractionId);
+        return requests.Select(MapToResearchRequestDto).ToList();
     }
 
     public async Task<List<FractionResearchRequestsDto>> GetAllPendingRequestsAsync()
@@ -247,18 +270,8 @@ public class GameStateService
             FractionName = s.FractionId, // TODO: Pobrać nazwę
             PendingRequests = s.ResearchRequests
                 .Where(r => r.Status == ResearchRequestStatus.Pending)
-                .Select(r =>
-                {
-                    var tech = _technologyConfig.GetTechnologyById(r.TechnologyId);
-                    return new ResearchRequestDto
-                    {
-                        TechnologyId = r.TechnologyId,
-                        TechnologyName = tech?.Name ?? "Unknown",
-                        RequestedAt = r.RequestedAt,
-                        Status = r.Status.ToString(),
-                        AdminComment = r.AdminComment
-                    };
-                }).ToList()
+                .Select(MapToResearchRequestDto)
+                .ToList()
         }).ToList();
     }
 
@@ -268,19 +281,17 @@ public class GameStateService
         {
             if (resolution.Approved)
             {
-                await _stateRepository.ApproveResearchRequestAsync(
+                await _technologyService.ApproveResearchRequestAsync(
                     resolution.FractionId,
                     resolution.TechnologyId,
                     resolution.Comment);
-                _logger.LogInformation($"Approved research: {resolution.FractionId} -> {resolution.TechnologyId}");
             }
             else
             {
-                await _stateRepository.RejectResearchRequestAsync(
+                await _technologyService.RejectResearchRequestAsync(
                     resolution.FractionId,
                     resolution.TechnologyId,
                     resolution.Comment);
-                _logger.LogInformation($"Rejected research: {resolution.FractionId} -> {resolution.TechnologyId}");
             }
         }
 
@@ -360,6 +371,49 @@ public class GameStateService
         };
     }
 
+    #region Private Validation Methods
+
+    /// <summary>
+    /// Validates technology request - checks if fraction and technology exist,
+    /// if technology is not already owned, and if all requirements are met
+    /// </summary>
+    private async Task<TechnologyValidationResult> ValidateTechnologyRequest(string fractionId, string technologyId)
+    {
+        var state = await _stateRepository.GetByFractionIdAsync(fractionId);
+        if (state == null)
+        {
+            return TechnologyValidationResult.Failure($"Fraction state not found for {fractionId}");
+        }
+
+        var tech = _technologyConfig.GetTechnologyById(technologyId);
+        if (tech == null)
+        {
+            return TechnologyValidationResult.Failure($"Technology not found: {technologyId}");
+        }
+
+        // Sprawdź czy już posiada
+        if (state.Technologies.Any(t => t.TechnologyId == technologyId))
+        {
+            return TechnologyValidationResult.Failure($"Fraction {fractionId} already has technology {technologyId}");
+        }
+
+        // Sprawdź wymagania
+        var ownedTechIds = state.Technologies.Select(t => t.TechnologyId).ToHashSet();
+        var missingReqs = tech.RequiredTechnologies.Where(r => !ownedTechIds.Contains(r)).ToList();
+        if (missingReqs.Any())
+        {
+            return TechnologyValidationResult.MissingRequirementsFailure(
+                $"Missing requirements for {technologyId}: {string.Join(", ", missingReqs)}",
+                missingReqs);
+        }
+
+        return TechnologyValidationResult.Success(state, tech, ownedTechIds);
+    }
+
+    #endregion
+
+    #region Private Mapping Methods
+
     private GameSessionDto MapToDto(GameSession session)
     {
         return new GameSessionDto
@@ -378,6 +432,9 @@ public class GameStateService
     {
         // TODO: Pobrać nazwę frakcji z FractionRepository
         var fractionName = state.FractionId; // Tymczasowo
+        
+        // Helper do pobierania tieru technologii
+        int GetTechTier(string techId) => _technologyConfig.GetTechnologyById(techId)?.Tier ?? 1;
 
         var technologies = state.Technologies.Select(t =>
         {
@@ -386,6 +443,7 @@ public class GameStateService
             {
                 TechnologyId = t.TechnologyId,
                 TechnologyName = tech?.Name ?? "Unknown",
+                Tier = tech?.Tier ?? 1,
                 Source = t.Source.ToString(),
                 SourceFractionId = t.SourceFractionId,
                 SourceFractionName = t.SourceFractionId, // TODO: Pobrać nazwę
@@ -394,6 +452,23 @@ public class GameStateService
                 AcquiredDate = t.AcquiredDate
             };
         }).ToList();
+        
+        // Oblicz postęp dla każdego tieru
+        var tierProgress = new List<TierProgressDto>();
+        for (int tier = 1; tier <= 5; tier++) // Max 5 tierów
+        {
+            var techs = _technologyConfig.GetTechnologiesByTier(tier);
+            if (!techs.Any()) continue;
+            
+            tierProgress.Add(new TierProgressDto
+            {
+                Tier = tier,
+                ResearchedCount = state.GetResearchedCountForTier(GetTechTier, tier),
+                RequiredForNextTier = 15,
+                CanResearch = state.CanResearchTier(GetTechTier, tier),
+                CanView = state.CanViewTier(GetTechTier, tier)
+            });
+        }
 
         return new FractionGameStateDto
         {
@@ -401,11 +476,29 @@ public class GameStateService
             FractionId = state.FractionId,
             FractionName = fractionName,
             CurrentTier = state.CurrentTier,
+            ResearchSlots = state.ResearchSlots,
+            UsedResearchSlots = state.GetUsedResearchSlots(GetTechTier),
             ResearchedTechnologiesInCurrentTier = state.ResearchedTechnologiesInCurrentTier,
             CanAdvanceToNextTier = state.CanAdvanceToNextTier(),
             Technologies = technologies,
+            TierProgress = tierProgress,
             CreatedAt = state.CreatedAt,
             UpdatedAt = state.UpdatedAt
         };
     }
+
+    private ResearchRequestDto MapToResearchRequestDto(ResearchRequest r)
+    {
+        var tech = _technologyConfig.GetTechnologyById(r.TechnologyId);
+        return new ResearchRequestDto
+        {
+            TechnologyId = r.TechnologyId,
+            TechnologyName = tech?.Name ?? "Unknown",
+            RequestedAt = r.RequestedAt,
+            Status = r.Status.ToString(),
+            AdminComment = r.AdminComment
+        };
+    }
+
+    #endregion
 }

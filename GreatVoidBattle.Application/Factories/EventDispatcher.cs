@@ -1,57 +1,60 @@
-﻿using GreatVoidBattle.Application.Events.Base;
+﻿using GreatVoidBattle.Application.Events;
+using GreatVoidBattle.Application.Events.Base;
 using GreatVoidBattle.Application.Events.Handler;
 using GreatVoidBattle.Application.Events.Handler.Base;
+using GreatVoidBattle.Application.Events.InProgress;
 using GreatVoidBattle.Application.Events.InProgress.Handler;
 using GreatVoidBattle.Core.Domains;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace GreatVoidBattle.Application.Factories;
 
+/// <summary>
+/// Dispatches battle events to their respective handlers without using reflection.
+/// Uses a dictionary of typed handler functions for type-safe event dispatching.
+/// </summary>
 public class EventDispatcher
 {
-    private readonly Dictionary<Type, object> _handlers = new();
+    private readonly Dictionary<Type, Func<BattleEvent, BattleState, Task>> _handlers = new();
 
     public EventDispatcher()
     {
         // Register all event handlers here
-        RegisterHandler(new AddFractionEventHandler());
-        RegisterHandler(new UpdateFractionEventHandler());
-        RegisterHandler(new AddFractionShipEventHandler());
-        RegisterHandler(new UpdateFractionShipEventHandler());
-        RegisterHandler(new StartBattleEventHandler());
-        RegisterHandler(new SetShipPositionEventHandler());
-        RegisterHandler(new AddLaserShotEventHandler());
-        RegisterHandler(new AddMissileShotEventHandler());
-        RegisterHandler(new AddShipMoveEventHandler());
-        RegisterHandler(new EndOfTurnEventHandler());
+        RegisterHandler<AddFractionEvent>(new AddFractionEventHandler());
+        RegisterHandler<UpdateFractionEvent>(new UpdateFractionEventHandler());
+        RegisterHandler<AddFractionShipEvent>(new AddFractionShipEventHandler());
+        RegisterHandler<UpdateFractionShipEvent>(new UpdateFractionShipEventHandler());
+        RegisterHandler<StartBattleEvent>(new StartBattleEventHandler());
+        RegisterHandler<SetShipPositionEvent>(new SetShipPositionEventHandler());
+        RegisterHandler<AddLaserShotEvent>(new AddLaserShotEventHandler());
+        RegisterHandler<AddMissileShotEvent>(new AddMissileShotEventHandler());
+        RegisterHandler<AddShipMoveEvent>(new AddShipMoveEventHandler());
+        RegisterHandler<EndOfTurnEvent>(new EndOfTurnEventHandler());
         // Add more handlers as needed
     }
 
+    /// <summary>
+    /// Registers a typed event handler with a wrapper function to avoid reflection
+    /// </summary>
     private void RegisterHandler<TEvent>(BaseEventHandler<TEvent> handler) where TEvent : BattleEvent
     {
-        _handlers[typeof(TEvent)] = handler;
+        _handlers[typeof(TEvent)] = (battleEvent, battleState) => 
+            handler.HandleAsync((TEvent)battleEvent, battleState);
     }
 
+    /// <summary>
+    /// Dispatches an event to its registered handler
+    /// </summary>
     public async Task DispatchAsync<T>(T battleEvent, BattleState battleState) where T : BattleEvent
     {
-        var targetEvent = battleEvent.GetType();
-        if (_handlers.TryGetValue(targetEvent, out var handlerObj))
+        var eventType = battleEvent.GetType();
+        
+        if (_handlers.TryGetValue(eventType, out var handler))
         {
-            // Znajdź metodę HandleAsync za pomocą refleksji
-            var method = handlerObj.GetType().GetMethod("HandleAsync");
-            if (method == null)
-                throw new InvalidOperationException($"Handler for event type {targetEvent.Name} does not implement HandleAsync.");
-
-            // Wywołaj metodę asynchronicznie
-            var task = (Task?)method.Invoke(handlerObj, new object[] { battleEvent, battleState });
-            if (task != null)
-                await task;
+            await handler(battleEvent, battleState);
         }
         else
         {
-            throw new InvalidOperationException($"No handler registered for event type {targetEvent.Name}");
+            throw new InvalidOperationException($"No handler registered for event type {eventType.Name}");
         }
     }
 }

@@ -24,6 +24,7 @@ builder.Services.AddScoped<IFractionGameStateRepository, FractionGameStateReposi
 builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
 builder.Services.AddSingleton<TechnologyConfigService>();
 builder.Services.AddScoped<GameStateService>();
+builder.Services.AddScoped<FractionTechnologyService>();
 
 // Game initialization service - runs on startup
 builder.Services.AddHostedService<GameInitializationService>();

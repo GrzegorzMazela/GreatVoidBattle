@@ -2,6 +2,10 @@
 
 namespace GreatVoidBattle.Application.Repositories;
 
+/// <summary>
+/// Repository interface for FractionGameState - handles only data access operations.
+/// Business logic should be in the service layer.
+/// </summary>
 public interface IFractionGameStateRepository
 {
     Task<FractionGameState?> GetByFractionIdAsync(string fractionId);
@@ -16,22 +20,8 @@ public interface IFractionGameStateRepository
 
     Task DeleteAsync(string id);
 
-    Task<bool> HasTechnologyAsync(string fractionId, string technologyId);
-
-    Task AddTechnologyAsync(string fractionId, FractionTechnology technology);
-
-    Task RemoveTechnologyAsync(string fractionId, string technologyId);
-
-    Task AdvanceTierAsync(string fractionId);
-
-    // Research Request management
-    Task AddResearchRequestAsync(string fractionId, ResearchRequest request);
-
-    Task<List<ResearchRequest>> GetPendingResearchRequestsAsync(string fractionId);
-
+    /// <summary>
+    /// Gets all states that have pending research requests
+    /// </summary>
     Task<List<FractionGameState>> GetAllWithPendingRequestsAsync();
-
-    Task ApproveResearchRequestAsync(string fractionId, string technologyId, string? adminComment);
-
-    Task RejectResearchRequestAsync(string fractionId, string technologyId, string? adminComment);
 }

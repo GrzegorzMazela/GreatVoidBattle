@@ -1,44 +1,38 @@
 using GreatVoidBattle.Application.Repositories;
 using GreatVoidBattle.Core.Domains.GameState;
 using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace GreatVoidBattle.Infrastructure.Repository;
 
-public class GameSessionRepository : IGameSessionRepository
+/// <summary>
+/// Repository for GameSession - handles game session data access.
+/// </summary>
+public class GameSessionRepository : BaseMongoRepository<GameSession, string>, IGameSessionRepository
 {
-    private readonly IMongoCollection<GameSession> _collection;
-
-    public GameSessionRepository(IMongoDatabase database)
+    public GameSessionRepository(IMongoDatabase database) 
+        : base(database, "GameSessions")
     {
-        _collection = database.GetCollection<GameSession>("GameSessions");
+    }
+
+    protected override Expression<Func<GameSession, bool>> GetByIdFilter(string id)
+    {
+        return s => s.Id == id;
+    }
+
+    protected override void OnBeforeUpdate(GameSession entity)
+    {
+        entity.UpdatedAt = DateTime.UtcNow;
     }
 
     public async Task<GameSession?> GetActiveSessionAsync()
     {
-        return await _collection.Find(s => s.Status == GameSessionStatus.Active)
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task<GameSession?> GetByIdAsync(string id)
-    {
-        return await _collection.Find(s => s.Id == id).FirstOrDefaultAsync();
-    }
-
-    public async Task<GameSession> CreateAsync(GameSession session)
-    {
-        await _collection.InsertOneAsync(session);
-        return session;
+        return await FindFirstAsync(s => s.Status == GameSessionStatus.Active);
     }
 
     public async Task UpdateAsync(GameSession session)
     {
-        session.UpdatedAt = DateTime.UtcNow;
-        await _collection.ReplaceOneAsync(s => s.Id == session.Id, session);
-    }
-
-    public async Task<List<GameSession>> GetAllAsync()
-    {
-        return await _collection.Find(_ => true).ToListAsync();
+        await UpdateAsync(session, session.Id);
     }
 
     public async Task IncrementTurnAsync(string sessionId)
@@ -47,7 +41,6 @@ public class GameSessionRepository : IGameSessionRepository
         if (session == null) return;
 
         session.CurrentTurn++;
-        session.UpdatedAt = DateTime.UtcNow;
         await UpdateAsync(session);
     }
 }

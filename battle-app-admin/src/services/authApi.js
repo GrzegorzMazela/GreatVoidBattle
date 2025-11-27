@@ -1,45 +1,7 @@
-import axios from 'axios';
+import apiClient from './apiClient';
 
-// Konfiguracja API
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Interceptor dodający AuthToken do wszystkich requestów
-api.interceptors.request.use(
-  (config) => {
-    const authToken = localStorage.getItem('authToken');
-    
-    if (authToken) {
-      config.headers['X-Auth-Token'] = authToken;
-    }
-    
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Interceptor obsługujący błędy autoryzacji
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      // Przekierowanie do strony błędu lub wylogowanie
-      console.error('Authorization error:', error.response.data);
-      
-      // Opcjonalnie: wyczyść dane i przekieruj
-      // localStorage.removeItem('authToken');
-      // localStorage.removeItem('fractionId');
-      // window.location.href = '/unauthorized';
-    }
-    return Promise.reject(error);
-  }
-);
+// Re-export the client for backwards compatibility
+const api = apiClient;
 
 // === FRACTION API ===
 
@@ -47,7 +9,7 @@ api.interceptors.response.use(
  * Tworzy nową frakcję w bitwie
  */
 export const createFraction = async (battleId, fractionData) => {
-  const response = await api.post(`/battles/${battleId}/fractions`, {
+  const response = await api.post(`/api/battles/${battleId}/fractions`, {
     fractionName: fractionData.fractionName,
     playerName: fractionData.playerName,
     fractionColor: fractionData.fractionColor,
@@ -61,7 +23,7 @@ export const createFraction = async (battleId, fractionData) => {
  * Pobiera wszystkie frakcje w bitwie
  */
 export const getFractions = async (battleId) => {
-  const response = await api.get(`/battles/${battleId}/fractions`);
+  const response = await api.get(`/api/battles/${battleId}/fractions`);
   return response.data;
 };
 
@@ -72,7 +34,7 @@ export const getFractions = async (battleId) => {
  */
 export const addShip = async (battleId, fractionId, shipData) => {
   const response = await api.post(
-    `/battles/${battleId}/fractions/${fractionId}/ships`,
+    `/api/battles/${battleId}/fractions/${fractionId}/ships`,
     shipData
   );
   return response.data;
@@ -83,7 +45,7 @@ export const addShip = async (battleId, fractionId, shipData) => {
  */
 export const updateShip = async (battleId, fractionId, shipId, shipData) => {
   const response = await api.put(
-    `/battles/${battleId}/fractions/${fractionId}/ships/${shipId}`,
+    `/api/battles/${battleId}/fractions/${fractionId}/ships/${shipId}`,
     shipData
   );
   return response.data;
@@ -94,7 +56,7 @@ export const updateShip = async (battleId, fractionId, shipId, shipData) => {
  */
 export const getShips = async (battleId, fractionId) => {
   const response = await api.get(
-    `/battles/${battleId}/fractions/${fractionId}/ships`
+    `/api/battles/${battleId}/fractions/${fractionId}/ships`
   );
   return response.data;
 };
@@ -104,7 +66,7 @@ export const getShips = async (battleId, fractionId) => {
  */
 export const setShipPosition = async (battleId, fractionId, shipId, position) => {
   const response = await api.patch(
-    `/battles/${battleId}/fractions/${fractionId}/ships/${shipId}/position`,
+    `/api/battles/${battleId}/fractions/${fractionId}/ships/${shipId}/position`,
     { x: position.x, y: position.y }
   );
   return response.data;
@@ -162,7 +124,7 @@ export const clearPlayerSession = () => {
 };
 
 /**
- * Sprawdza czy gracz jest zalogowany
+ * Sprawdza czy gracz jest zalogowany (przez auth token)
  */
 export const isPlayerAuthenticated = () => {
   return !!localStorage.getItem('authToken') && !!localStorage.getItem('fractionId');

@@ -9,18 +9,19 @@ import FractionForm from '../features/admin/FractionForm';
 import ShipsTable from '../features/admin/ShipsTable';
 import ShipForm from '../features/admin/ShipForm';
 import { BattleSimulator } from '../features/battle-simulator';
-import RequireAuth from '../components/RequireAuth';
 import MainPage from '../components/MainPage';
 import { DiscordLogin } from '../components/auth/DiscordLogin';
 import { DiscordCallback } from '../components/auth/DiscordCallback';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
+import { FractionAuthRoute } from '../components/auth/FractionAuthRoute';
 import AllBattlesPage from '../features/admin/AllBattlesPage';
 import HegemoniaPage from '../features/admin/HegemoniaPage';
 import ShimuraPage from '../features/admin/ShimuraPage';
 import ProtektoratPage from '../features/admin/ProtektoratPage';
 import AdminPanelPage from '../features/admin/AdminPanelPage';
 import { TechnologyAdmin } from '../features/admin/TechnologyAdminSimple';
-import { FractionTechnologyView } from '../features/admin/FractionTechnologyView';
+import { FractionSettingsAdmin } from '../features/admin/FractionSettingsAdmin';
+import { OwnedTechnologies } from '../features/player/OwnedTechnologies';
 import ResearchRequests from '../features/player/ResearchRequests';
 import TurnManagementSimple from '../features/admin/TurnManagementSimple';
 
@@ -35,7 +36,7 @@ export const router = createBrowserRouter([
     path: '/auth/discord/callback',
     element: <DiscordCallback />,
   },
-  // Panel administracyjny z layoutem (Sidebar + Topbar)
+  // Panel administracyjny z layoutem (Sidebar + Topbar) - wymaga Discord login
   {
     path: '/pustka-admin-panel',
     element: (
@@ -73,7 +74,7 @@ export const router = createBrowserRouter([
         path: 'hegemonia/technologies', 
         element: (
           <ProtectedRoute allowedRoles={["Hegemonia Titanum"]}>
-            <FractionTechnologyView fractionId="hegemonia_titanum" />
+            <OwnedTechnologies />
           </ProtectedRoute>
         )
       },
@@ -97,7 +98,7 @@ export const router = createBrowserRouter([
         path: 'shimura/technologies', 
         element: (
           <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
-            <FractionTechnologyView fractionId="shimura_incorporated" />
+            <OwnedTechnologies />
           </ProtectedRoute>
         )
       },
@@ -121,7 +122,7 @@ export const router = createBrowserRouter([
         path: 'protektorat/technologies', 
         element: (
           <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
-            <FractionTechnologyView fractionId="protektorat_pogranicza" />
+            <OwnedTechnologies />
           </ProtectedRoute>
         )
       },
@@ -150,6 +151,14 @@ export const router = createBrowserRouter([
         )
       },
       { 
+        path: 'admin-panel/fraction-settings', 
+        element: (
+          <ProtectedRoute requireAdmin={true}>
+            <FractionSettingsAdmin />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: 'admin-panel/turn-management', 
         element: (
           <ProtectedRoute requireAdmin={true}>
@@ -159,7 +168,8 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // Symulator - pełny ekran bez layoutu (wymaga roli gracza)
+  // Symulator - pełny ekran bez layoutu
+  // Używa FractionAuthRoute - wymaga tylko auth key (token), NIE wymaga logowania Discord
   {
     path: '/battles',
     element: <SimulatorLayout />,
@@ -167,14 +177,14 @@ export const router = createBrowserRouter([
       { 
         path: ':battleId/simulator', 
         element: (
-          <ProtectedRoute requirePlayer={true} requireAdmin={false}>
+          <FractionAuthRoute>
             <BattleSimulator />
-          </ProtectedRoute>
+          </FractionAuthRoute>
         )
       },
     ],
   },
-  // Przekierowanie ze starego URL
+  // Strona główna
   {
     path: '/',
     element: <MainPage />,

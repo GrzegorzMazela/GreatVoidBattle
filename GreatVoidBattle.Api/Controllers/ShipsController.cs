@@ -1,8 +1,8 @@
 ﻿using GreatVoidBattle.Application.Dto.Ships;
 using GreatVoidBattle.Application.Factories;
+using GreatVoidBattle.Application.Mappers;
 using GreatVoidBattle.Core.Domains.Enums;
 using GreatVoidBattle.Api.Attributes;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GreatVoidBattle.Application.Controllers;
@@ -55,60 +55,29 @@ public class ShipsController(BattleManagerFactory battleManagerFactory) : Contro
     public async Task<IActionResult> GetShips(Guid battleId, Guid fractionId)
     {
         var battleState = await battleManagerFactory.GetBattleState(battleId);
-        var ships = battleState.Fractions
-            .FirstOrDefault(f => f.FractionId == fractionId)?
-            .Ships.Select(s => new ShipDto
-            {
-                ShipId = s.ShipId,
-                Name = s.Name,
-                Type = s.Type.ToString(),
-                X = s.Position.X,
-                Y = s.Position.Y,
-                Speed = s.Speed,
-                Armor = s.Armor,
-                Shields = s.Shields,
-                HitPoints = s.HitPoints,
-                Modules = s.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
-                NumberOfMissiles = s.NumberOfMissiles,
-                NumberOfLasers = s.NumberOfLasers,
-                NumberOfPointsDefense = s.NumberOfPointsDefense,
-                MissileMaxRange = Core.Domains.Const.MissileMaxRage,
-                MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
-                LaserMaxRange = Core.Domains.Const.LaserMaxRange
-            });
-        return Ok(ships);
+        var fraction = battleState.Fractions.FirstOrDefault(f => f.FractionId == fractionId);
+        
+        if (fraction == null)
+        {
+            return NotFound("Fraction not found");
+        }
+
+        return Ok(ShipMapper.ToDtoList(fraction.Ships));
     }
 
     [HttpGet("{shipId}")]
-    [ProducesResponseType<IEnumerable<ShipDto>>(200)]
+    [ProducesResponseType<ShipDto>(200)]
     public async Task<IActionResult> GetShip(Guid battleId, Guid fractionId, Guid shipId)
     {
         var battleState = await battleManagerFactory.GetBattleState(battleId);
         var shipState = battleState.GetShip(shipId);
+        
         if (shipState is null)
         {
             return NotFound();
         }
 
-        return Ok(new ShipDto
-        {
-            ShipId = shipState.ShipId,
-            Name = shipState.Name,
-            Type = shipState.Type.ToString(),
-            X = shipState.Position.X,
-            Y = shipState.Position.Y,
-            Speed = shipState.Speed,
-            Armor = shipState.Armor,
-            Shields = shipState.Shields,
-            HitPoints = shipState.HitPoints,
-            Modules = shipState.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
-            NumberOfMissiles = shipState.NumberOfMissiles,
-            NumberOfLasers = shipState.NumberOfLasers,
-            NumberOfPointsDefense = shipState.NumberOfPointsDefense,
-            MissileMaxRange = Core.Domains.Const.MissileMaxRage,
-            MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
-            LaserMaxRange = Core.Domains.Const.LaserMaxRange
-        });
+        return Ok(ShipMapper.ToDto(shipState));
     }
 
     [HttpPatch("{shipId}/position")]

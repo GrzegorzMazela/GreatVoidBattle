@@ -101,7 +101,26 @@ public class GameStateController : ControllerBase
         }
         return Ok();
     }
+    
+    [HttpPut("admin/fraction/{fractionId}/research-slots")]
+    public async Task<ActionResult> SetResearchSlots(string fractionId, [FromBody] SetResearchSlotsRequest request)
+    {
+        var success = await _gameStateService.SetResearchSlotsAsync(fractionId, request.Slots);
+        if (!success)
+        {
+            return BadRequest("Failed to set research slots.");
+        }
+        return Ok();
+    }
+    
+    [HttpGet("admin/fractions")]
+    public async Task<ActionResult<List<FractionGameStateDto>>> GetAllFractionStates()
+    {
+        var states = await _gameStateService.GetAllFractionStatesAsync();
+        return Ok(states);
+    }
 }
 
 public record CreateSessionRequest(string Name, List<string> FractionIds);
 public record RequestResearchDto(string TechnologyId);
+public record SetResearchSlotsRequest(int Slots);

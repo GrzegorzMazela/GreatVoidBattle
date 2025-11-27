@@ -2,28 +2,48 @@
 using GreatVoidBattle.Application.Repositories;
 using GreatVoidBattle.Core.Domains;
 using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace GreatVoidBattle.Infrastructure.Repository;
 
-public class BattleStateRepository : IBattleStateRepository
+/// <summary>
+/// Repository for BattleState - handles battle state data access.
+/// </summary>
+public class BattleStateRepository : BaseMongoRepository<BattleState, Guid>, IBattleStateRepository
 {
-    private readonly IMongoCollection<BattleState> _collection;
+    public BattleStateRepository(IMongoDatabase database) 
+        : base(database, "BattleState")
+    {
+    }
 
-    public BattleStateRepository(IMongoDatabase db) =>
-        _collection = db.GetCollection<BattleState>("BattleState");
+    protected override Expression<Func<BattleState, bool>> GetByIdFilter(Guid id)
+    {
+        return x => x.BattleId == id;
+    }
 
-    public async Task AddAsync(BattleState battleState) =>
-        await _collection.InsertOneAsync(battleState);
+    protected override void OnBeforeUpdate(BattleState entity)
+    {
+        entity.LastUpdated = DateTime.UtcNow;
+    }
 
-    public async Task UpdateAsync(Guid id, BattleState battleState) =>
-    await _collection.ReplaceOneAsync(x => x.BattleId == id, battleState);
+    public async Task AddAsync(BattleState battleState)
+    {
+        await CreateAsync(battleState);
+    }
 
-    public async Task<BattleState?> GetByIdAsync(Guid id) =>
-        await _collection.Find(x => x.BattleId == id && !x.IsDeleted).FirstOrDefaultAsync();
+    public async Task UpdateAsync(Guid id, BattleState battleState)
+    {
+        await UpdateAsync(battleState, id);
+    }
+
+    public new async Task<BattleState?> GetByIdAsync(Guid id)
+    {
+        return await FindFirstAsync(x => x.BattleId == id && !x.IsDeleted);
+    }
 
     public async Task<IEnumerable<BattleDto>> GetBattles()
     {
-        var battles = await _collection.Find(b => !b.IsDeleted).ToListAsync();
+        var battles = await FindAsync(b => !b.IsDeleted);
         return battles.Select(b => new BattleDto(
             b.BattleId,
             b.BattleName,
@@ -42,7 +62,7 @@ public class BattleStateRepository : IBattleStateRepository
             .Set(b => b.IsDeleted, true)
             .Set(b => b.LastUpdated, DateTime.UtcNow);
         
-        var result = await _collection.UpdateOneAsync(x => x.BattleId == id, update);
+        var result = await _collection.UpdateOneAsync(GetByIdFilter(id), update);
         return result.ModifiedCount > 0;
     }
 }

@@ -27,6 +27,7 @@ export default function Sidebar() {
     ]},
     { path: '/pustka-admin-panel/admin-panel', label: '⚙️ Panel Admina', exact: false, requiredRole: 'admin', submenu: [
       { path: '/pustka-admin-panel/admin-panel/technologies', label: '🔬 Zarządzanie Technologiami', exact: false, requiredRole: 'admin' },
+      { path: '/pustka-admin-panel/admin-panel/fraction-settings', label: '🎯 Ustawienia Frakcji', exact: false, requiredRole: 'admin' },
       { path: '/pustka-admin-panel/admin-panel/turn-management', label: '🎲 Zakończ Turę', exact: false, requiredRole: 'admin' }
     ]},
   ];

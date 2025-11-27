@@ -6,7 +6,8 @@ import {
   DialogBody,
   DialogFooter,
   DialogCloseTrigger,
-  DialogActionTrigger,
+  DialogBackdrop,
+  DialogPositioner,
 } from '@chakra-ui/react';
 import { Button, HStack } from '@chakra-ui/react';
 
@@ -33,30 +34,29 @@ export const ConfirmModal = ({
       open={isOpen} 
       onOpenChange={(e) => !e.open && onClose()} 
       size="md"
-      blockScrollOnMount={false}
-      preserveScrollBarGap
     >
-      <DialogContent style={{ backgroundColor: '#ffffff', color: '#000000' }}>
-        <DialogHeader style={{ borderBottom: '1px solid #e2e8f0' }}>
-          <DialogTitle style={{ color: '#000000' }}>{title}</DialogTitle>
-        </DialogHeader>
-        <DialogCloseTrigger />
-        <DialogBody style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
-          <p style={{ color: '#000000' }}>{message}</p>
-        </DialogBody>
-        <DialogFooter style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
-          <HStack spacing={3}>
-            <DialogActionTrigger asChild>
-              <Button variant="outline" onClick={onClose} style={{ color: '#000000', borderColor: '#e2e8f0' }}>
+      <DialogBackdrop />
+      <DialogPositioner>
+        <DialogContent bg="white" color="black">
+          <DialogHeader borderBottom="1px solid" borderColor="gray.200">
+            <DialogTitle color="black">{title}</DialogTitle>
+          </DialogHeader>
+          <DialogCloseTrigger />
+          <DialogBody py={4}>
+            <p>{message}</p>
+          </DialogBody>
+          <DialogFooter borderTop="1px solid" borderColor="gray.200" pt={4}>
+            <HStack gap={3}>
+              <Button variant="outline" onClick={onClose}>
                 {cancelText}
               </Button>
-            </DialogActionTrigger>
-            <Button colorScheme={colorScheme} onClick={handleConfirm} style={{ color: '#ffffff' }}>
-              {confirmText}
-            </Button>
-          </HStack>
-        </DialogFooter>
-      </DialogContent>
+              <Button colorPalette={colorScheme} onClick={handleConfirm}>
+                {confirmText}
+              </Button>
+            </HStack>
+          </DialogFooter>
+        </DialogContent>
+      </DialogPositioner>
     </DialogRoot>
   );
 };

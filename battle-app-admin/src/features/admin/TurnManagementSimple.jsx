@@ -1,20 +1,15 @@
 import { useState, useEffect } from 'react';
 import { gameStateApi } from '../../services/gameStateApi';
+import { FRACTION_NAMES } from '../../constants/fractions';
+import { useNotification } from '../../contexts/NotificationContext';
 import './TurnManagement.css';
-
-const FRACTION_NAMES = {
-  hegemonia_titanum: 'Hegemonia Titanum',
-  shimura_incorporated: 'Shimura Incorporated',
-  protektorat_pogranicza: 'Protektorat Pogranicza'
-};
 
 export default function TurnManagement() {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [resolutions, setResolutions] = useState({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const { showSuccess, showError } = useNotification();
 
   const loadPendingRequests = async () => {
     try {
@@ -37,8 +32,7 @@ export default function TurnManagement() {
       setResolutions(initialResolutions);
     } catch (error) {
       console.error('Error loading pending requests:', error);
-      setErrorMessage('Nie udało się załadować zgłoszeń');
-      setTimeout(() => setErrorMessage(''), 3000);
+      showError('Nie udało się załadować zgłoszeń');
     } finally {
       setLoading(false);
     }
@@ -65,14 +59,12 @@ export default function TurnManagement() {
       const resolutionList = Object.values(resolutions);
       await gameStateApi.endTurn(resolutionList);
       
-      setSuccessMessage('Tura zakończona - wszystkie decyzje zostały zapisane');
-      setTimeout(() => setSuccessMessage(''), 5000);
+      showSuccess('Tura zakończona - wszystkie decyzje zostały zapisane');
 
       await loadPendingRequests();
     } catch (error) {
       console.error('Error ending turn:', error);
-      setErrorMessage('Nie udało się zakończyć tury');
-      setTimeout(() => setErrorMessage(''), 3000);
+      showError('Nie udało się zakończyć tury');
     } finally {
       setSubmitting(false);
     }
@@ -90,18 +82,6 @@ export default function TurnManagement() {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
-      {successMessage && (
-        <div style={{ padding: '12px', marginBottom: '16px', backgroundColor: '#C6F6D5', borderRadius: '8px', color: '#22543D' }}>
-          ✓ {successMessage}
-        </div>
-      )}
-
-      {errorMessage && (
-        <div style={{ padding: '12px', marginBottom: '16px', backgroundColor: '#FED7D7', borderRadius: '8px', color: '#742A2A' }}>
-          ✗ {errorMessage}
-        </div>
-      )}
-
       <div style={{ marginBottom: '16px' }}>
         <h1>Zarządzanie turą</h1>
         <p style={{ color: '#718096', marginTop: '8px' }}>

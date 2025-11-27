@@ -1,23 +1,32 @@
 ﻿using GreatVoidBattle.Application.Events.Base;
 using GreatVoidBattle.Application.Repositories;
 using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace GreatVoidBattle.Infrastructure.Repository;
 
-public class BattleEventRepository : IBattleEventRepository
+/// <summary>
+/// Repository for BattleEvent - handles battle event data access.
+/// </summary>
+public class BattleEventRepository : BaseMongoRepository<BattleEvent, Guid>, IBattleEventRepository
 {
-    private readonly IMongoCollection<BattleEvent> _collection;
+    public BattleEventRepository(IMongoDatabase database) 
+        : base(database, "BattleEvent")
+    {
+    }
 
-    public BattleEventRepository(IMongoDatabase db) =>
-       _collection = db.GetCollection<BattleEvent>("BattleEvent");
+    protected override Expression<Func<BattleEvent, bool>> GetByIdFilter(Guid id)
+    {
+        return e => e.EventId == id;
+    }
 
-    public async Task AddAsync(BattleEvent battleEvent) =>
-       await _collection.InsertOneAsync(battleEvent);
+    public async Task AddAsync(BattleEvent battleEvent)
+    {
+        await CreateAsync(battleEvent);
+    }
 
     public async Task<List<BattleEvent>> GetByBattleIdAsync(Guid battleId)
     {
-        var filter = Builders<BattleEvent>.Filter.Eq(e => e.BattleId, battleId);
-        var result = await _collection.FindAsync(filter);
-        return await result.ToListAsync() ?? [];
+        return await FindAsync(e => e.BattleId == battleId);
     }
 }

@@ -1,9 +1,6 @@
 ﻿using GreatVoidBattle.Application.Dto.Fractions;
-using GreatVoidBattle.Application.Dto.Ships;
-
-using GreatVoidBattle.Application.Dto.Fractions;
-
 using GreatVoidBattle.Application.Factories;
+using GreatVoidBattle.Application.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GreatVoidBattle.Application.Controllers;
@@ -57,24 +54,8 @@ public class FractionsController(BattleManagerFactory battleManagerFactory) : Co
     public async Task<IActionResult> GetFractions(Guid battleId)
     {
         var battleState = await battleManagerFactory.GetBattleState(battleId);
-        var fractions = battleState.Fractions.Select(f => new FractionDto
-        {
-            FractionId = f.FractionId,
-            FractionName = f.FractionName,
-            PlayerName = f.PlayerName,
-            FractionColor = f.FractionColor,
-            IsDefeated = f.IsDefeated,
-            Ships = f.Ships.Select(s => new ShipDto
-            {
-                ShipId = s.ShipId,
-                Name = s.Name,
-                X = s.Position.X,
-                Y = s.Position.Y,
-                Armor = s.Armor,
-                Shields = s.Shields,
-                HitPoints = s.HitPoints
-            }).ToList()
-        });
+        // Basic view without full ship details
+        var fractions = FractionMapper.ToDtoList(battleState.Fractions, includeFullShipDetails: false);
         return Ok(fractions);
     }
 
@@ -83,34 +64,7 @@ public class FractionsController(BattleManagerFactory battleManagerFactory) : Co
     public async Task<IActionResult> GetFractionsAdmin(Guid battleId)
     {
         var battleState = await battleManagerFactory.GetBattleState(battleId);
-        var fractions = battleState.Fractions.Select(f => new FractionAdminDto
-        {
-            FractionId = f.FractionId,
-            FractionName = f.FractionName,
-            PlayerName = f.PlayerName,
-            FractionColor = f.FractionColor,
-            AuthToken = f.AuthToken,
-            IsDefeated = f.IsDefeated,
-            Ships = f.Ships.Select(s => new ShipDto
-            {
-                ShipId = s.ShipId,
-                Name = s.Name,
-                Type = s.Type.ToString(),
-                X = s.Position.X,
-                Y = s.Position.Y,
-                Speed = s.Speed,
-                Armor = s.Armor,
-                Shields = s.Shields,
-                HitPoints = s.HitPoints,
-                Modules = s.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
-                NumberOfMissiles = s.NumberOfMissiles,
-                NumberOfLasers = s.NumberOfLasers,
-                NumberOfPointsDefense = s.NumberOfPointsDefense,
-                MissileMaxRange = Core.Domains.Const.MissileMaxRage,
-                MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
-                LaserMaxRange = Core.Domains.Const.LaserMaxRange
-            }).ToList()
-        });
+        var fractions = FractionMapper.ToAdminDtoList(battleState.Fractions);
         return Ok(fractions);
     }
 
@@ -126,34 +80,7 @@ public class FractionsController(BattleManagerFactory battleManagerFactory) : Co
             return NotFound();
         }
 
-        var fractionDto = new FractionDto
-        {
-            FractionId = fraction.FractionId,
-            FractionName = fraction.FractionName,
-            PlayerName = fraction.PlayerName,
-            FractionColor = fraction.FractionColor,
-            IsDefeated = fraction.IsDefeated,
-            Ships = fraction.Ships.Select(s => new ShipDto
-            {
-                ShipId = s.ShipId,
-                Name = s.Name,
-                Type = s.Type.ToString(),
-                X = s.Position.X,
-                Y = s.Position.Y,
-                Speed = s.Speed,
-                Armor = s.Armor,
-                Shields = s.Shields,
-                HitPoints = s.HitPoints,
-                Modules = s.Modules.Select(m => new ModuleDto(m.Slots.Select(slot => slot.WeaponType!.ToString()!).ToList())).ToList(),
-                NumberOfMissiles = s.NumberOfMissiles,
-                NumberOfLasers = s.NumberOfLasers,
-                NumberOfPointsDefense = s.NumberOfPointsDefense,
-                MissileMaxRange = Core.Domains.Const.MissileMaxRage,
-                MissileEffectiveRange = Core.Domains.Const.MissileEffectiveRage,
-                LaserMaxRange = Core.Domains.Const.LaserMaxRange
-            }).ToList()
-        };
-        
-        return Ok(fractionDto);
+        // Full details for single fraction view
+        return Ok(FractionMapper.ToDto(fraction, includeFullShipDetails: true));
     }
 }
