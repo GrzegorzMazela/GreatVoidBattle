@@ -305,4 +305,236 @@ public class AddFractionShipEventHandlerTests
         f2.Ships[0].Name.ShouldBe("F2 Battleship");
         f2.Ships[0].Type.ShouldBe(ShipType.Battleship);
     }
+
+    #region Custom Stats Tests
+
+    [Fact]
+    public async Task AddFractionShipEventHandler_WithCustomSpeed_ShouldUseCustomValue()
+    {
+        // Arrange
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Fast Corvette",
+            Type = ShipType.Corvette,
+            PositionX = 0,
+            PositionY = 0,
+            Speed = 15, // Custom speed (default is 10)
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+            ]
+        };
+
+        // Act
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        // Assert
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.First(s => s.Name == "Fast Corvette");
+
+        ship.Speed.ShouldBe(15);
+    }
+
+    [Fact]
+    public async Task AddFractionShipEventHandler_WithCustomHitPoints_ShouldUseCustomValue()
+    {
+        // Arrange
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Tough Corvette",
+            Type = ShipType.Corvette,
+            PositionX = 0,
+            PositionY = 0,
+            HitPoints = 100, // Custom HP (default is 50)
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+            ]
+        };
+
+        // Act
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        // Assert
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.First(s => s.Name == "Tough Corvette");
+
+        ship.HitPoints.ShouldBe(100);
+    }
+
+    [Fact]
+    public async Task AddFractionShipEventHandler_WithCustomShields_ShouldUseCustomValue()
+    {
+        // Arrange
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Shielded Destroyer",
+            Type = ShipType.Destroyer,
+            PositionX = 0,
+            PositionY = 0,
+            Shields = 150, // Custom shields (default is 50)
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+            ]
+        };
+
+        // Act
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        // Assert
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.First(s => s.Name == "Shielded Destroyer");
+
+        ship.Shields.ShouldBe(150);
+    }
+
+    [Fact]
+    public async Task AddFractionShipEventHandler_WithCustomArmor_ShouldUseCustomValue()
+    {
+        // Arrange
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Armored Cruiser",
+            Type = ShipType.Cruiser,
+            PositionX = 0,
+            PositionY = 0,
+            Armor = 300, // Custom armor (default is 100)
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+            ]
+        };
+
+        // Act
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        // Assert
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.First(s => s.Name == "Armored Cruiser");
+
+        ship.Armor.ShouldBe(300);
+    }
+
+    [Fact]
+    public async Task AddFractionShipEventHandler_WithAllCustomStats_ShouldUseAllCustomValues()
+    {
+        // Arrange
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Custom Battleship",
+            Type = ShipType.Battleship,
+            PositionX = 0,
+            PositionY = 0,
+            Speed = 3,
+            HitPoints = 800,
+            Shields = 500,
+            Armor = 400,
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+            ]
+        };
+
+        // Act
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        // Assert
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.First(s => s.Name == "Custom Battleship");
+
+        ship.Speed.ShouldBe(3);
+        ship.HitPoints.ShouldBe(800);
+        ship.Shields.ShouldBe(500);
+        ship.Armor.ShouldBe(400);
+    }
+
+    [Fact]
+    public async Task AddFractionShipEventHandler_WithoutCustomStats_ShouldUseDefaultValues()
+    {
+        // Arrange - no custom stats set
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Default Corvette",
+            Type = ShipType.Corvette,
+            PositionX = 0,
+            PositionY = 0,
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+            ]
+        };
+
+        // Act
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        // Assert - default Corvette stats
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.First(s => s.Name == "Default Corvette");
+
+        ship.Speed.ShouldBe(10);
+        ship.HitPoints.ShouldBe(50);
+        ship.Shields.ShouldBe(25);
+        ship.Armor.ShouldBe(25);
+    }
+
+    [Fact]
+    public async Task AddFractionShipEventHandler_WithPartialCustomStats_ShouldMixCustomAndDefaults()
+    {
+        // Arrange - only speed and shields are custom
+        var addShipEvent = new AddFractionShipEvent
+        {
+            BattleId = _battleManager.BattleId,
+            FractionId = _fractionId,
+            Name = "Partial Custom Destroyer",
+            Type = ShipType.Destroyer,
+            PositionX = 0,
+            PositionY = 0,
+            Speed = 12, // Custom
+            Shields = 100, // Custom
+            // HitPoints and Armor are not set, should use defaults
+            Modules = [
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense }),
+                new Module(new List<WeaponType> { WeaponType.Laser, WeaponType.Missile, WeaponType.PointDefense })
+            ]
+        };
+
+        // Act
+        await _battleManager.ApplyEventAsync(addShipEvent);
+
+        // Assert
+        var ship = _battleManager.BattleState.Fractions
+            .First(f => f.FractionId == _fractionId)
+            .Ships.First(s => s.Name == "Partial Custom Destroyer");
+
+        ship.Speed.ShouldBe(12); // Custom
+        ship.Shields.ShouldBe(100); // Custom
+        ship.HitPoints.ShouldBe(100); // Default for Destroyer
+        ship.Armor.ShouldBe(50); // Default for Destroyer
+    }
+
+    #endregion
 }

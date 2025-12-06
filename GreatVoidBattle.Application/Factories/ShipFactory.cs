@@ -6,17 +6,36 @@ namespace GreatVoidBattle.Core.Factories;
 
 public static class ShipFactory
 {
-    public static ShipState CreateShip(AddFractionShipEvent addShipEvent, BattleLog battleLog)
-    => addShipEvent.Type switch
+    /// <summary>
+    /// Pobiera domyślne statystyki dla danego typu statku
+    /// </summary>
+    public static (int speed, int hitPoints, int shields, int armor, int modules) GetDefaultStats(ShipType type)
     {
-        ShipType.Corvette => CreateShipState(addShipEvent, speed: 10, hitPoints: 50, shields: 25, armor: 25, 1, battleLog),
-        ShipType.Destroyer => CreateShipState(addShipEvent, speed: 8, hitPoints: 100, shields: 50, armor: 50, 2, battleLog),
-        ShipType.Cruiser => CreateShipState(addShipEvent, speed: 6, hitPoints: 200, shields: 100, armor: 100, 4, battleLog),
-        ShipType.Battleship => CreateShipState(addShipEvent, speed: 5, hitPoints: 400, shields: 200, armor: 200, 8, battleLog),
-        ShipType.SuperBattleship => CreateShipState(addShipEvent, speed: 5, hitPoints: 600, shields: 300, armor: 300, 12, battleLog),
-        ShipType.OrbitalFort => CreateShipState(addShipEvent, speed: 0, hitPoints: 100, shields: 50, armor: 50, 2, battleLog),
-        _ => throw new ArgumentOutOfRangeException()
-    };
+        return type switch
+        {
+            ShipType.Corvette => (10, 50, 25, 25, 1),
+            ShipType.Destroyer => (8, 100, 50, 50, 2),
+            ShipType.Cruiser => (6, 200, 100, 100, 4),
+            ShipType.Battleship => (5, 400, 200, 200, 8),
+            ShipType.SuperBattleship => (5, 600, 300, 300, 12),
+            ShipType.OrbitalFort => (0, 100, 50, 50, 2),
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
+    }
+    
+    public static ShipState CreateShip(AddFractionShipEvent addShipEvent, BattleLog battleLog)
+    {
+        var (defaultSpeed, defaultHitPoints, defaultShields, defaultArmor, defaultModules) = GetDefaultStats(addShipEvent.Type);
+        
+        // Użyj wartości z eventu jeśli podane, w przeciwnym razie domyślne
+        var speed = addShipEvent.Speed ?? defaultSpeed;
+        var hitPoints = addShipEvent.HitPoints ?? defaultHitPoints;
+        var shields = addShipEvent.Shields ?? defaultShields;
+        var armor = addShipEvent.Armor ?? defaultArmor;
+        var numberOfModules = addShipEvent.Modules.Count > 0 ? addShipEvent.Modules.Count : defaultModules;
+        
+        return CreateShipState(addShipEvent, speed, hitPoints, shields, armor, numberOfModules, battleLog);
+    }
 
     public static ShipState CreateShipState(AddFractionShipEvent addShipEvent, int speed, int hitPoints,
         int shields, int armor, int numberOfModules, BattleLog battleLog)

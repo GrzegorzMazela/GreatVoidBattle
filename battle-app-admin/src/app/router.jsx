@@ -24,6 +24,8 @@ import { FractionSettingsAdmin } from '../features/admin/FractionSettingsAdmin';
 import { OwnedTechnologies } from '../features/player/OwnedTechnologies';
 import ResearchRequests from '../features/player/ResearchRequests';
 import TurnManagementSimple from '../features/admin/TurnManagementSimple';
+import FleetManagementPage from '../features/admin/FleetManagementPage';
+import AdminFleetManagementPage from '../features/admin/AdminFleetManagementPage';
 
 export const router = createBrowserRouter([
   // Strona logowania Discord
@@ -87,6 +89,14 @@ export const router = createBrowserRouter([
         )
       },
       { 
+        path: 'hegemonia/fleet', 
+        element: (
+          <ProtectedRoute allowedRoles={["Hegemonia Titanum"]}>
+            <FleetManagementPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: 'shimura', 
         element: (
           <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
@@ -111,6 +121,14 @@ export const router = createBrowserRouter([
         )
       },
       { 
+        path: 'shimura/fleet', 
+        element: (
+          <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
+            <FleetManagementPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: 'protektorat', 
         element: (
           <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
@@ -131,6 +149,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
             <ResearchRequests />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'protektorat/fleet', 
+        element: (
+          <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
+            <FleetManagementPage />
           </ProtectedRoute>
         )
       },
@@ -163,6 +189,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requireAdmin={true}>
             <TurnManagementSimple />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'admin-panel/fleet-management', 
+        element: (
+          <ProtectedRoute requireAdmin={true}>
+            <AdminFleetManagementPage />
           </ProtectedRoute>
         )
       },
