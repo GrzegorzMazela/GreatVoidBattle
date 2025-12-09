@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Box, Heading, VStack, HStack, Button, Text, Spinner, 
-  Table, Badge, IconButton, createToaster, Toaster,
+  Table, Badge, IconButton,
   Dialog, Portal
 } from '@chakra-ui/react';
 import { LuMapPin, LuRocket, LuGlobe, LuInfo } from 'react-icons/lu';
@@ -11,11 +11,7 @@ import {
   getFractionFleet, 
   assignShipToSystem 
 } from '../../services/api';
-
-const toaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
+import { useNotification } from '../../contexts/NotificationContext';
 
 const FRACTION_IDS = {
   'Hegemonia Titanum': 'hegemonia-titanum',
@@ -25,6 +21,7 @@ const FRACTION_IDS = {
 
 export default function FleetManagementPage() {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useNotification();
   const session = getDiscordSession();
   const fractionRoles = session?.user?.fractionRoles || [];
   
@@ -47,12 +44,12 @@ export default function FleetManagementPage() {
     mutationFn: ({ shipId, systemId }) => assignShipToSystem(fractionId, shipId, systemId),
     onSuccess: () => {
       queryClient.invalidateQueries(['fleet', fractionId]);
-      toaster.success({ title: 'Statek przypisany do układu' });
+      showSuccess('Statek przypisany do układu');
       setAssignDialogOpen(false);
       setAssigningShip(null);
     },
     onError: () => {
-      toaster.error({ title: 'Błąd podczas przypisywania statku' });
+      showError('Błąd podczas przypisywania statku');
     }
   });
 
@@ -81,7 +78,6 @@ export default function FleetManagementPage() {
 
   return (
     <>
-      <Toaster toaster={toaster} />
       <Box>
         <Heading size="lg" mb="6">🚀 Flota Frakcji</Heading>
         

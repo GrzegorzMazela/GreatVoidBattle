@@ -4,22 +4,19 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  VStack, HStack, Field, Input, Button, Textarea, createToaster
+  VStack, HStack, Field, Input, Button, Textarea
 } from '@chakra-ui/react';
 import { createPlanetarySystem, updatePlanetarySystem } from '../../services/api';
 import { emptyPlanetarySystemPayload } from '../../types/dto';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const schema = z.object({
   name: z.string().min(1, 'Nazwa jest wymagana'),
   description: z.string().optional()
 });
 
-const defaultToaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
-
-export default function PlanetarySystemForm({ fractionId, system, onClose, toaster = defaultToaster }) {
+export default function PlanetarySystemForm({ fractionId, system, onClose }) {
+  const { showSuccess, showError } = useNotification();
   const isEditMode = !!system;
   const queryClient = useQueryClient();
 
@@ -44,11 +41,11 @@ export default function PlanetarySystemForm({ fractionId, system, onClose, toast
       : createPlanetarySystem(fractionId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(['fleet', fractionId]);
-      toaster.success({ title: isEditMode ? 'Układ zaktualizowany' : 'Układ planetarny dodany' });
+      showSuccess(isEditMode ? 'Układ zaktualizowany' : 'Układ planetarny dodany');
       onClose();
     },
     onError: (error) => {
-      toaster.error({ title: 'Błąd', description: error.message });
+      showError(`Błąd: ${error.message}`);
     }
   });
 

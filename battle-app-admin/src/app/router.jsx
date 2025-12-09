@@ -26,6 +26,8 @@ import ResearchRequests from '../features/player/ResearchRequests';
 import TurnManagementSimple from '../features/admin/TurnManagementSimple';
 import FleetManagementPage from '../features/admin/FleetManagementPage';
 import AdminFleetManagementPage from '../features/admin/AdminFleetManagementPage';
+import AdminExplorationPage from '../features/exploration/AdminExplorationPage';
+import ExplorationPage from '../features/exploration/ExplorationPage';
 
 export const router = createBrowserRouter([
   // Strona logowania Discord
@@ -97,6 +99,14 @@ export const router = createBrowserRouter([
         )
       },
       { 
+        path: 'hegemonia/exploration', 
+        element: (
+          <ProtectedRoute allowedRoles={["Hegemonia Titanum"]}>
+            <ExplorationPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: 'shimura', 
         element: (
           <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
@@ -129,6 +139,14 @@ export const router = createBrowserRouter([
         )
       },
       { 
+        path: 'shimura/exploration', 
+        element: (
+          <ProtectedRoute allowedRoles={["Shimura Incorporated"]}>
+            <ExplorationPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
         path: 'protektorat', 
         element: (
           <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
@@ -157,6 +175,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
             <FleetManagementPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'protektorat/exploration', 
+        element: (
+          <ProtectedRoute allowedRoles={["Protektorat Pogranicza"]}>
+            <ExplorationPage />
           </ProtectedRoute>
         )
       },
@@ -197,6 +223,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requireAdmin={true}>
             <AdminFleetManagementPage />
+          </ProtectedRoute>
+        )
+      },
+      { 
+        path: 'admin-panel/exploration', 
+        element: (
+          <ProtectedRoute requireAdmin={true}>
+            <AdminExplorationPage />
           </ProtectedRoute>
         )
       },

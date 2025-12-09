@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Box, Heading, VStack, HStack, Button, Text, Spinner, 
-  Table, Badge, IconButton, createToaster, Toaster,
+  Table, Badge, IconButton,
   Dialog, Portal, Tabs, NativeSelectRoot, NativeSelectField
 } from '@chakra-ui/react';
 import { LuPlus, LuPencil, LuTrash2, LuRocket, LuGlobe } from 'react-icons/lu';
@@ -13,11 +13,7 @@ import {
 } from '../../services/api';
 import FleetShipForm from './FleetShipForm';
 import PlanetarySystemForm from './PlanetarySystemForm';
-
-const toaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
+import { useNotification } from '../../contexts/NotificationContext';
 
 const FRACTION_OPTIONS = [
   { id: 'hegemonia-titanum', name: 'Hegemonia Titanum' },
@@ -27,6 +23,7 @@ const FRACTION_OPTIONS = [
 
 export default function AdminFleetManagementPage() {
   const queryClient = useQueryClient();
+  const { showSuccess, showError } = useNotification();
   const [selectedFraction, setSelectedFraction] = useState(FRACTION_OPTIONS[0].id);
   
   const [shipFormOpen, setShipFormOpen] = useState(false);
@@ -44,10 +41,10 @@ export default function AdminFleetManagementPage() {
     mutationFn: (shipId) => deleteFleetShip(selectedFraction, shipId),
     onSuccess: () => {
       queryClient.invalidateQueries(['fleet', selectedFraction]);
-      toaster.success({ title: 'Statek usunięty' });
+      showSuccess('Statek usunięty');
     },
     onError: () => {
-      toaster.error({ title: 'Błąd podczas usuwania statku' });
+      showError('Błąd podczas usuwania statku');
     }
   });
 
@@ -55,10 +52,10 @@ export default function AdminFleetManagementPage() {
     mutationFn: (systemId) => deletePlanetarySystem(selectedFraction, systemId),
     onSuccess: () => {
       queryClient.invalidateQueries(['fleet', selectedFraction]);
-      toaster.success({ title: 'Układ planetarny usunięty' });
+      showSuccess('Układ planetarny usunięty');
     },
     onError: () => {
-      toaster.error({ title: 'Błąd podczas usuwania układu' });
+      showError('Błąd podczas usuwania układu');
     }
   });
 
@@ -89,7 +86,6 @@ export default function AdminFleetManagementPage() {
 
   return (
     <>
-      <Toaster toaster={toaster} />
       <Box>
         <Heading size="lg" mb="4">⚙️ Zarządzanie Flotami (Admin)</Heading>
         
@@ -306,7 +302,6 @@ export default function AdminFleetManagementPage() {
                   planetarySystems={planetarySystems}
                   onClose={handleCloseShipForm}
                   requireSystem={true}
-                  toaster={toaster}
                 />
               </Dialog.Body>
             </Dialog.Content>
@@ -330,7 +325,6 @@ export default function AdminFleetManagementPage() {
                   fractionId={selectedFraction}
                   system={editingSystem}
                   onClose={handleCloseSystemForm}
-                  toaster={toaster}
                 />
               </Dialog.Body>
             </Dialog.Content>

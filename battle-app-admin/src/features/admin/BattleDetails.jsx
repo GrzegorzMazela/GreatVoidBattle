@@ -8,7 +8,7 @@ import {
 import { Table } from '@chakra-ui/react';
 import { useModal } from '../../hooks/useModal';
 import { ConfirmModal } from '../../components/modals/ConfirmModal';
-import { AlertModal } from '../../components/modals/AlertModal';
+import { useNotification } from '../../contexts/NotificationContext';
 
 export default function BattleDetails() {
   const { battleId } = useParams();
@@ -16,7 +16,7 @@ export default function BattleDetails() {
   const [copiedToken, setCopiedToken] = useState(null);
   
   const confirmModal = useModal();
-  const alertModal = useModal();
+  const { showSuccess, showError } = useNotification();
   
   const { data: battle, isLoading } = useQuery({
     queryKey: ['battle', battleId, 'admin'],
@@ -39,11 +39,7 @@ export default function BattleDetails() {
 
   const copyPlayerLink = async (fraction) => {
     if (!fraction.authToken) {
-      alertModal.openModal({
-        title: 'Błąd',
-        message: 'Auth token nie jest dostępny dla tej frakcji.',
-        variant: 'error'
-      });
+      showError('Auth token nie jest dostępny dla tej frakcji.');
       return;
     }
     const playerUrl = `${window.location.origin}/battles/${battleId}/simulator?token=${fraction.authToken}&fractionId=${fraction.fractionId}`;
@@ -65,13 +61,10 @@ export default function BattleDetails() {
       }
       setCopiedToken(fraction.fractionId);
       setTimeout(() => setCopiedToken(null), 2000);
+      showSuccess('Link skopiowany do schowka!');
     } catch (error) {
       console.error('Failed to copy:', error);
-      alertModal.openModal({
-        title: 'Błąd',
-        message: 'Nie udało się skopiować linku. Spróbuj ręcznie: ' + playerUrl,
-        variant: 'error'
-      });
+      showError('Nie udało się skopiować linku. Spróbuj ręcznie: ' + playerUrl);
     }
   };
 
@@ -210,14 +203,6 @@ export default function BattleDetails() {
         confirmText="Rozpocznij"
         cancelText="Anuluj"
         colorScheme="orange"
-      />
-
-      <AlertModal
-        isOpen={alertModal.isOpen}
-        onClose={alertModal.closeModal}
-        title={alertModal.modalData.title}
-        message={alertModal.modalData.message}
-        variant={alertModal.modalData.variant}
       />
     </Box>
   );

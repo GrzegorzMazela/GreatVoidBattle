@@ -22,10 +22,15 @@ builder.Services.AddScoped<IBattleStateRepository, BattleStateRepository>();
 builder.Services.AddScoped<IBattleEventRepository, BattleEventRepository>();
 builder.Services.AddScoped<IFractionGameStateRepository, FractionGameStateRepository>();
 builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
+builder.Services.AddScoped<IStarSystemRepository, StarSystemRepository>();
+builder.Services.AddScoped<IExpeditionRepository, ExpeditionRepository>();
+builder.Services.AddScoped<ISystemDiscoveryRepository, SystemDiscoveryRepository>();
+builder.Services.AddScoped<IExplorationStateRepository, ExplorationStateRepository>();
 builder.Services.AddSingleton<TechnologyConfigService>();
 builder.Services.AddScoped<GameStateService>();
 builder.Services.AddScoped<FractionTechnologyService>();
 builder.Services.AddScoped<FleetService>();
+builder.Services.AddScoped<ExplorationService>();
 
 // Game initialization service - runs on startup
 builder.Services.AddHostedService<GameInitializationService>();

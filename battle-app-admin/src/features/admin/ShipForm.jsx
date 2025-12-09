@@ -4,9 +4,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createShip, updateShip, getShip } from '../../services/api';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { Box, Heading, VStack, Field, Input, NativeSelectRoot, NativeSelectField, Button, HStack, createToaster, Toaster, Text, Spinner } from '@chakra-ui/react';
+import { Box, Heading, VStack, Field, Input, NativeSelectRoot, NativeSelectField, Button, HStack, Text, Spinner } from '@chakra-ui/react';
 import { ShipTypes, ShipDefaultStats, emptyShipPayload } from '../../types/dto';
 import { useEffect } from 'react';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const WeaponTypes = ['Missile', 'Laser', 'PointDefense'];
 
@@ -28,12 +29,8 @@ const schema = z.object({
   }))
 });
 
-const toaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
-
 export default function ShipForm() {
+  const { showSuccess } = useNotification();
   const { battleId, fractionId, shipId } = useParams();
   const isEditMode = !!shipId;
   
@@ -107,7 +104,7 @@ export default function ShipForm() {
     onSuccess: () => {
       qc.invalidateQueries(['ships', battleId, fractionId]);
       qc.invalidateQueries(['battle', battleId]);
-      toaster.success({ title: isEditMode ? 'Ship updated' : 'Ship created' });
+      showSuccess(isEditMode ? 'Statek zaktualizowany' : 'Statek utworzony');
       nav(`/pustka-admin-panel/${battleId}/fractions/${fractionId}/ships`);
     }
   });
@@ -115,9 +112,7 @@ export default function ShipForm() {
   if (isEditMode && loadingShip) return <Spinner />;
 
   return (
-    <>
-      <Toaster toaster={toaster} />
-      <Box>
+    <Box>
         <Heading size="md" mb="4">{isEditMode ? 'Edit Ship' : 'Add Ship'}</Heading>
         <VStack as="form" align="stretch" spacing="4" onSubmit={handleSubmit((v) => mutation.mutate(v))}>
           <Field.Root><Field.Label>Name</Field.Label><Input {...register('name')} /></Field.Root>
@@ -188,7 +183,6 @@ export default function ShipForm() {
             Cancel
           </Button>
         </VStack>
-      </Box>
-    </>
+    </Box>
   );
 }

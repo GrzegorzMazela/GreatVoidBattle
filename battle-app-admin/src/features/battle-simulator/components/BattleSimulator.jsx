@@ -11,10 +11,11 @@ import { TurnController } from './TurnController';
 import { WeaponCountDialog } from './WeaponCountDialog';
 import { TurnWaitingModal } from './TurnWaitingModal';
 import { TurnLogsModal } from './TurnLogsModal';
-import { useModal } from '../../../hooks/useModal';
-import { AlertModal } from '../../../components/modals/AlertModal';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { useTurnSystem } from '../hooks/useTurnSystem';
 import './BattleSimulator.css';
+
+// Removed AlertModal - using useNotification context instead for consistency
 
 /**
  * Główny komponent symulatora bitwy
@@ -45,8 +46,8 @@ export const BattleSimulator = ({ sessionData }) => {
   // State dla dialogu wyboru liczby strzałów
   const [weaponDialog, setWeaponDialog] = useState(null); // { type, targetShip, targetFraction, maxCount }
   
-  // Modal dla komunikatów
-  const alertModal = useModal();
+  // Hook dla powiadomień
+  const { showSuccess, showError, showWarning, showInfo } = useNotification();
 
   // State dla logów tury
   const [turnLogs, setTurnLogs] = useState(null);
@@ -89,14 +90,10 @@ export const BattleSimulator = ({ sessionData }) => {
       } catch (error) {
         console.error('Error fetching turn logs:', error);
         // W przypadku błędu pokaż komunikat
-        alertModal.openModal({
-          title: 'Nowa tura!',
-          message: `Rozpoczyna się tura ${newTurnNumber}! (Nie udało się pobrać logów)`,
-          variant: 'warning'
-        });
+        showWarning(`Rozpoczyna się tura ${newTurnNumber}! (Nie udało się pobrać logów)`, 'Nowa tura!');
       }
     }
-  }, [refresh, ordersManager, alertModal, battleId, playerFractionId]);
+  }, [refresh, ordersManager, showWarning, battleId, playerFractionId]);
 
   // System turowy z SignalR
   const turnSystem = useTurnSystem(battleId, playerFractionId, handleNewTurn, battleState);
@@ -150,13 +147,9 @@ export const BattleSimulator = ({ sessionData }) => {
       // Aktualizuj wybrany statek po przesunięciu
       setSelectedShip(prev => prev ? { ...prev, x, y } : null);
     } catch (error) {
-      alertModal.openModal({
-        title: 'Błąd',
-        message: `Błąd przy ustawianiu pozycji: ${error.response?.data?.message || error.message}`,
-        variant: 'error'
-      });
+      showError(`Błąd przy ustawianiu pozycji: ${error.response?.data?.message || error.message}`);
     }
-  }, [battleId, refresh, alertModal]);
+  }, [battleId, refresh, showError]);
 
   // Obsługa rozkazów w trybie rozgrywki
   const handleOrderInProgress = useCallback((x, y) => {
@@ -207,18 +200,10 @@ export const BattleSimulator = ({ sessionData }) => {
                 maxCount: available
               });
             } else {
-              alertModal.openModal({
-                title: 'Brak amunicji',
-                message: 'Brak dostępnych rakiet!',
-                variant: 'warning'
-              });
+              showWarning('Brak dostępnych rakiet!', 'Brak amunicji');
             }
           } else {
-            alertModal.openModal({
-              title: 'Cel poza zasięgiem',
-              message: `Cel poza zasięgiem! Odległość: ${distance.toFixed(1)}, Max: ${MISSILE_MAX_RANGE}`,
-              variant: 'warning'
-            });
+            showWarning(`Cel poza zasięgiem! Odległość: ${distance.toFixed(1)}, Max: ${MISSILE_MAX_RANGE}`, 'Cel poza zasięgiem');
           }
         } else if (weaponMode === 'laser') {
           // Tryb lasera - sprawdź zasięg
@@ -243,18 +228,10 @@ export const BattleSimulator = ({ sessionData }) => {
                 maxCount: available
               });
             } else {
-              alertModal.openModal({
-                title: 'Brak amunicji',
-                message: 'Brak dostępnych laserów!',
-                variant: 'warning'
-              });
+              showWarning('Brak dostępnych laserów!', 'Brak amunicji');
             }
           } else {
-            alertModal.openModal({
-              title: 'Cel poza zasięgiem',
-              message: `Cel poza zasięgiem! Odległość: ${distance.toFixed(1)}, Max: ${LASER_MAX_RANGE}`,
-              variant: 'warning'
-            });
+            showWarning(`Cel poza zasięgiem! Odległość: ${distance.toFixed(1)}, Max: ${LASER_MAX_RANGE}`, 'Cel poza zasięgiem');
           }
         }
         // Jeśli nie ma wybranej broni, nie rób nic (nie atakuj, nie zmieniaj focusu)
@@ -366,19 +343,11 @@ export const BattleSimulator = ({ sessionData }) => {
       } else {
         await refresh();
       }
-      alertModal.openModal({
-        title: 'Sukces',
-        message: 'Rozkazy zostały zatwierdzone!',
-        variant: 'success'
-      });
+      showSuccess('Rozkazy zostały zatwierdzone!');
     } else {
-      alertModal.openModal({
-        title: 'Błąd',
-        message: `Błąd: ${result.error}`,
-        variant: 'error'
-      });
+      showError(`Błąd: ${result.error}`);
     }
-  }, [ordersManager, refresh, alertModal]);
+  }, [ordersManager, refresh, showSuccess, showError]);
 
   // Obsługa zakończenia tury przez gracza
   const handleEndTurn = useCallback(async () => {
@@ -391,11 +360,7 @@ export const BattleSimulator = ({ sessionData }) => {
         
         if (!submitResult.success) {
           // Jeśli wysłanie rozkazów się nie powiodło, zatrzymaj proces
-          alertModal.openModal({
-            title: 'Błąd wysyłania rozkazów',
-            message: `Nie udało się wysłać rozkazów: ${submitResult.error}`,
-            variant: 'error'
-          });
+          showError(`Nie udało się wysłać rozkazów: ${submitResult.error}`, 'Błąd wysyłania rozkazów');
           setIsExecuting(false);
           return;
         }
@@ -425,16 +390,12 @@ export const BattleSimulator = ({ sessionData }) => {
       
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || 'Failed to end turn';
-      alertModal.openModal({
-        title: 'Błąd zakończenia tury',
-        message: errorMsg,
-        variant: 'error'
-      });
+      showError(errorMsg, 'Błąd zakończenia tury');
       console.error('Error ending turn:', error);
     } finally {
       setIsExecuting(false);
     }
-  }, [battleId, playerFractionId, refresh, ordersManager, alertModal, turnSystem]);
+  }, [battleId, playerFractionId, refresh, ordersManager, showError, turnSystem]);
 
   // Pokaż informację o frakcji gracza
   const playerFraction = battleState?.fractions.find(f => f.fractionId === playerFractionId);
@@ -640,14 +601,6 @@ export const BattleSimulator = ({ sessionData }) => {
         fractionId={playerFractionId}
         authToken={getPlayerSession()?.authToken}
         maxTurn={maxTurnNumber}
-      />
-
-      <AlertModal
-        isOpen={alertModal.isOpen}
-        onClose={alertModal.closeModal}
-        title={alertModal.modalData.title}
-        message={alertModal.modalData.message}
-        variant={alertModal.modalData.variant}
       />
     </div>
   );

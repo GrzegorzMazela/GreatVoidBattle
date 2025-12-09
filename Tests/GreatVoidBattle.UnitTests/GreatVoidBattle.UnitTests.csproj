@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GreatVoidBattle.Api\GreatVoidBattle.Api.csproj" />
     <ProjectReference Include="..\..\GreatVoidBattle.Application\GreatVoidBattle.Application.csproj" />
   </ItemGroup>
 

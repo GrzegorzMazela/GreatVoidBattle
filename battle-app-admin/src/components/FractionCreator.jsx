@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { createFraction } from '../services/authApi';
-import { useModal } from '../hooks/useModal';
-import { AlertModal } from './modals/AlertModal';
+import { useNotification } from '../contexts/NotificationContext';
 
 /**
  * Komponent administratora do tworzenia frakcji i generowania linków dla graczy
@@ -14,7 +13,7 @@ const FractionCreator = ({ battleId }) => {
   const [createdFractions, setCreatedFractions] = useState([]);
   const [error, setError] = useState(null);
   
-  const alertModal = useModal();
+  const { showSuccess, showError } = useNotification();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,18 +70,10 @@ const FractionCreator = ({ battleId }) => {
         document.execCommand('copy');
         document.body.removeChild(textArea);
       }
-      alertModal.openModal({
-        title: 'Sukces',
-        message: 'Skopiowano do schowka!',
-        variant: 'success'
-      });
+      showSuccess('Skopiowano do schowka!');
     } catch (error) {
       console.error('Failed to copy:', error);
-      alertModal.openModal({
-        title: 'Błąd',
-        message: 'Nie udało się skopiować. Tekst: ' + text,
-        variant: 'error'
-      });
+      showError('Nie udało się skopiować. Tekst: ' + text);
     }
   };
 
@@ -224,14 +215,6 @@ const FractionCreator = ({ battleId }) => {
           ))}
         </div>
       )}
-
-      <AlertModal
-        isOpen={alertModal.isOpen}
-        onClose={alertModal.closeModal}
-        title={alertModal.modalData.title}
-        message={alertModal.modalData.message}
-        variant={alertModal.modalData.variant}
-      />
     </div>
   );
 };

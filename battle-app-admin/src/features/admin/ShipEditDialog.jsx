@@ -19,14 +19,13 @@ import {
   NativeSelectField, 
   Button, 
   HStack, 
-  createToaster, 
-  Toaster,
   Box,
   Text,
   Heading
 } from '@chakra-ui/react';
 import { ShipTypes } from '../../types/dto';
 import { useEffect } from 'react';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const WeaponTypes = ['Missile', 'Laser', 'PointDefense'];
 
@@ -52,12 +51,8 @@ const schema = z.object({
   }))
 });
 
-const toaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
-
 export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) {
+  const { showSuccess } = useNotification();
   const qc = useQueryClient();
   
   const { register, handleSubmit, control } = useForm({
@@ -97,15 +92,13 @@ export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) 
     onSuccess: () => {
       qc.invalidateQueries(['ships', battleId, fractionId]);
       qc.invalidateQueries(['battle', battleId]);
-      toaster.success({ title: 'Ship updated' });
+      showSuccess('Statek zaktualizowany');
       onClose();
     }
   });
 
   return (
-    <>
-      <Toaster toaster={toaster} />
-      <DialogRoot 
+    <DialogRoot 
         open={true} 
         size="xl"
         blockScrollOnMount={false}
@@ -178,6 +171,5 @@ export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) 
           </DialogFooter>
         </DialogContent>
       </DialogRoot>
-    </>
   );
 }

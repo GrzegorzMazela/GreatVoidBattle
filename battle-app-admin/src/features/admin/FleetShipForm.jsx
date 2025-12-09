@@ -5,10 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   VStack, HStack, Field, Input, Button, Box, Text,
-  NativeSelectRoot, NativeSelectField, createToaster
+  NativeSelectRoot, NativeSelectField
 } from '@chakra-ui/react';
 import { createFleetShip, updateFleetShip } from '../../services/api';
 import { ShipTypes, ShipCategories, ShipDefaultStats, emptyFleetShipPayload } from '../../types/dto';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const WeaponTypes = ['Missile', 'Laser', 'PointDefense'];
 
@@ -29,12 +30,8 @@ const createSchema = (requireSystem) => z.object({
     : z.string().nullable().optional()
 });
 
-const defaultToaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
-
-export default function FleetShipForm({ fractionId, ship, planetarySystems = [], onClose, requireSystem = false, toaster = defaultToaster }) {
+export default function FleetShipForm({ fractionId, ship, planetarySystems = [], onClose, requireSystem = false }) {
+  const { showSuccess, showError } = useNotification();
   const isEditMode = !!ship;
   const queryClient = useQueryClient();
 
@@ -93,11 +90,11 @@ export default function FleetShipForm({ fractionId, ship, planetarySystems = [],
       : createFleetShip(fractionId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(['fleet', fractionId]);
-      toaster.success({ title: isEditMode ? 'Statek zaktualizowany' : 'Statek dodany do floty' });
+      showSuccess(isEditMode ? 'Statek zaktualizowany' : 'Statek dodany do floty');
       onClose();
     },
     onError: (error) => {
-      toaster.error({ title: 'Błąd', description: error.message });
+      showError(`Błąd: ${error.message}`);
     }
   });
 

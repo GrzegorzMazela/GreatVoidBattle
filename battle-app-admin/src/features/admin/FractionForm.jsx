@@ -6,9 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createFraction, updateFraction, getFraction } from '../../services/api';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import {
-  Box, Heading, VStack, HStack, Input, Button, createToaster, Toaster, Spinner
+  Box, Heading, VStack, HStack, Input, Button, Spinner
 } from '@chakra-ui/react';
 import { Field } from '@chakra-ui/react';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const schema = z.object({
   fractionName: z.string().min(1, 'Fraction name is required'),
@@ -16,12 +17,8 @@ const schema = z.object({
   fractionColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color')
 });
 
-const toaster = createToaster({
-  placement: 'top-end',
-  duration: 3000,
-});
-
 export default function FractionForm() {
+  const { showSuccess } = useNotification();
   const { battleId, fractionId } = useParams();
   const isEditMode = !!fractionId;
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
@@ -61,9 +58,7 @@ export default function FractionForm() {
       : createFraction(battleId, payload),
     onSuccess: () => {
       qc.invalidateQueries(['battle', battleId]);
-      toaster.success({ 
-        title: isEditMode ? 'Fraction updated' : 'Fraction created'
-      });
+      showSuccess(isEditMode ? 'Frakcja zaktualizowana' : 'Frakcja utworzona');
       nav(`/pustka-admin-panel/${battleId}`);
     }
   });
@@ -73,9 +68,7 @@ export default function FractionForm() {
   }
 
   return (
-    <>
-      <Toaster toaster={toaster} />
-      <Box>
+    <Box>
         <Heading size="md" mb="4">{isEditMode ? 'Edit Fraction' : 'Add Fraction'}</Heading>
         <VStack as="form" align="stretch" spacing="4" onSubmit={handleSubmit((v) => mutation.mutate(v))}>
           <Field.Root invalid={!!errors.fractionName}>
@@ -114,7 +107,6 @@ export default function FractionForm() {
             {isEditMode ? 'Update Fraction' : 'Create Fraction'}
           </Button>
         </VStack>
-      </Box>
-    </>
+    </Box>
   );
 }
