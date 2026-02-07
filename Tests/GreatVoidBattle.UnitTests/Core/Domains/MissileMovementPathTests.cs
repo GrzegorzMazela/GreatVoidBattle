@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Core.Domains;
+using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
 using Shouldly;
 
@@ -32,7 +32,7 @@ public class MissileMovementPathTests
         var target = CreateShip("Defender", 2, 2);
 
         // Act
-        var missilePath = new MissileMovementPath(ship, target, speed: 3, firedAtTurn: 1);
+        var missilePath = new MissileMovementPath(ship, target, speed: 3, Const.MissileMaxRage, Const.MissileEffectiveRage, firedAtTurn: 1);
 
         // Assert
         missilePath.ShipId.ShouldBe(ship.ShipId);
@@ -54,7 +54,7 @@ public class MissileMovementPathTests
         var target = CreateShip("Defender", 0, 1); // Short distance
 
         // Act
-        var missilePath = new MissileMovementPath(ship, target, speed: 1, firedAtTurn: 1);
+        var missilePath = new MissileMovementPath(ship, target, speed: 1, Const.MissileMaxRage, Const.MissileEffectiveRage, firedAtTurn: 1);
 
         // Assert
         missilePath.Accuracy.ShouldBe(Const.MissileAccuracy + (Const.MissileEffectiveRage - missilePath.Path.Count));
@@ -68,7 +68,7 @@ public class MissileMovementPathTests
         var target = CreateShip("Defender", 0, Const.MissileEffectiveRage + 2);
 
         // Act
-        var missilePath = new MissileMovementPath(ship, target, speed: 1, firedAtTurn: 1);
+        var missilePath = new MissileMovementPath(ship, target, speed: 1, Const.MissileMaxRage, Const.MissileEffectiveRage, firedAtTurn: 1);
 
         // Assert
         missilePath.Accuracy.ShouldBe(Const.MissileAccuracy - (missilePath.Path.Count - Const.MissileEffectiveRage));
@@ -83,7 +83,7 @@ public class MissileMovementPathTests
 
         // Act & Assert
         Should.Throw<InvalidOperationException>(() =>
-            new MissileMovementPath(ship, target, speed: 1, firedAtTurn: 1)
+            new MissileMovementPath(ship, target, speed: 1, Const.MissileMaxRage, Const.MissileEffectiveRage, firedAtTurn: 1)
         ).Message.ShouldBe("Missile target is out of range.");
     }
 
@@ -95,7 +95,7 @@ public class MissileMovementPathTests
         var target = CreateShip("Defender", 4, 4);
 
         // Act
-        var missilePath = new MissileMovementPath(ship, target, speed: 2, firedAtTurn: 1);
+        var missilePath = new MissileMovementPath(ship, target, speed: 2, Const.MissileMaxRage, Const.MissileEffectiveRage, firedAtTurn: 1);
 
         // Assert
         missilePath.Path.Count.ShouldBeGreaterThan(0);

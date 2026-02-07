@@ -19,15 +19,10 @@ public class FractionGameState
     public List<FractionTechnology> Technologies { get; set; } = new();
     public List<ResearchRequest> ResearchRequests { get; set; } = new(); // Zgłoszenia graczy do zbadania
     
-    /// <summary>
-    /// Lista układów planetarnych należących do frakcji
-    /// </summary>
-    public List<PlanetarySystem> PlanetarySystems { get; set; } = new();
-    
-    /// <summary>
-    /// Flota frakcji - wszystkie statki posiadane przez frakcję
-    /// </summary>
+    /// <summary>Flota frakcji - szablony statków.</summary>
     public List<FractionShipTemplate> Fleet { get; set; } = new();
+    /// <summary>Układy planetarne frakcji.</summary>
+    public List<PlanetarySystem> PlanetarySystems { get; set; } = new();
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

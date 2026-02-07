@@ -1,3 +1,4 @@
+using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -24,6 +25,19 @@ public class FractionShipTemplate
     public int Shields { get; set; }
     public int Armor { get; set; }
     public int NumberOfModules { get; set; }
+    
+    /// <summary>Zasięg lasera (jednostki). 0 = użyj domyślnego z Const.</summary>
+    public int LaserMaxRange { get; set; }
+    /// <summary>Obrażenia lasera na strzał.</summary>
+    public int LaserDamage { get; set; }
+    /// <summary>Maks. zasięg rakiet (Manhattan). 0 = użyj domyślnego z Const.</summary>
+    public int MissileMaxRange { get; set; }
+    /// <summary>Zasięg efektywny rakiet (dla celności). 0 = użyj domyślnego z Const.</summary>
+    public int MissileEffectiveRange { get; set; }
+    /// <summary>Obrażenia rakiety.</summary>
+    public int MissileDamage { get; set; }
+    /// <summary>Prędkość rakiety (komórki na turę). 0 = użyj domyślnego z Const.</summary>
+    public int MissileSpeed { get; set; }
     
     /// <summary>
     /// Konfiguracja modułów - lista broni dla każdego modułu
@@ -55,6 +69,12 @@ public class FractionShipTemplate
             Shields = shields,
             Armor = armor,
             NumberOfModules = modules,
+            LaserMaxRange = Const.LaserMaxRange,
+            LaserDamage = Const.LaserDamage,
+            MissileMaxRange = Const.MissileMaxRage,
+            MissileEffectiveRange = Const.MissileEffectiveRage,
+            MissileDamage = Const.MissileDamage,
+            MissileSpeed = Const.MissileSpeed,
             Modules = CreateDefaultModules(modules)
         };
     }

@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Application.Events;
+using GreatVoidBattle.Application.Events;
 using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
 
@@ -40,8 +40,15 @@ public static class ShipFactory
     public static ShipState CreateShipState(AddFractionShipEvent addShipEvent, int speed, int hitPoints,
         int shields, int armor, int numberOfModules, BattleLog battleLog)
     {
+        var laserMaxRange = addShipEvent.LaserMaxRange ?? 0;
+        var laserDamage = addShipEvent.LaserDamage ?? 0;
+        var missileMaxRange = addShipEvent.MissileMaxRange ?? 0;
+        var missileEffectiveRange = addShipEvent.MissileEffectiveRange ?? 0;
+        var missileDamage = addShipEvent.MissileDamage ?? 0;
+        var missileSpeed = addShipEvent.MissileSpeed ?? 0;
         return ShipState.Create(addShipEvent.FractionId!.Value, addShipEvent.Name, addShipEvent.Type, addShipEvent.PositionX, addShipEvent.PositionY,
             speed: speed, hitPoints: hitPoints, shields: shields, armor: armor, numberOfModules: numberOfModules,
-            addShipEvent.Modules.Select(m => ModuleState.Create(m.WeaponTypes.Select(wt => SystemSlot.Create(wt)).ToList())).ToList(), battleLog);
+            addShipEvent.Modules.Select(m => ModuleState.Create(m.WeaponTypes.Select(wt => SystemSlot.Create(wt)).ToList())).ToList(), battleLog,
+            laserMaxRange, laserDamage, missileMaxRange, missileEffectiveRange, missileDamage, missileSpeed);
     }
 }

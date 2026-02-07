@@ -49,7 +49,25 @@ public static class BattleStateMapper
         {
             dto.ShipMovementPaths = MapShipMovementPaths(battleState.ShipMovementPaths);
             dto.MissileMovementPaths = MapMissileMovementPaths(battleState.MissileMovementPaths);
+            dto.LaserShots = MapLaserShots(battleState.LaserShots, battleState);
         }
+    }
+
+    private static List<LaserShotDto> MapLaserShots(IEnumerable<LaserShot> laserShots, BattleState battleState)
+    {
+        return laserShots.Select(ls =>
+        {
+            var shootingShip = battleState.GetShip(ls.ShipId);
+            var targetShip = battleState.GetShip(ls.TargetId);
+            return new LaserShotDto
+            {
+                LaserId = ls.LaserId,
+                ShipId = ls.ShipId,
+                TargetId = ls.TargetId,
+                ShipName = shootingShip?.Name ?? string.Empty,
+                TargetName = targetShip?.Name ?? string.Empty
+            };
+        }).ToList();
     }
 
     /// <summary>

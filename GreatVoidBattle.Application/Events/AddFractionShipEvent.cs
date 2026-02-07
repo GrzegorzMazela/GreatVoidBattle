@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Application.Events.Base;
+using GreatVoidBattle.Application.Events.Base;
 using GreatVoidBattle.Core.Domains.Enums;
 
 namespace GreatVoidBattle.Application.Events;
@@ -16,6 +16,14 @@ public class AddFractionShipEvent : BattleEvent
     public int? HitPoints { get; set; }
     public int? Shields { get; set; }
     public int? Armor { get; set; }
+    
+    // Opcjonalne parametry broni - 0 lub null = domyślne z Const
+    public int? LaserMaxRange { get; set; }
+    public int? LaserDamage { get; set; }
+    public int? MissileMaxRange { get; set; }
+    public int? MissileEffectiveRange { get; set; }
+    public int? MissileDamage { get; set; }
+    public int? MissileSpeed { get; set; }
     
     /// <summary>
     /// ID statku z floty frakcji - jeśli ustawione, kopiujemy parametry z szablonu floty

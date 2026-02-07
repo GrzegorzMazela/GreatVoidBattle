@@ -13,5 +13,6 @@ public abstract class BattleStateBaseDto
     public int Height { get; set; }
     public List<ShipMovementPathDto> ShipMovementPaths { get; set; } = [];
     public List<MissileMovementPathDto> MissileMovementPaths { get; set; } = [];
+    public List<LaserShotDto> LaserShots { get; set; } = [];
 }
 

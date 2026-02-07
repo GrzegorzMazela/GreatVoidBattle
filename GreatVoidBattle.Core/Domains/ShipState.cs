@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Core.Domains.Enums;
+using GreatVoidBattle.Core.Domains.Enums;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace GreatVoidBattle.Core.Domains;
@@ -26,6 +26,19 @@ public class ShipState
     public int NumberOfLasers => Modules.Sum(m => m.Slots.Count(x => x.WeaponType == WeaponType.Laser));
     public int NumberOfLasersFiredPerTurn { get; private set; } = 0;
 
+    /// <summary>Zasięg lasera. 0 = użyj Const.LaserMaxRange.</summary>
+    public int LaserMaxRange { get; private set; }
+    /// <summary>Obrażenia lasera na strzał.</summary>
+    public int LaserDamage { get; private set; }
+    /// <summary>Maks. zasięg rakiet (Manhattan). 0 = użyj Const.MissileMaxRage.</summary>
+    public int MissileMaxRange { get; private set; }
+    /// <summary>Zasięg efektywny rakiet (celność). 0 = użyj Const.MissileEffectiveRage.</summary>
+    public int MissileEffectiveRange { get; private set; }
+    /// <summary>Obrażenia rakiety.</summary>
+    public int MissileDamage { get; private set; }
+    /// <summary>Prędkość rakiety (komórki na turę). 0 = użyj Const.MissileSpeed.</summary>
+    public int MissileSpeed { get; private set; }
+
     [BsonElement("Modules")]
     public List<ModuleState> Modules { get; set; } = new();
 
@@ -36,7 +49,8 @@ public class ShipState
 
     // create statict created method
     public static ShipState Create(Guid fractionId, string name, ShipType type, double positionX, double positionY,
-        int speed, int hitPoints, int shields, int armor, int numberOfModules, List<ModuleState> modules, BattleLog battleLog)
+        int speed, int hitPoints, int shields, int armor, int numberOfModules, List<ModuleState> modules, BattleLog battleLog,
+        int laserMaxRange = 0, int laserDamage = 0, int missileMaxRange = 0, int missileEffectiveRange = 0, int missileDamage = 0, int missileSpeed = 0)
     {
         if (numberOfModules != modules.Count)
         {
@@ -57,7 +71,13 @@ public class ShipState
             Modules = modules,
             NumberOfModules = numberOfModules,
             Energy = new EnergyDistribution(),
-            Status = ShipStatus.Active
+            Status = ShipStatus.Active,
+            LaserMaxRange = laserMaxRange > 0 ? laserMaxRange : Const.LaserMaxRange,
+            LaserDamage = laserDamage > 0 ? laserDamage : Const.LaserDamage,
+            MissileMaxRange = missileMaxRange > 0 ? missileMaxRange : Const.MissileMaxRage,
+            MissileEffectiveRange = missileEffectiveRange > 0 ? missileEffectiveRange : Const.MissileEffectiveRage,
+            MissileDamage = missileDamage > 0 ? missileDamage : Const.MissileDamage,
+            MissileSpeed = missileSpeed > 0 ? missileSpeed : Const.MissileSpeed
         };
     }
 
@@ -70,6 +90,16 @@ public class ShipState
     {
         Type = type;
         Modules = modules;
+    }
+
+    public void UpdateWeaponStats(int laserMaxRange, int laserDamage, int missileMaxRange, int missileEffectiveRange, int missileDamage, int missileSpeed)
+    {
+        LaserMaxRange = laserMaxRange > 0 ? laserMaxRange : Const.LaserMaxRange;
+        LaserDamage = laserDamage > 0 ? laserDamage : Const.LaserDamage;
+        MissileMaxRange = missileMaxRange > 0 ? missileMaxRange : Const.MissileMaxRage;
+        MissileEffectiveRange = missileEffectiveRange > 0 ? missileEffectiveRange : Const.MissileEffectiveRage;
+        MissileDamage = missileDamage > 0 ? missileDamage : Const.MissileDamage;
+        MissileSpeed = missileSpeed > 0 ? missileSpeed : Const.MissileSpeed;
     }
 
     public void UpdatePosition(double newX, double newY)

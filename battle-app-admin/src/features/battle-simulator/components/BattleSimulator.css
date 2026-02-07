@@ -325,6 +325,58 @@
   overflow-y: auto;
 }
 
+/* Widok admina – panel z planami */
+.battle-simulator-admin .battle-content {
+  display: flex;
+}
+.battle-sidebar-admin {
+  width: 320px;
+  min-width: 280px;
+  flex-shrink: 0;
+  border-left: 2px solid #444;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.battle-simulator-admin .battle-admin-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.25rem;
+}
+.battle-simulator-admin .battle-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.battle-simulator-admin .admin-simulator-back-link {
+  padding: 0.4rem 0.8rem;
+  background: #444;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.battle-simulator-admin .admin-simulator-back-link:hover {
+  background: #555;
+}
+.battle-simulator-admin .admin-simulator-copy-link,
+.battle-simulator-admin .admin-simulator-refresh {
+  padding: 0.4rem 0.8rem;
+  background: #2d5a2d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.battle-simulator-admin .admin-simulator-copy-link:hover,
+.battle-simulator-admin .admin-simulator-refresh:hover {
+  background: #3d6a3d;
+}
+
 .orders-error {
   position: fixed;
   bottom: 1rem;

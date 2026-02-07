@@ -1,14 +1,23 @@
 export const ShipTypes = ['Corvette','Destroyer','Cruiser','Battleship','SuperBattleship','OrbitalFort'];
 export const ShipCategories = ['Combat', 'OrbitalStation', 'Research'];
 
-// Domyślne statystyki statków według typu
+// Domyślne statystyki statków według typu (broń: wspólne domyślne z Const)
+export const WeaponDefaults = {
+  laserMaxRange: 15,
+  laserDamage: 30,
+  missileMaxRange: 55,
+  missileEffectiveRange: 35,
+  missileDamage: 20,
+  missileSpeed: 15
+};
+
 export const ShipDefaultStats = {
-  Corvette: { speed: 10, hitPoints: 50, shields: 25, armor: 25, modules: 1 },
-  Destroyer: { speed: 8, hitPoints: 100, shields: 50, armor: 50, modules: 2 },
-  Cruiser: { speed: 6, hitPoints: 200, shields: 100, armor: 100, modules: 4 },
-  Battleship: { speed: 5, hitPoints: 400, shields: 200, armor: 200, modules: 8 },
-  SuperBattleship: { speed: 5, hitPoints: 600, shields: 300, armor: 300, modules: 12 },
-  OrbitalFort: { speed: 0, hitPoints: 100, shields: 50, armor: 50, modules: 2 }
+  Corvette: { speed: 10, hitPoints: 50, shields: 25, armor: 25, modules: 1, ...WeaponDefaults },
+  Destroyer: { speed: 8, hitPoints: 100, shields: 50, armor: 50, modules: 2, ...WeaponDefaults },
+  Cruiser: { speed: 6, hitPoints: 200, shields: 100, armor: 100, modules: 4, ...WeaponDefaults },
+  Battleship: { speed: 5, hitPoints: 400, shields: 200, armor: 200, modules: 8, ...WeaponDefaults },
+  SuperBattleship: { speed: 5, hitPoints: 600, shields: 300, armor: 300, modules: 12, ...WeaponDefaults },
+  OrbitalFort: { speed: 0, hitPoints: 100, shields: 50, armor: 50, modules: 2, ...WeaponDefaults }
 };
 
 export function emptyBattlePayload() {
@@ -25,7 +34,13 @@ export function emptyShipPayload() {
     speed: defaults.speed,
     hitPoints: defaults.hitPoints,
     shields: defaults.shields,
-    armor: defaults.armor
+    armor: defaults.armor,
+    laserMaxRange: defaults.laserMaxRange,
+    laserDamage: defaults.laserDamage,
+    missileMaxRange: defaults.missileMaxRange,
+    missileEffectiveRange: defaults.missileEffectiveRange,
+    missileDamage: defaults.missileDamage,
+    missileSpeed: defaults.missileSpeed
   };
 }
 
@@ -40,6 +55,12 @@ export function emptyFleetShipPayload() {
     hitPoints: defaults.hitPoints,
     shields: defaults.shields,
     armor: defaults.armor,
+    laserMaxRange: defaults.laserMaxRange,
+    laserDamage: defaults.laserDamage,
+    missileMaxRange: defaults.missileMaxRange,
+    missileEffectiveRange: defaults.missileEffectiveRange,
+    missileDamage: defaults.missileDamage,
+    missileSpeed: defaults.missileSpeed,
     modules: Array.from({ length: defaults.modules }, () => ({
       weaponTypes: ['Missile', 'Laser', 'PointDefense']
     })),

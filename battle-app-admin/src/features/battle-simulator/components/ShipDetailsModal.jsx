@@ -176,6 +176,9 @@ export const ShipDetailsModal = ({ ship, onClose, fractionColor }) => {
                   <div className="weapon-info">
                     <span className="weapon-name">Lasery</span>
                     <span className="weapon-count-detail">{ship.numberOfLasers}</span>
+                    {(ship.laserMaxRange != null || ship.laserDamage != null) && (
+                      <span className="weapon-stats">zasięg {ship.laserMaxRange ?? 15}, {ship.laserDamage ?? 30} dmg</span>
+                    )}
                   </div>
                 </div>
               )}
@@ -189,6 +192,9 @@ export const ShipDetailsModal = ({ ship, onClose, fractionColor }) => {
                   <div className="weapon-info">
                     <span className="weapon-name">Pociski</span>
                     <span className="weapon-count-detail">{ship.numberOfMissiles}</span>
+                    {(ship.missileMaxRange != null || ship.missileDamage != null) && (
+                      <span className="weapon-stats">zasięg {ship.missileMaxRange ?? 55}, {ship.missileDamage ?? 20} dmg</span>
+                    )}
                   </div>
                 </div>
               )}

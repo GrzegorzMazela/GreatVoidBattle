@@ -14,6 +14,7 @@ export default function BattleDetails() {
   const { battleId } = useParams();
   const queryClient = useQueryClient();
   const [copiedToken, setCopiedToken] = useState(null);
+  const [copiedAdminSimulator, setCopiedAdminSimulator] = useState(false);
   
   const confirmModal = useModal();
   const { showSuccess, showError } = useNotification();
@@ -68,6 +69,29 @@ export default function BattleDetails() {
     }
   };
 
+  const copyAdminSimulatorLink = async () => {
+    const adminSimulatorUrl = `${window.location.origin}/pustka-admin-panel/${battleId}/simulator-admin`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(adminSimulatorUrl);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = adminSimulatorUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopiedAdminSimulator(true);
+      setTimeout(() => setCopiedAdminSimulator(null), 2000);
+      showSuccess('Link do widoku admin skopiowany!');
+    } catch (error) {
+      showError('Nie udało się skopiować. Link: ' + adminSimulatorUrl);
+    }
+  };
+
   if (isLoading) return <Spinner />;
   if (!battle) return <Text>Battle not found</Text>;
 
@@ -103,6 +127,21 @@ export default function BattleDetails() {
               📊 Admin Logs
             </Button>
           )}
+          <Button
+            as={Link}
+            to={`/pustka-admin-panel/${battleId}/simulator-admin`}
+            colorScheme="teal"
+            variant="outline"
+          >
+            🗺️ Symulator (widok admin)
+          </Button>
+          <Button
+            size="sm"
+            colorScheme={copiedAdminSimulator ? 'green' : 'gray'}
+            onClick={copyAdminSimulatorLink}
+          >
+            {copiedAdminSimulator ? '✓ Skopiowano link admin' : '📋 Link widoku admin'}
+          </Button>
           <Button as={Link} to="/pustka-admin-panel" variant="outline">
             Back to List
           </Button>

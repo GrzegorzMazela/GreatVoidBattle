@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Core.Domains.Enums;
+using GreatVoidBattle.Core.Domains.Enums;
 using GreatVoidBattle.Core.Domains.ExtraActions;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Net.WebSockets;
@@ -162,8 +162,12 @@ public class BattleState
         var ship = GetFraction(fractionId).GetShip(shipId);
         var targetShip = GetFraction(targetFractionId).GetShip(targetShipId);
 
+        var manhattanDistance = (int)(Math.Abs(ship.Position.X - targetShip.Position.X) + Math.Abs(ship.Position.Y - targetShip.Position.Y));
+        if (manhattanDistance > ship.MissileMaxRange)
+            throw new InvalidOperationException($"Cel poza zasięgiem rakiet. Odległość: {manhattanDistance}, Maks. zasięg: {ship.MissileMaxRange}.");
+
         ship.FireMissile();
-        var missilePath = new MissileMovementPath(ship, targetShip, Const.MissileSpeed, TurnNumber);
+        var missilePath = new MissileMovementPath(ship, targetShip, ship.MissileSpeed, ship.MissileMaxRange, ship.MissileEffectiveRange, TurnNumber);
         _missileMovementPaths.Add(missilePath);
 
         // Log wystrzelenia rakiety dla administratora
@@ -189,6 +193,10 @@ public class BattleState
     {
         var ship = GetFraction(fractionId).GetShip(shipId);
         var targetShip = GetFraction(targetFractionId).GetShip(targetShipId);
+
+        var distance = Math.Sqrt(Math.Pow(ship.Position.X - targetShip.Position.X, 2) + Math.Pow(ship.Position.Y - targetShip.Position.Y, 2));
+        if (distance > ship.LaserMaxRange)
+            throw new InvalidOperationException($"Cel poza zasięgiem lasera. Odległość: {distance:F1}, Maks. zasięg: {ship.LaserMaxRange}.");
 
         ship.FireLaser();
         var laserShot = new LaserShot(ship.ShipId, targetShip.ShipId);
@@ -230,7 +238,8 @@ public class BattleState
 
             if (targetShip is null || shootingShip is null) continue;
 
-            var (hit, rolledValue) = targetShip.TakeDamage(BattleLog, Const.LaserDamage);
+            var laserDamage = shootingShip.LaserDamage;
+            var (hit, rolledValue) = targetShip.TakeDamage(BattleLog, laserDamage);
 
             // Log dla strzelającego
             BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
@@ -245,9 +254,9 @@ public class BattleState
                 TargetFractionId = targetShip.FractionId,
                 TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
                 Message = hit
-                    ? $"{shootingShip.Name} trafił laserem w {targetShip.Name} ({Const.LaserDamage} dmg)"
+                    ? $"{shootingShip.Name} trafił laserem w {targetShip.Name} ({laserDamage} dmg)"
                     : $"{shootingShip.Name} nie trafił laserem w {targetShip.Name}",
-                AdminLog = $"[Admin] Laser shot: damage={( hit ? Const.LaserDamage : 0)}, rolledValue={rolledValue}, hit={hit}"
+                AdminLog = $"[Admin] Laser shot: damage={( hit ? laserDamage : 0)}, rolledValue={rolledValue}, hit={hit}"
             });
 
             // Log dla trafionego (jeśli inna frakcja)
@@ -264,7 +273,7 @@ public class BattleState
                     TargetShipName = shootingShip.Name,
                     TargetFractionId = shootingShip.FractionId,
                     TargetFractionName = GetFraction(shootingShip.FractionId).FractionName,
-                    Message = $"{targetShip.Name} otrzymał obrażenia od lasera {shootingShip.Name} ({Const.LaserDamage} dmg)"
+                    Message = $"{targetShip.Name} otrzymał obrażenia od lasera {shootingShip.Name} ({laserDamage} dmg)"
                 });
             }
 
@@ -317,8 +326,9 @@ public class BattleState
 
             if (targetShip is not null && shootingShip is not null)
             {
+                var missileDamage = shootingShip.MissileDamage;
                 var accuracy = GetAccuracy(missileMovementPath.Accuracy, targetShip);
-                var (hit, rolledValue) = targetShip.TakeDamage(BattleLog, Const.MissileDamage, accuracy);
+                var (hit, rolledValue) = targetShip.TakeDamage(BattleLog, missileDamage, accuracy);
 
                 // Log dla strzelającego z rozszerzonymi informacjami dla admina
                 BattleLog.AddTurnLog(turnNumber, new TurnLogEntry
@@ -333,9 +343,9 @@ public class BattleState
                     TargetFractionId = targetShip.FractionId,
                     TargetFractionName = GetFraction(targetShip.FractionId).FractionName,
                     Message = hit
-                        ? $"{shootingShip.Name} trafił rakietą w {targetShip.Name} ({Const.MissileDamage} dmg)"
+                        ? $"{shootingShip.Name} trafił rakietą w {targetShip.Name} ({missileDamage} dmg)"
                         : $"{shootingShip.Name} nie trafił rakietą w {targetShip.Name}",
-                    AdminLog = $"[Admin] Missile {missileMovementPath.MissileId}: firedAt={missileMovementPath.FiredAtTurn}, hitAt={turnNumber}, travel={turnNumber - missileMovementPath.FiredAtTurn} turns, initAcc={missileMovementPath.Accuracy}, finalAcc={accuracy}, rolled={rolledValue}, hit={hit}, dmg={( hit ? Const.MissileDamage : 0)}"
+                    AdminLog = $"[Admin] Missile {missileMovementPath.MissileId}: firedAt={missileMovementPath.FiredAtTurn}, hitAt={turnNumber}, travel={turnNumber - missileMovementPath.FiredAtTurn} turns, initAcc={missileMovementPath.Accuracy}, finalAcc={accuracy}, rolled={rolledValue}, hit={hit}, dmg={( hit ? missileDamage : 0)}"
                 });
 
                 // Log dla trafionego
@@ -352,7 +362,7 @@ public class BattleState
                         TargetShipName = shootingShip.Name,
                         TargetFractionId = shootingShip.FractionId,
                         TargetFractionName = GetFraction(shootingShip.FractionId).FractionName,
-                        Message = $"{targetShip.Name} trafiony rakietą z {shootingShip.Name} ({Const.MissileDamage} dmg)"
+                        Message = $"{targetShip.Name} trafiony rakietą z {shootingShip.Name} ({missileDamage} dmg)"
                     });
                 }
 

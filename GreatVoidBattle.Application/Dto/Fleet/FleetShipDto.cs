@@ -19,6 +19,13 @@ public class FleetShipDto
     public int Armor { get; set; }
     public int NumberOfModules { get; set; }
     
+    public int LaserMaxRange { get; set; }
+    public int LaserDamage { get; set; }
+    public int MissileMaxRange { get; set; }
+    public int MissileEffectiveRange { get; set; }
+    public int MissileDamage { get; set; }
+    public int MissileSpeed { get; set; }
+    
     public List<ModuleDto> Modules { get; set; } = new();
     
     /// <summary>
@@ -42,6 +49,12 @@ public class CreateFleetShipDto
     public int? HitPoints { get; set; }
     public int? Shields { get; set; }
     public int? Armor { get; set; }
+    public int? LaserMaxRange { get; set; }
+    public int? LaserDamage { get; set; }
+    public int? MissileMaxRange { get; set; }
+    public int? MissileEffectiveRange { get; set; }
+    public int? MissileDamage { get; set; }
+    public int? MissileSpeed { get; set; }
     
     public List<ModuleDto>? Modules { get; set; }
     
@@ -64,6 +77,12 @@ public class UpdateFleetShipDto
     public int HitPoints { get; set; }
     public int Shields { get; set; }
     public int Armor { get; set; }
+    public int LaserMaxRange { get; set; }
+    public int LaserDamage { get; set; }
+    public int MissileMaxRange { get; set; }
+    public int MissileEffectiveRange { get; set; }
+    public int MissileDamage { get; set; }
+    public int MissileSpeed { get; set; }
     
     public List<ModuleDto> Modules { get; set; } = new();
     

@@ -7,7 +7,6 @@ import {
   DialogFooter,
   DialogCloseTrigger,
   DialogBackdrop,
-  DialogPositioner,
 } from '@chakra-ui/react';
 import { Button, HStack } from '@chakra-ui/react';
 
@@ -36,27 +35,25 @@ export const ConfirmModal = ({
       size="md"
     >
       <DialogBackdrop />
-      <DialogPositioner>
-        <DialogContent bg="white" color="black">
-          <DialogHeader borderBottom="1px solid" borderColor="gray.200">
-            <DialogTitle color="black">{title}</DialogTitle>
-          </DialogHeader>
-          <DialogCloseTrigger />
-          <DialogBody py={4}>
-            <p>{message}</p>
-          </DialogBody>
-          <DialogFooter borderTop="1px solid" borderColor="gray.200" pt={4}>
-            <HStack gap={3}>
-              <Button variant="outline" onClick={onClose}>
-                {cancelText}
-              </Button>
-              <Button colorPalette={colorScheme} onClick={handleConfirm}>
-                {confirmText}
-              </Button>
-            </HStack>
-          </DialogFooter>
-        </DialogContent>
-      </DialogPositioner>
+      <DialogContent style={{ backgroundColor: '#ffffff', color: '#000000' }}>
+        <DialogHeader style={{ borderBottom: '1px solid #e2e8f0' }}>
+          <DialogTitle style={{ color: '#000000' }}>{title}</DialogTitle>
+        </DialogHeader>
+        <DialogCloseTrigger />
+        <DialogBody style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
+          <p style={{ color: '#000000' }}>{message}</p>
+        </DialogBody>
+        <DialogFooter style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
+          <HStack gap={3}>
+            <Button variant="outline" onClick={onClose} style={{ color: '#000000', borderColor: '#e2e8f0' }}>
+              {cancelText}
+            </Button>
+            <Button colorPalette={colorScheme} onClick={handleConfirm} style={{ color: '#ffffff' }}>
+              {confirmText}
+            </Button>
+          </HStack>
+        </DialogFooter>
+      </DialogContent>
     </DialogRoot>
   );
 };

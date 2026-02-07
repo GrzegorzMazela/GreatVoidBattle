@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createShip, updateShip, getShip } from '../../services/api';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Box, Heading, VStack, Field, Input, NativeSelectRoot, NativeSelectField, Button, HStack, Text, Spinner } from '@chakra-ui/react';
-import { ShipTypes, ShipDefaultStats, emptyShipPayload } from '../../types/dto';
+import { ShipTypes, ShipDefaultStats, WeaponDefaults, emptyShipPayload } from '../../types/dto';
 import { useEffect } from 'react';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -24,6 +24,12 @@ const schema = z.object({
   hitPoints: z.coerce.number().min(1).optional(),
   shields: z.coerce.number().min(0).optional(),
   armor: z.coerce.number().min(0).optional(),
+  laserMaxRange: z.coerce.number().min(0).optional(),
+  laserDamage: z.coerce.number().min(0).optional(),
+  missileMaxRange: z.coerce.number().min(0).optional(),
+  missileEffectiveRange: z.coerce.number().min(0).optional(),
+  missileDamage: z.coerce.number().min(0).optional(),
+  missileSpeed: z.coerce.number().min(0).optional(),
   modules: z.array(z.object({
     weaponTypes: z.array(z.string()).length(3)
   }))
@@ -54,6 +60,18 @@ export default function ShipForm() {
 
   const shipType = useWatch({ control, name: 'type' });
 
+  // Dla nowego statku: ustaw domyślne wartości broni w UI przy pierwszym montażu
+  useEffect(() => {
+    if (!isEditMode) {
+      setValue('laserMaxRange', WeaponDefaults.laserMaxRange);
+      setValue('laserDamage', WeaponDefaults.laserDamage);
+      setValue('missileMaxRange', WeaponDefaults.missileMaxRange);
+      setValue('missileEffectiveRange', WeaponDefaults.missileEffectiveRange);
+      setValue('missileDamage', WeaponDefaults.missileDamage);
+      setValue('missileSpeed', WeaponDefaults.missileSpeed);
+    }
+  }, [isEditMode, setValue]);
+
   // Load existing ship data when in edit mode
   useEffect(() => {
     if (existingShip && isEditMode) {
@@ -66,6 +84,12 @@ export default function ShipForm() {
         hitPoints: existingShip.hitPoints,
         shields: existingShip.shields,
         armor: existingShip.armor,
+        laserMaxRange: existingShip.laserMaxRange ?? WeaponDefaults.laserMaxRange,
+        laserDamage: existingShip.laserDamage ?? WeaponDefaults.laserDamage,
+        missileMaxRange: existingShip.missileMaxRange ?? WeaponDefaults.missileMaxRange,
+        missileEffectiveRange: existingShip.missileEffectiveRange ?? WeaponDefaults.missileEffectiveRange,
+        missileDamage: existingShip.missileDamage ?? WeaponDefaults.missileDamage,
+        missileSpeed: existingShip.missileSpeed ?? WeaponDefaults.missileSpeed,
         modules: existingShip.modules?.map(m => ({
           weaponTypes: m.weaponTypes || ['Missile', 'Laser', 'PointDefense']
         })) || []
@@ -89,11 +113,17 @@ export default function ShipForm() {
     }
     
     // Update default stats when type changes (only for new ships)
-    if (!isEditMode) {
+    if (!isEditMode && defaults) {
       setValue('speed', defaults.speed);
       setValue('hitPoints', defaults.hitPoints);
       setValue('shields', defaults.shields);
       setValue('armor', defaults.armor);
+      setValue('laserMaxRange', defaults.laserMaxRange);
+      setValue('laserDamage', defaults.laserDamage);
+      setValue('missileMaxRange', defaults.missileMaxRange);
+      setValue('missileEffectiveRange', defaults.missileEffectiveRange);
+      setValue('missileDamage', defaults.missileDamage);
+      setValue('missileSpeed', defaults.missileSpeed);
     }
   }, [shipType, replace, fields.length, isEditMode, setValue]);
 
@@ -147,6 +177,35 @@ export default function ShipForm() {
               <Field.Root flex="1" minW="100px">
                 <Field.Label>Pancerz</Field.Label>
                 <Input type="number" {...register('armor')} />
+              </Field.Root>
+            </HStack>
+          </Box>
+          <Box mt="4" p="4" borderWidth="1px" borderRadius="md" bg="blue.50">
+            <Text fontWeight="bold" mb="3">Broń – zasięg i obrażenia (domyślnie: laser 15/30, rakiety 55/35/20/15)</Text>
+            <HStack spacing="4" flexWrap="wrap">
+              <Field.Root flex="1" minW="100px">
+                <Field.Label>Zasięg lasera</Field.Label>
+                <Input type="number" {...register('laserMaxRange')} placeholder={String(WeaponDefaults.laserMaxRange)} />
+              </Field.Root>
+              <Field.Root flex="1" minW="100px">
+                <Field.Label>Obr. lasera</Field.Label>
+                <Input type="number" {...register('laserDamage')} placeholder={String(WeaponDefaults.laserDamage)} />
+              </Field.Root>
+              <Field.Root flex="1" minW="100px">
+                <Field.Label>Zasięg rakiet</Field.Label>
+                <Input type="number" {...register('missileMaxRange')} placeholder={String(WeaponDefaults.missileMaxRange)} />
+              </Field.Root>
+              <Field.Root flex="1" minW="100px">
+                <Field.Label>Zasięg efektyw. rakiet</Field.Label>
+                <Input type="number" {...register('missileEffectiveRange')} placeholder={String(WeaponDefaults.missileEffectiveRange)} />
+              </Field.Root>
+              <Field.Root flex="1" minW="100px">
+                <Field.Label>Obr. rakiety</Field.Label>
+                <Input type="number" {...register('missileDamage')} placeholder={String(WeaponDefaults.missileDamage)} />
+              </Field.Root>
+              <Field.Root flex="1" minW="100px">
+                <Field.Label>Prędk. rakiety</Field.Label>
+                <Input type="number" {...register('missileSpeed')} placeholder={String(WeaponDefaults.missileSpeed)} />
               </Field.Root>
             </HStack>
           </Box>

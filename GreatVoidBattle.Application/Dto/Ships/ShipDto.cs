@@ -1,4 +1,4 @@
-﻿namespace GreatVoidBattle.Application.Dto.Ships;
+namespace GreatVoidBattle.Application.Dto.Ships;
 
 public class ShipDto
 {
@@ -18,8 +18,11 @@ public class ShipDto
     public int NumberOfLasers { get; set; }
     public int NumberOfPointsDefense { get; set; }
     
-    // Weapon ranges (from Const)
+    // Weapon ranges and damage (per ship)
     public int MissileMaxRange { get; set; }
     public int MissileEffectiveRange { get; set; }
+    public int MissileDamage { get; set; }
+    public int MissileSpeed { get; set; }
     public int LaserMaxRange { get; set; }
+    public int LaserDamage { get; set; }
 }

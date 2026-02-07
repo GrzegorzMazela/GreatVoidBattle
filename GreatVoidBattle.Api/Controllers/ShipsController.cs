@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Application.Dto.Ships;
+using GreatVoidBattle.Application.Dto.Ships;
 using GreatVoidBattle.Application.Factories;
 using GreatVoidBattle.Application.Mappers;
 using GreatVoidBattle.Core.Domains.Enums;
@@ -25,11 +25,16 @@ public class ShipsController(BattleManagerFactory battleManagerFactory) : Contro
             Modules = createShipDto.Modules.Select(m => new Application.Events.Module(m.WeaponTypes.Select(wt =>
                 Enum.Parse<WeaponType>(wt)).ToList())
             ).ToList(),
-            // Przekazujemy opcjonalne parametry statku
             Speed = createShipDto.Speed,
             HitPoints = createShipDto.HitPoints,
             Shields = createShipDto.Shields,
             Armor = createShipDto.Armor,
+            LaserMaxRange = createShipDto.LaserMaxRange,
+            LaserDamage = createShipDto.LaserDamage,
+            MissileMaxRange = createShipDto.MissileMaxRange,
+            MissileEffectiveRange = createShipDto.MissileEffectiveRange,
+            MissileDamage = createShipDto.MissileDamage,
+            MissileSpeed = createShipDto.MissileSpeed,
             FleetShipTemplateId = createShipDto.FleetShipTemplateId
         };
         await battleManagerFactory.ApplyEventAsync(addShipEvent);
@@ -50,7 +55,13 @@ public class ShipsController(BattleManagerFactory battleManagerFactory) : Contro
             Type = Enum.Parse<ShipType>(createShipDto.Type),
             Modules = createShipDto.Modules.Select(m => new Application.Events.Module(m.WeaponTypes.Select(wt =>
                 Enum.Parse<WeaponType>(wt)).ToList())
-            ).ToList()
+            ).ToList(),
+            LaserMaxRange = createShipDto.LaserMaxRange,
+            LaserDamage = createShipDto.LaserDamage,
+            MissileMaxRange = createShipDto.MissileMaxRange,
+            MissileEffectiveRange = createShipDto.MissileEffectiveRange,
+            MissileDamage = createShipDto.MissileDamage,
+            MissileSpeed = createShipDto.MissileSpeed
         };
         await battleManagerFactory.ApplyEventAsync(updateShipEvent);
         return Ok();

@@ -93,8 +93,8 @@ public class ShipMapperTests
         dto.Armor.ShouldBe(ship.Armor);
         dto.Shields.ShouldBe(ship.Shields);
         dto.HitPoints.ShouldBe(ship.HitPoints);
-        // Basic DTO should not have weapon ranges set (they default to 0)
-        dto.MissileMaxRange.ShouldBe(0);
+        dto.MissileMaxRange.ShouldBe(ship.MissileMaxRange);
+        dto.LaserMaxRange.ShouldBe(ship.LaserMaxRange);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class ShipMapperTests
 
         // Assert
         dtos.Count.ShouldBe(2);
-        dtos.All(d => d.MissileMaxRange == 0).ShouldBeTrue(); // Basic DTOs don't have weapon ranges
+        dtos.All(d => d.MissileMaxRange == Const.MissileMaxRage && d.LaserMaxRange == Const.LaserMaxRange).ShouldBeTrue();
     }
 
     [Fact]

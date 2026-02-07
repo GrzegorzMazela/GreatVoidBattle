@@ -23,7 +23,7 @@ import {
   Text,
   Heading
 } from '@chakra-ui/react';
-import { ShipTypes } from '../../types/dto';
+import { ShipTypes, WeaponDefaults } from '../../types/dto';
 import { useEffect } from 'react';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -46,6 +46,12 @@ const schema = z.object({
   type: z.enum(ShipTypes),
   positionX: z.coerce.number().min(0),
   positionY: z.coerce.number().min(0),
+  laserMaxRange: z.coerce.number().min(0).optional(),
+  laserDamage: z.coerce.number().min(0).optional(),
+  missileMaxRange: z.coerce.number().min(0).optional(),
+  missileEffectiveRange: z.coerce.number().min(0).optional(),
+  missileDamage: z.coerce.number().min(0).optional(),
+  missileSpeed: z.coerce.number().min(0).optional(),
   modules: z.array(z.object({
     weaponTypes: z.array(z.string()).length(3)
   }))
@@ -62,6 +68,12 @@ export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) 
       type: ship.type,
       positionX: ship.x,
       positionY: ship.y,
+      laserMaxRange: ship.laserMaxRange ?? WeaponDefaults.laserMaxRange,
+      laserDamage: ship.laserDamage ?? WeaponDefaults.laserDamage,
+      missileMaxRange: ship.missileMaxRange ?? WeaponDefaults.missileMaxRange,
+      missileEffectiveRange: ship.missileEffectiveRange ?? WeaponDefaults.missileEffectiveRange,
+      missileDamage: ship.missileDamage ?? WeaponDefaults.missileDamage,
+      missileSpeed: ship.missileSpeed ?? WeaponDefaults.missileSpeed,
       modules: ship.modules?.map(m => ({
         weaponTypes: m.weaponTypes || ['Missile', 'Laser', 'PointDefense']
       })) || []
@@ -134,7 +146,17 @@ export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) 
                   <Input type="number" {...register('positionY')} />
                 </Field.Root>
               </HStack>
-              
+              <Box p="3" borderWidth="1px" borderRadius="md" bg="blue.50">
+                <Text fontWeight="bold" mb="2">Broń – zasięg i obrażenia</Text>
+                <HStack gap="2" flexWrap="wrap">
+                  <Field.Root minW="90px"><Field.Label>Zasięg lasera</Field.Label><Input type="number" {...register('laserMaxRange')} /></Field.Root>
+                  <Field.Root minW="90px"><Field.Label>Obr. lasera</Field.Label><Input type="number" {...register('laserDamage')} /></Field.Root>
+                  <Field.Root minW="90px"><Field.Label>Zasięg rakiet</Field.Label><Input type="number" {...register('missileMaxRange')} /></Field.Root>
+                  <Field.Root minW="90px"><Field.Label>Zasięg efektyw.</Field.Label><Input type="number" {...register('missileEffectiveRange')} /></Field.Root>
+                  <Field.Root minW="90px"><Field.Label>Obr. rakiety</Field.Label><Input type="number" {...register('missileDamage')} /></Field.Root>
+                  <Field.Root minW="90px"><Field.Label>Prędk. rakiety</Field.Label><Input type="number" {...register('missileSpeed')} /></Field.Root>
+                </HStack>
+              </Box>
               {fields.length > 0 && (
                 <Box mt="4" p="4" borderWidth="1px" borderRadius="md">
                   <Heading size="sm" mb="3">Modules ({fields.length} required)</Heading>

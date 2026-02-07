@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Application.Events.Handler.Base;
+using GreatVoidBattle.Application.Events.Handler.Base;
 using GreatVoidBattle.Core.Domains;
 
 namespace GreatVoidBattle.Application.Events.Handler;
@@ -17,6 +17,17 @@ public class UpdateFractionShipEventHandler : BaseEventHandler<UpdateFractionShi
         ship.UpdatePosition(battleEvent.PositionX, battleEvent.PositionY);
         ship.UpdateType(battleEvent.Type,
             battleEvent.Modules.Select(m => ModuleState.Create(m.WeaponTypes.Select(wt => SystemSlot.Create(wt)).ToList())).ToList());
+        if (battleEvent.LaserMaxRange.HasValue || battleEvent.LaserDamage.HasValue || battleEvent.MissileMaxRange.HasValue
+            || battleEvent.MissileEffectiveRange.HasValue || battleEvent.MissileDamage.HasValue || battleEvent.MissileSpeed.HasValue)
+        {
+            ship.UpdateWeaponStats(
+                battleEvent.LaserMaxRange ?? 0,
+                battleEvent.LaserDamage ?? 0,
+                battleEvent.MissileMaxRange ?? 0,
+                battleEvent.MissileEffectiveRange ?? 0,
+                battleEvent.MissileDamage ?? 0,
+                battleEvent.MissileSpeed ?? 0);
+        }
         return Task.CompletedTask;
     }
 }

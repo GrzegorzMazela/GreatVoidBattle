@@ -14,26 +14,18 @@ export default function Sidebar() {
     { path: '/pustka-admin-panel', label: '⚔️ Bitwy', exact: true, requiredRole: null },
     { path: '/pustka-admin-panel/wszystkie-bitwy', label: '🌐 Wszystkie Bitwy', exact: false, requiredRole: 'player' },
     { path: '/pustka-admin-panel/hegemonia', label: '👑 Hegemonia Titanum', exact: false, requiredRole: 'Hegemonia Titanum', submenu: [
-      { path: '/pustka-admin-panel/hegemonia/fleet', label: '🚀 Flota', exact: false, requiredRole: 'Hegemonia Titanum' },
-      { path: '/pustka-admin-panel/hegemonia/exploration', label: '🌌 Eksploracja', exact: false, requiredRole: 'Hegemonia Titanum' },
       { path: '/pustka-admin-panel/hegemonia/technologies', label: '📖 Lista Technologii', exact: false, requiredRole: 'Hegemonia Titanum' },
       { path: '/pustka-admin-panel/hegemonia/research', label: '🔬 Zgłoś Badania', exact: false, requiredRole: 'Hegemonia Titanum' }
     ]},
     { path: '/pustka-admin-panel/shimura', label: '🏢 Shimura Incorporated', exact: false, requiredRole: 'Shimura Incorporated', submenu: [
-      { path: '/pustka-admin-panel/shimura/fleet', label: '🚀 Flota', exact: false, requiredRole: 'Shimura Incorporated' },
-      { path: '/pustka-admin-panel/shimura/exploration', label: '🌌 Eksploracja', exact: false, requiredRole: 'Shimura Incorporated' },
       { path: '/pustka-admin-panel/shimura/technologies', label: '📖 Lista Technologii', exact: false, requiredRole: 'Shimura Incorporated' },
       { path: '/pustka-admin-panel/shimura/research', label: '🔬 Zgłoś Badania', exact: false, requiredRole: 'Shimura Incorporated' }
     ]},
     { path: '/pustka-admin-panel/protektorat', label: '🛡️ Protektorat Pogranicza', exact: false, requiredRole: 'Protektorat Pogranicza', submenu: [
-      { path: '/pustka-admin-panel/protektorat/fleet', label: '🚀 Flota', exact: false, requiredRole: 'Protektorat Pogranicza' },
-      { path: '/pustka-admin-panel/protektorat/exploration', label: '🌌 Eksploracja', exact: false, requiredRole: 'Protektorat Pogranicza' },
       { path: '/pustka-admin-panel/protektorat/technologies', label: '📖 Lista Technologii', exact: false, requiredRole: 'Protektorat Pogranicza' },
       { path: '/pustka-admin-panel/protektorat/research', label: '🔬 Zgłoś Badania', exact: false, requiredRole: 'Protektorat Pogranicza' }
     ]},
     { path: '/pustka-admin-panel/admin-panel', label: '⚙️ Panel Admina', exact: false, requiredRole: 'admin', submenu: [
-      { path: '/pustka-admin-panel/admin-panel/fleet-management', label: '🚀 Zarządzanie Flotami', exact: false, requiredRole: 'admin' },
-      { path: '/pustka-admin-panel/admin-panel/exploration', label: '🌌 Eksploracja Galaktyki', exact: false, requiredRole: 'admin' },
       { path: '/pustka-admin-panel/admin-panel/technologies', label: '🔬 Zarządzanie Technologiami', exact: false, requiredRole: 'admin' },
       { path: '/pustka-admin-panel/admin-panel/fraction-settings', label: '🎯 Ustawienia Frakcji', exact: false, requiredRole: 'admin' },
       { path: '/pustka-admin-panel/admin-panel/turn-management', label: '🎲 Zakończ Turę', exact: false, requiredRole: 'admin' }

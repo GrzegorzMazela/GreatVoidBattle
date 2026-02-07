@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Application.Events.Base;
+using GreatVoidBattle.Application.Events.Base;
 using GreatVoidBattle.Core.Domains.Enums;
 
 namespace GreatVoidBattle.Application.Events;
@@ -11,4 +11,10 @@ public class UpdateFractionShipEvent : BattleEvent
     public double PositionY { get; set; }
     public ShipType Type { get; set; }
     public List<Module> Modules { get; set; }
+    public int? LaserMaxRange { get; set; }
+    public int? LaserDamage { get; set; }
+    public int? MissileMaxRange { get; set; }
+    public int? MissileEffectiveRange { get; set; }
+    public int? MissileDamage { get; set; }
+    public int? MissileSpeed { get; set; }
 }

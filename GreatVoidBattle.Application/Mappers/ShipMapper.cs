@@ -27,9 +27,12 @@ public static class ShipMapper
             NumberOfMissiles = ship.NumberOfMissiles,
             NumberOfLasers = ship.NumberOfLasers,
             NumberOfPointsDefense = ship.NumberOfPointsDefense,
-            MissileMaxRange = Const.MissileMaxRage,
-            MissileEffectiveRange = Const.MissileEffectiveRage,
-            LaserMaxRange = Const.LaserMaxRange
+            MissileMaxRange = ship.MissileMaxRange,
+            MissileEffectiveRange = ship.MissileEffectiveRange,
+            MissileDamage = ship.MissileDamage,
+            MissileSpeed = ship.MissileSpeed,
+            LaserMaxRange = ship.LaserMaxRange,
+            LaserDamage = ship.LaserDamage
         };
     }
 
@@ -46,7 +49,9 @@ public static class ShipMapper
             Y = ship.Position.Y,
             Armor = ship.Armor,
             Shields = ship.Shields,
-            HitPoints = ship.HitPoints
+            HitPoints = ship.HitPoints,
+            MissileMaxRange = ship.MissileMaxRange,
+            LaserMaxRange = ship.LaserMaxRange
         };
     }
 

@@ -46,6 +46,12 @@ public class FleetService(IFractionGameStateRepository repository)
         if (dto.HitPoints.HasValue) ship.HitPoints = dto.HitPoints.Value;
         if (dto.Shields.HasValue) ship.Shields = dto.Shields.Value;
         if (dto.Armor.HasValue) ship.Armor = dto.Armor.Value;
+        if (dto.LaserMaxRange.HasValue) ship.LaserMaxRange = dto.LaserMaxRange.Value;
+        if (dto.LaserDamage.HasValue) ship.LaserDamage = dto.LaserDamage.Value;
+        if (dto.MissileMaxRange.HasValue) ship.MissileMaxRange = dto.MissileMaxRange.Value;
+        if (dto.MissileEffectiveRange.HasValue) ship.MissileEffectiveRange = dto.MissileEffectiveRange.Value;
+        if (dto.MissileDamage.HasValue) ship.MissileDamage = dto.MissileDamage.Value;
+        if (dto.MissileSpeed.HasValue) ship.MissileSpeed = dto.MissileSpeed.Value;
         
         if (dto.Modules != null && dto.Modules.Count > 0)
         {
@@ -96,6 +102,12 @@ public class FleetService(IFractionGameStateRepository repository)
         ship.HitPoints = dto.HitPoints;
         ship.Shields = dto.Shields;
         ship.Armor = dto.Armor;
+        ship.LaserMaxRange = dto.LaserMaxRange;
+        ship.LaserDamage = dto.LaserDamage;
+        ship.MissileMaxRange = dto.MissileMaxRange;
+        ship.MissileEffectiveRange = dto.MissileEffectiveRange;
+        ship.MissileDamage = dto.MissileDamage;
+        ship.MissileSpeed = dto.MissileSpeed;
         ship.Modules = dto.Modules.Select(m => new ShipModuleTemplate
         {
             WeaponTypes = m.WeaponTypes.Select(wt => Enum.Parse<WeaponType>(wt)).ToList()

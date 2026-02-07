@@ -1,4 +1,5 @@
 export { BattleSimulator } from './components/BattleSimulator';
+export { BattleSimulatorAdmin } from './components/BattleSimulatorAdmin';
 export { BattleCanvas } from './components/BattleCanvas';
 export { ShipControlPanel } from './components/ShipControlPanel';
 export { ShipBottomPanel } from './components/ShipBottomPanel';

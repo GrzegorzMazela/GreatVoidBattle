@@ -1,4 +1,4 @@
-﻿namespace GreatVoidBattle.Core.Domains;
+namespace GreatVoidBattle.Core.Domains;
 
 public class MissileMovementPath : MovementPath
 {
@@ -8,10 +8,14 @@ public class MissileMovementPath : MovementPath
     public Guid TargetId { get; private set; }
     public int Accuracy { get; private set; }
     public int FiredAtTurn { get; private set; }
+    private readonly int _missileMaxRange;
+    private readonly int _missileEffectiveRange;
 
-    public MissileMovementPath(ShipState ship, ShipState targetShip, int speed, int firedAtTurn)
+    public MissileMovementPath(ShipState ship, ShipState targetShip, int speed, int missileMaxRange, int missileEffectiveRange, int firedAtTurn)
         : base(speed, ship.Position, targetShip.Position)
     {
+        _missileMaxRange = missileMaxRange;
+        _missileEffectiveRange = missileEffectiveRange;
         MissileId = Guid.NewGuid();
         ShipId = ship.ShipId;
         ShipName = ship.Name;
@@ -37,15 +41,15 @@ public class MissileMovementPath : MovementPath
     private void SetAccuracy()
     {
         var distance = Path.Count;
-        if (distance > Const.MissileMaxRage)
+        if (distance > _missileMaxRange)
             throw new InvalidOperationException("Missile target is out of range.");
 
-        if (distance > Const.MissileEffectiveRage)
+        if (distance > _missileEffectiveRange)
         {
-            Accuracy = Const.MissileAccuracy - (distance - Const.MissileEffectiveRage);
+            Accuracy = Const.MissileAccuracy - (distance - _missileEffectiveRange);
             return;
         }
 
-        Accuracy = Const.MissileAccuracy + (Const.MissileEffectiveRage - distance);
+        Accuracy = Const.MissileAccuracy + (_missileEffectiveRange - distance);
     }
 }

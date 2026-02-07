@@ -1,4 +1,4 @@
-﻿using GreatVoidBattle.Core.Domains;
+using GreatVoidBattle.Core.Domains;
 using GreatVoidBattle.Core.Domains.Enums;
 using Shouldly;
 using Xunit;
@@ -302,8 +302,8 @@ public class BattleStateTests
             fractionId: fraction2.FractionId,
             name: "Target Ship",
             type: ShipType.Corvette,
-            positionX: 200,
-            positionY: 200,
+            positionX: 110,
+            positionY: 100,
             speed: 10,
             hitPoints: 100,
             shields: 50,

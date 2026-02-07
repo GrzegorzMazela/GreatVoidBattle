@@ -23,6 +23,12 @@ public static class FleetMapper
             Shields = ship.Shields,
             Armor = ship.Armor,
             NumberOfModules = ship.NumberOfModules,
+            LaserMaxRange = ship.LaserMaxRange,
+            LaserDamage = ship.LaserDamage,
+            MissileMaxRange = ship.MissileMaxRange,
+            MissileEffectiveRange = ship.MissileEffectiveRange,
+            MissileDamage = ship.MissileDamage,
+            MissileSpeed = ship.MissileSpeed,
             Modules = ship.Modules.Select(m => new ModuleDto(
                 m.WeaponTypes.Select(wt => wt.ToString()).ToList()
             )).ToList(),
