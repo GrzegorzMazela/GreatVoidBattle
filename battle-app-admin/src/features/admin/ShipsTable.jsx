@@ -138,6 +138,15 @@ export default function ShipsTable() {
                       >
                         Edit
                       </Button>
+                      <Button 
+                        size="sm" 
+                        colorScheme="teal" 
+                        variant="outline" 
+                        as={Link} 
+                        to={`/pustka-admin-panel/${battleId}/fractions/${fractionId}/ships/${s.shipId}/clone`}
+                      >
+                        Klonuj
+                      </Button>
                       <Button size="sm" colorScheme="red" variant="outline" onClick={() => handleDeleteClick(s)}>
                         Delete
                       </Button>

@@ -8,6 +8,7 @@ import BattleAdminLogs from '../features/admin/BattleAdminLogs';
 import FractionForm from '../features/admin/FractionForm';
 import ShipsTable from '../features/admin/ShipsTable';
 import ShipForm from '../features/admin/ShipForm';
+import ShipCloneForm from '../features/admin/ShipCloneForm';
 import { BattleSimulator, BattleSimulatorAdmin } from '../features/battle-simulator';
 import MainPage from '../components/MainPage';
 import { DiscordLogin } from '../components/auth/DiscordLogin';
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
       { path: ':battleId/fractions/:fractionId/ships', element: <ShipsTable /> },
       { path: ':battleId/fractions/:fractionId/ships/new', element: <ShipForm /> },
       { path: ':battleId/fractions/:fractionId/ships/:shipId/edit', element: <ShipForm /> },
+      { path: ':battleId/fractions/:fractionId/ships/:shipId/clone', element: <ShipCloneForm /> },
       { 
         path: 'wszystkie-bitwy', 
         element: (
