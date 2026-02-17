@@ -19,6 +19,7 @@ public static class ShipFactory
             ShipType.Battleship => (5, 400, 200, 200, 8),
             ShipType.SuperBattleship => (5, 600, 300, 300, 12),
             ShipType.OrbitalFort => (0, 100, 50, 50, 2),
+            ShipType.Transport => (6, 200, 0, 100, 0), // Jak krążownik, ale 0 modułów i 0 tarcz
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }

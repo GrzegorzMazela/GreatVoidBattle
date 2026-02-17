@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { getShipTypeNamePl } from '../../../types/dto';
 import './ShipDetailsModal.css';
 
 // Import ikon statków
@@ -17,6 +18,7 @@ const SHIP_ICONS_LARGE = {
   Battleship: BattleshipIcon,
   SuperBattleship: SuperBattleshipIcon,
   OrbitalFort: OrbitalFortIcon,
+  Transport: CruiserIcon,
 };
 
 // Maksymalne wartości dla każdego typu statku
@@ -27,16 +29,7 @@ const SHIP_MAX_VALUES = {
   Battleship: { hitPoints: 400, shields: 200, armor: 200, speed: 5 },
   SuperBattleship: { hitPoints: 600, shields: 300, armor: 300, speed: 5 },
   OrbitalFort: { hitPoints: 100, shields: 50, armor: 50, speed: 0 },
-};
-
-// Tłumaczenia typów statków
-const SHIP_TYPE_NAMES = {
-  Corvette: 'Korweta',
-  Destroyer: 'Niszczyciel',
-  Cruiser: 'Krążownik',
-  Battleship: 'Pancernik',
-  SuperBattleship: 'Super Pancernik',
-  OrbitalFort: 'Fort Orbitalny',
+  Transport: { hitPoints: 200, shields: 0, armor: 100, speed: 6 },
 };
 
 /**
@@ -47,11 +40,13 @@ export const ShipDetailsModal = ({ ship, onClose, fractionColor }) => {
   const maxValues = SHIP_MAX_VALUES[ship.type] || { 
     hitPoints: 100, shields: 50, armor: 50, speed: 5 
   };
-  const shipTypeName = SHIP_TYPE_NAMES[ship.type] || ship.type;
+  const shipTypeName = getShipTypeNamePl(ship.type);
 
   // Oblicz procenty
   const hpPercent = Math.max(0, Math.min(100, (ship.hitPoints / maxValues.hitPoints) * 100));
-  const shieldsPercent = Math.max(0, Math.min(100, (ship.shields / maxValues.shields) * 100));
+  const shieldsPercent = maxValues.shields > 0
+    ? Math.max(0, Math.min(100, (ship.shields / maxValues.shields) * 100))
+    : 0;
   const armorPercent = Math.max(0, Math.min(100, (ship.armor / maxValues.armor) * 100));
 
   // Kolory pasków

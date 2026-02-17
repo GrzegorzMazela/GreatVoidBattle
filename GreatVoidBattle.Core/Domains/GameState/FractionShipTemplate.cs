@@ -89,6 +89,7 @@ public class FractionShipTemplate
             ShipType.Battleship => (5, 400, 200, 200, 8),
             ShipType.SuperBattleship => (5, 600, 300, 300, 12),
             ShipType.OrbitalFort => (0, 100, 50, 50, 2),
+            ShipType.Transport => (6, 200, 0, 100, 0),
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
     }

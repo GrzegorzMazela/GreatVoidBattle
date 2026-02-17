@@ -1,4 +1,4 @@
-﻿namespace GreatVoidBattle.Core.Domains.Enums;
+namespace GreatVoidBattle.Core.Domains.Enums;
 
 public enum ShipType
 {
@@ -7,5 +7,6 @@ public enum ShipType
     Cruiser,
     Battleship,
     SuperBattleship,
-    OrbitalFort
+    OrbitalFort,
+    Transport
 }

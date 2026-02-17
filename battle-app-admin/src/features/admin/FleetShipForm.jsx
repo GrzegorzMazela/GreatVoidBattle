@@ -8,7 +8,7 @@ import {
   NativeSelectRoot, NativeSelectField
 } from '@chakra-ui/react';
 import { createFleetShip, updateFleetShip } from '../../services/api';
-import { ShipTypes, ShipCategories, ShipDefaultStats, WeaponDefaults, emptyFleetShipPayload } from '../../types/dto';
+import { ShipTypes, ShipCategories, ShipDefaultStats, WeaponDefaults, emptyFleetShipPayload, getShipTypeNamePl } from '../../types/dto';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const WeaponTypes = ['Missile', 'Laser', 'PointDefense'];
@@ -144,7 +144,7 @@ export default function FleetShipForm({ fractionId, ship, planetarySystems = [],
             <Field.Label>Typ</Field.Label>
             <NativeSelectRoot>
               <NativeSelectField {...register('type')}>
-                {ShipTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                {ShipTypes.map(t => <option key={t} value={t}>{getShipTypeNamePl(t)}</option>)}
               </NativeSelectField>
             </NativeSelectRoot>
           </Field.Root>

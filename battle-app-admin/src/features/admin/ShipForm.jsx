@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { createShip, updateShip, getShip } from '../../services/api';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Box, Heading, VStack, Field, Input, NativeSelectRoot, NativeSelectField, Button, HStack, Text, Spinner } from '@chakra-ui/react';
-import { ShipTypes, ShipDefaultStats, WeaponDefaults, emptyShipPayload } from '../../types/dto';
+import { ShipTypes, ShipDefaultStats, WeaponDefaults, emptyShipPayload, getShipTypeNamePl } from '../../types/dto';
 import { useEffect } from 'react';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -150,7 +150,7 @@ export default function ShipForm() {
             <Field.Label>Type</Field.Label>
             <NativeSelectRoot>
               <NativeSelectField {...register('type')}>
-                {ShipTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                {ShipTypes.map(t => <option key={t} value={t}>{getShipTypeNamePl(t)}</option>)}
               </NativeSelectField>
             </NativeSelectRoot>
           </Field.Root>

@@ -23,7 +23,7 @@ import {
   Text,
   Heading
 } from '@chakra-ui/react';
-import { ShipTypes, WeaponDefaults } from '../../types/dto';
+import { ShipTypes, WeaponDefaults, getShipTypeNamePl } from '../../types/dto';
 import { useEffect } from 'react';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -37,6 +37,7 @@ const getModuleCountForShipType = (type) => {
     case 'Battleship': return 8;
     case 'SuperBattleship': return 12;
     case 'OrbitalFort': return 2;
+    case 'Transport': return 0;
     default: return 0;
   }
 };
@@ -132,7 +133,7 @@ export default function ShipEditDialog({ ship, battleId, fractionId, onClose }) 
                 <Field.Label>Type</Field.Label>
                 <NativeSelectRoot>
                   <NativeSelectField {...register('type')}>
-                    {ShipTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                    {ShipTypes.map(t => <option key={t} value={t}>{getShipTypeNamePl(t)}</option>)}
                   </NativeSelectField>
                 </NativeSelectRoot>
               </Field.Root>

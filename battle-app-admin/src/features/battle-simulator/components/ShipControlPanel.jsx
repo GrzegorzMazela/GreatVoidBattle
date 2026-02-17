@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { getShipTypeNamePl } from '../../../types/dto';
 import './ShipControlPanel.css';
 
 // Map ship types to max HP (from ShipFactory.cs)
@@ -9,6 +10,7 @@ const SHIP_MAX_HP = {
   Battleship: 400,
   SuperBattleship: 600,
   OrbitalFort: 100,
+  Transport: 200,
 };
 
 /**
@@ -67,7 +69,7 @@ export const ShipControlPanel = ({
       <div className="ship-info">
         <h3>{selectedShip.name}</h3>
         <div className="ship-type-badge">
-          {selectedShip.type}
+          {getShipTypeNamePl(selectedShip.type)}
         </div>
         <div className="fraction-badge" style={{ 
           backgroundColor: selectedFraction.color || '#4CAF50' 

@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { getShipTypeNamePl } from '../../../types/dto';
 import './ShipCard.css';
 
 // Import ikon statków
@@ -17,6 +18,7 @@ const SHIP_ICONS = {
   Battleship: BattleshipIcon,
   SuperBattleship: SuperBattleshipIcon,
   OrbitalFort: OrbitalFortIcon,
+  Transport: CruiserIcon,
 };
 
 // Maksymalne wartości dla każdego typu statku (z ShipFactory.cs)
@@ -27,6 +29,7 @@ const SHIP_MAX_VALUES = {
   Battleship: { hitPoints: 400, shields: 200, armor: 200 },
   SuperBattleship: { hitPoints: 600, shields: 300, armor: 300 },
   OrbitalFort: { hitPoints: 100, shields: 50, armor: 50 },
+  Transport: { hitPoints: 200, shields: 0, armor: 100 },
 };
 
 /**
@@ -97,7 +100,7 @@ export const ShipCard = ({
         {/* Informacje o statku */}
         <div className="ship-card-info">
           <div className="ship-card-name">{ship.name}</div>
-          <div className="ship-card-type">{ship.type}</div>
+          <div className="ship-card-type">{getShipTypeNamePl(ship.type)}</div>
         </div>
 
         {/* Ikonki broni */}

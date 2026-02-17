@@ -17,7 +17,7 @@ import {
   Breadcrumb,
   SimpleGrid,
 } from '@chakra-ui/react';
-import { WeaponDefaults } from '../../types/dto';
+import { WeaponDefaults, getShipTypeNamePl } from '../../types/dto';
 import { useState } from 'react';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -161,7 +161,7 @@ export default function ShipCloneForm() {
       </Breadcrumb.Root>
 
       <Heading size="md" mb="4">
-        Klonowanie statku: {templateShip.name} ({templateShip.type})
+        Klonowanie statku: {templateShip.name} ({getShipTypeNamePl(templateShip.type)})
       </Heading>
 
       {step === 1 && (

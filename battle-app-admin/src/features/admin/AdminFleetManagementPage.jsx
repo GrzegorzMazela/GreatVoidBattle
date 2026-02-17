@@ -14,6 +14,7 @@ import {
 import FleetShipForm from './FleetShipForm';
 import PlanetarySystemForm from './PlanetarySystemForm';
 import { useNotification } from '../../contexts/NotificationContext';
+import { getShipTypeNamePl } from '../../types/dto';
 
 const FRACTION_OPTIONS = [
   { id: 'hegemonia-titanum', name: 'Hegemonia Titanum' },
@@ -174,7 +175,7 @@ export default function AdminFleetManagementPage() {
                             <HStack gap="2" flexWrap="wrap">
                               {system.stationedShips.map(ship => (
                                 <Badge key={ship.id} colorPalette="blue">
-                                  {ship.name} ({ship.type})
+                                  {ship.name} ({getShipTypeNamePl(ship.type)})
                                 </Badge>
                               ))}
                             </HStack>
@@ -233,7 +234,7 @@ export default function AdminFleetManagementPage() {
                         <Table.Row key={ship.id}>
                           <Table.Cell fontWeight="bold">{ship.name}</Table.Cell>
                           <Table.Cell>
-                            <Badge colorPalette="purple">{ship.type}</Badge>
+                            <Badge colorPalette="purple">{getShipTypeNamePl(ship.type)}</Badge>
                           </Table.Cell>
                           <Table.Cell>
                             <Badge colorPalette={

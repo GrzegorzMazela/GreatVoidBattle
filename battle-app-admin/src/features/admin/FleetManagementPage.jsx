@@ -12,6 +12,7 @@ import {
   assignShipToSystem 
 } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
+import { getShipTypeNamePl } from '../../types/dto';
 
 const FRACTION_IDS = {
   'Hegemonia Titanum': 'hegemonia-titanum',
@@ -118,7 +119,7 @@ export default function FleetManagementPage() {
                         <HStack gap="2" flexWrap="wrap">
                           {system.stationedShips.map(ship => (
                             <Badge key={ship.id} colorPalette="blue">
-                              {ship.name} ({ship.type})
+                              {ship.name} ({getShipTypeNamePl(ship.type)})
                             </Badge>
                           ))}
                         </HStack>
@@ -159,7 +160,7 @@ export default function FleetManagementPage() {
                     <Table.Row key={ship.id}>
                       <Table.Cell fontWeight="bold">{ship.name}</Table.Cell>
                       <Table.Cell>
-                        <Badge colorPalette="purple">{ship.type}</Badge>
+                        <Badge colorPalette="purple">{getShipTypeNamePl(ship.type)}</Badge>
                       </Table.Cell>
                       <Table.Cell>
                         <Badge colorPalette={
@@ -209,7 +210,7 @@ export default function FleetManagementPage() {
               <HStack gap="2" flexWrap="wrap">
                 {unassignedShips.map(ship => (
                   <Badge key={ship.id} colorPalette="orange" cursor="pointer" onClick={() => handleAssignShip(ship)}>
-                    {ship.name} ({ship.type})
+                    {ship.name} ({getShipTypeNamePl(ship.type)})
                   </Badge>
                 ))}
               </HStack>
@@ -241,7 +242,7 @@ export default function FleetManagementPage() {
                         {selectedSystem.stationedShips.map(ship => (
                           <HStack key={ship.id} p="2" bg="gray.50" borderRadius="md" justify="space-between">
                             <Text fontWeight="medium">{ship.name}</Text>
-                            <Badge colorPalette="purple">{ship.type}</Badge>
+                            <Badge colorPalette="purple">{getShipTypeNamePl(ship.type)}</Badge>
                           </HStack>
                         ))}
                       </VStack>

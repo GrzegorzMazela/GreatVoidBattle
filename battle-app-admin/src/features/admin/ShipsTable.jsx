@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listShips, deleteShip, getBattle } from '../../services/api';
+import { getShipTypeNamePl } from '../../types/dto';
 import { Box, Heading, Button, Table, HStack, Spinner, Text, VStack, Badge, Breadcrumb } from '@chakra-ui/react';
 import { useState } from 'react';
 import { ConfirmModal } from '../../components/modals/ConfirmModal';
@@ -113,7 +114,7 @@ export default function ShipsTable() {
               {ships?.map(s => (
                 <Table.Row key={s.shipId}>
                   <Table.Cell>{s.name}</Table.Cell>
-                  <Table.Cell>{s.type}</Table.Cell>
+                  <Table.Cell>{getShipTypeNamePl(s.type)}</Table.Cell>
                   <Table.Cell>({s.x}, {s.y})</Table.Cell>
                   <Table.Cell>
                     <VStack align="start" gap="1">

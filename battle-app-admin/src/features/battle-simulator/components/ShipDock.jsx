@@ -19,6 +19,7 @@ const SHIP_ICONS = {
   Battleship: BattleshipIcon,
   SuperBattleship: SuperBattleshipIcon,
   OrbitalFort: OrbitalFortIcon,
+  Transport: CruiserIcon,
 };
 
 // Map ship types to max HP
@@ -29,7 +30,10 @@ const SHIP_MAX_HP = {
   Battleship: 400,
   SuperBattleship: 600,
   OrbitalFort: 100,
+  Transport: 200,
 };
+
+import { getShipTypeNamePl } from '../../../types/dto';
 
 /**
  * Dolny panel z ikonami statków gracza
@@ -50,7 +54,7 @@ export const ShipDock = ({
 
   // Sortuj statki według typu (większe statki najpierw)
   const sortedShips = useMemo(() => {
-    const typeOrder = ['OrbitalFort', 'SuperBattleship', 'Battleship', 'Cruiser', 'Destroyer', 'Corvette'];
+    const typeOrder = ['OrbitalFort', 'SuperBattleship', 'Battleship', 'Cruiser', 'Transport', 'Destroyer', 'Corvette'];
     return [...playerShips].sort((a, b) => {
       return typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
     });
@@ -109,7 +113,7 @@ export const ShipDock = ({
                   onClick={() => onShipSelect(ship)}
                   onMouseEnter={(e) => handleMouseEnter(ship, e)}
                   onMouseLeave={handleMouseLeave}
-                  title={`${ship.name} (${ship.type})`}
+                  title={`${ship.name} (${getShipTypeNamePl(ship.type)})`}
                 >
                   <div className="ship-dock-icon-wrapper">
                     {shipIcon && (
@@ -148,7 +152,7 @@ export const ShipDock = ({
                       </div>
                     )}
                   </div>
-                  <div className="ship-dock-name">{ship.name || ship.type}</div>
+                  <div className="ship-dock-name">{ship.name || getShipTypeNamePl(ship.type)}</div>
                 </div>
               );
             })}
@@ -204,8 +208,8 @@ export const ShipDock = ({
           }}
         >
           <div className="ship-dock-tooltip-header">
-            <h4>{hoveredShip.name || hoveredShip.type}</h4>
-            <span className="ship-dock-tooltip-type">{hoveredShip.type}</span>
+            <h4>{hoveredShip.name || getShipTypeNamePl(hoveredShip.type)}</h4>
+            <span className="ship-dock-tooltip-type">{getShipTypeNamePl(hoveredShip.type)}</span>
           </div>
           <div className="ship-dock-tooltip-stats">
             <div className="tooltip-stat-row">

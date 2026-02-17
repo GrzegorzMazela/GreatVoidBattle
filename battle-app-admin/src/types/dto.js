@@ -1,4 +1,21 @@
-export const ShipTypes = ['Corvette','Destroyer','Cruiser','Battleship','SuperBattleship','OrbitalFort'];
+export const ShipTypes = ['Corvette','Destroyer','Cruiser','Battleship','SuperBattleship','OrbitalFort','Transport'];
+
+/** Nazwy typów statków po polsku (do wyświetlania w UI) */
+export const ShipTypeNamesPl = {
+  Corvette: 'Korweta',
+  Destroyer: 'Niszczyciel',
+  Cruiser: 'Krążownik',
+  Battleship: 'Pancernik',
+  SuperBattleship: 'Super Pancernik',
+  OrbitalFort: 'Fort Orbitalny',
+  Transport: 'Transportowiec',
+};
+
+/** Zwraca polską nazwę typu statku do wyświetlania w UI */
+export function getShipTypeNamePl(type) {
+  return ShipTypeNamesPl[type] ?? type;
+}
+
 export const ShipCategories = ['Combat', 'OrbitalStation', 'Research'];
 
 // Domyślne statystyki statków według typu (broń: wspólne domyślne z Const)
@@ -17,7 +34,8 @@ export const ShipDefaultStats = {
   Cruiser: { speed: 6, hitPoints: 200, shields: 100, armor: 100, modules: 4, ...WeaponDefaults },
   Battleship: { speed: 5, hitPoints: 400, shields: 200, armor: 200, modules: 8, ...WeaponDefaults },
   SuperBattleship: { speed: 5, hitPoints: 600, shields: 300, armor: 300, modules: 12, ...WeaponDefaults },
-  OrbitalFort: { speed: 0, hitPoints: 100, shields: 50, armor: 50, modules: 2, ...WeaponDefaults }
+  OrbitalFort: { speed: 0, hitPoints: 100, shields: 50, armor: 50, modules: 2, ...WeaponDefaults },
+  Transport: { speed: 6, hitPoints: 200, shields: 0, armor: 100, modules: 0, ...WeaponDefaults }
 };
 
 export function emptyBattlePayload() {

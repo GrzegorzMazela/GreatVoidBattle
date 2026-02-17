@@ -11,7 +11,7 @@ import SuperBattleshipIcon from '../../../assets/SuperBattleship_64.png';
 import OrbitalFortIcon from '../../../assets/OrbitalFort_64.png';
 import MissileIcon from '../../../assets/Missile_64.png';
 
-// Map ship types to icons
+// Map ship types to icons (Transport używa ikony Krążownika)
 const SHIP_ICONS = {
   Corvette: CorvetteIcon,
   Destroyer: DestroyerIcon,
@@ -19,6 +19,7 @@ const SHIP_ICONS = {
   Battleship: BattleshipIcon,
   SuperBattleship: SuperBattleshipIcon,
   OrbitalFort: OrbitalFortIcon,
+  Transport: CruiserIcon,
 };
 
 // Map ship types to max HP (from ShipFactory.cs)
@@ -29,6 +30,7 @@ const SHIP_MAX_HP = {
   Battleship: 400,
   SuperBattleship: 600,
   OrbitalFort: 100,
+  Transport: 200,
 };
 
 /**

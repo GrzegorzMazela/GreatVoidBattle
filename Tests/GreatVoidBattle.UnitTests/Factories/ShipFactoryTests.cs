@@ -27,6 +27,7 @@ public class ShipFactoryTests
             ShipType.Battleship => 8,
             ShipType.SuperBattleship => 12,
             ShipType.OrbitalFort => 2,
+            ShipType.Transport => 0,
             _ => 1
         };
 
@@ -62,6 +63,7 @@ public class ShipFactoryTests
     [InlineData(ShipType.Battleship, 5, 400, 200, 200, 8)]
     [InlineData(ShipType.SuperBattleship, 5, 600, 300, 300, 12)]
     [InlineData(ShipType.OrbitalFort, 0, 100, 50, 50, 2)]
+    [InlineData(ShipType.Transport, 6, 200, 0, 100, 0)]
     public void GetDefaultStats_ShouldReturnCorrectValuesForEachType(
         ShipType type, 
         int expectedSpeed, 
